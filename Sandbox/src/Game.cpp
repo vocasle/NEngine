@@ -4,7 +4,7 @@
 #include "MeshGenerator.h"
 #include "Mouse.h"
 #include "Texture.h"
-#include "Utils.h"
+#include "NEngine/Utils/Utils.h"
 
 #include <d3dcompiler.h>
 
