@@ -25,6 +25,15 @@
     <ClInclude Include="include\NEngine\Utils\Image.h" />
     <ClInclude Include="include\NEngine\Utils\Timer.h" />
     <ClInclude Include="include\NEngine\Utils\Utils.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_internal.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_truetype.h" />
     <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +41,13 @@
     <ClCompile Include="src\Input\Mouse.cpp" />
     <ClCompile Include="src\Math\Math.cpp" />
     <ClCompile Include="src\Utils\Utils.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx11.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx12.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_win32.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_tables.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp" />
     <ClCompile Include="thirdparty\stb_image\src\stb_image.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -87,7 +103,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
