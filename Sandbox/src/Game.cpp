@@ -10,9 +10,9 @@
 #include <d3dcompiler.h>
 
 #if WITH_IMGUI
-#include <backends/imgui_impl_dx11.h>
-#include <backends/imgui_impl_win32.h>
-#include <imgui.h>
+#include "imgui/imgui_impl_dx11.h"
+#include "imgui/imgui_impl_win32.h"
+#include "imgui/imgui.h"
 #endif
 
 using namespace Microsoft::WRL;

@@ -1,5 +1,6 @@
 #include "Sandbox/Game.h"
 #include "NEngine/Input/Mouse.h"
+#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Utils/Utils.h"
 
 #include <shellapi.h>
@@ -10,7 +11,7 @@
 #endif
 
 #if WITH_IMGUI
-#include <backends/imgui_impl_win32.h>
+#include "imgui/imgui_impl_win32.h"
 #endif
 
 using namespace NEngine::Input;
@@ -19,9 +20,9 @@ using namespace NEngine::Input;
 
 // Global Variables:
 HINSTANCE hInst; // current instance
-const char szTitle[MAX_LOADSTRING] = "bloom"; // The title bar text
-const char szWindowClass[MAX_LOADSTRING] =
-	"bloomWindowClass"; // the main window class name
+constexpr wchar_t szTitle[MAX_LOADSTRING] = L"Sandbox"; // The title bar text
+constexpr wchar_t szWindowClass[MAX_LOADSTRING] =
+	L"SandboxWindowClass"; // the main window class name
 FILE *hLog = nullptr;
 
 // Forward declarations of functions included in this code module:
@@ -66,9 +67,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
-	HACCEL hAccelTable =
-		LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_DX11));
-
 	MSG msg = {};
 
 	// Main message loop:
@@ -101,12 +99,12 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_DX11));
+	wcex.hIcon = nullptr;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = MAKEINTRESOURCE(IDC_DX11);
+	wcex.lpszMenuName = nullptr;
 	wcex.lpszClassName = szWindowClass;
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.hIconSm = nullptr;
 
 	return RegisterClassEx(&wcex);
 }
@@ -185,20 +183,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message) {
 	case WM_COMMAND: {
-		int wmId = LOWORD(wParam);
-		// Parse the menu selections:
-		switch (wmId) {
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd,
-				  About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-	} break;
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
 	case WM_PAINT:
 		if (s_in_sizemove && gGame) {
 			gGame->Tick();
