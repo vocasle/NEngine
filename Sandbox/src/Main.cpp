@@ -1,12 +1,6 @@
-// dx11.cpp : Defines the entry point for the application.
-//
-
-#include "dx11.h"
-#include "framework.h"
-
-#include "Game.h"
-#include "Mouse.h"
-#include "Utils.h"
+#include "Sandbox/Game.h"
+#include "NEngine/Input/Mouse.h"
+#include "NEngine/Utils/Utils.h"
 
 #include <shellapi.h>
 #include <winuser.h>
@@ -18,6 +12,8 @@
 #if WITH_IMGUI
 #include <backends/imgui_impl_win32.h>
 #endif
+
+using namespace NEngine::Input;
 
 #define MAX_LOADSTRING 1000
 

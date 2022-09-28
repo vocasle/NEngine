@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\NEngine\Input\Keyboard.h" />
+    <ClInclude Include="include\NEngine\Input\Mouse.h" />
     <ClInclude Include="include\NEngine\Math\Math.h" />
     <ClInclude Include="include\NEngine\Utils\Image.h" />
     <ClInclude Include="include\NEngine\Utils\Timer.h" />
@@ -26,6 +28,8 @@
     <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Input\Keyboard.cpp" />
+    <ClCompile Include="src\Input\Mouse.cpp" />
     <ClCompile Include="src\Math\Math.cpp" />
     <ClCompile Include="src\Utils\Utils.cpp" />
     <ClCompile Include="thirdparty\stb_image\src\stb_image.cpp" />

@@ -2,7 +2,8 @@
 #include "Camera.h"
 #include "DynamicConstBuffer.h"
 #include "MeshGenerator.h"
-#include "Mouse.h"
+#include "NEngine/Input/Keyboard.h"
+#include "NEngine/Input/Mouse.h"
 #include "Texture.h"
 #include "NEngine/Utils/Utils.h"
 
