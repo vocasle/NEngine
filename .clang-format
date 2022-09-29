@@ -1,0 +1,20 @@
+# Use the Google style in this project.
+BasedOnStyle: Google
+DerivePointerAlignment: false
+PointerAlignment: Right
+QualifierAlignment: Left
+IncludeBlocks: Regroup
+BinPackArguments: false
+BinPackParameters: false
+PackConstructorInitializers: Never
+AlwaysBreakAfterReturnType: AllDefinitions
+AlignAfterOpenBracket: Align
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+IndentWidth: 4
+IndentAccessModifiers: false
+AccessModifierOffset: -4
+AllowShortLoopsOnASingleLine: false
