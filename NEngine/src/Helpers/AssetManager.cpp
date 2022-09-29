@@ -8,7 +8,6 @@
 
 namespace NEngine {
 namespace Helpers {
-
 using namespace Utils;
 
 AssetManager::AssetManager(DeviceResources &deviceResources)

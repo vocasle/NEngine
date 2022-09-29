@@ -5,9 +5,10 @@
 #include "NEngine/Utils/Image.h"
 #include "NEngine/Helpers/InputLayout.h"
 
+using namespace Microsoft::WRL;
+
 namespace NEngine {
 namespace Helpers {
-using namespace Microsoft::WRL;
 using namespace Math;
 using namespace Utils;
 

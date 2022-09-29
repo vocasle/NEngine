@@ -37,7 +37,6 @@ public:
     void
     Create(ID3D11Device *device) {
         using namespace Utils;
-
         const CD3D11_BUFFER_DESC desc(m_bufferSize,
                                       m_description.bindFlags,
                                       m_description.usage,
