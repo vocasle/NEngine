@@ -63,13 +63,7 @@
     <ClInclude Include="thirdparty\imgui\include\imgui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NEngine\Helpers\Actor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\NEngine\Helpers\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NEngine\Helpers\CubeMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NEngine\Helpers\DeviceResources.h">
@@ -155,13 +149,7 @@
     <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Helpers\Actor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Helpers\Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Helpers\CubeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Helpers\DeviceResources.cpp">

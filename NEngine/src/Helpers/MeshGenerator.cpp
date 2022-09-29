@@ -1,5 +1,4 @@
 #include "NEngine/Helpers/MeshGenerator.h"
-#include "NEngine/Helpers/Actor.h"
 #include "NEngine/Math/Math.h"
 
 #include <cassert>
@@ -7,6 +6,8 @@
 
 namespace NEngine {
 namespace Helpers {
+using namespace Math;
+
 std::unique_ptr<Mesh>
 MGGeneratePlane(const Vec3D *origin,
                 const float width,

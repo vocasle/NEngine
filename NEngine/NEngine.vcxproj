@@ -19,11 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\NEngine\Helpers\Actor.h" />
     <ClInclude Include="include\NEngine\Helpers\AssetManager.h" />
     <ClInclude Include="include\NEngine\Helpers\Buffer.h" />
     <ClInclude Include="include\NEngine\Helpers\Camera.h" />
-    <ClInclude Include="include\NEngine\Helpers\CubeMap.h" />
     <ClInclude Include="include\NEngine\Helpers\DeviceResources.h" />
     <ClInclude Include="include\NEngine\Helpers\DynamicConstBuffer.h" />
     <ClInclude Include="include\NEngine\Helpers\DynamicCubeMap.h" />
@@ -55,10 +53,8 @@
     <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Helpers\Actor.cpp" />
     <ClCompile Include="src\Helpers\AssetManager.cpp" />
     <ClCompile Include="src\Helpers\Camera.cpp" />
-    <ClCompile Include="src\Helpers\CubeMap.cpp" />
     <ClCompile Include="src\Helpers\DeviceResources.cpp" />
     <ClCompile Include="src\Helpers\DynamicConstBuffer.cpp" />
     <ClCompile Include="src\Helpers\DynamicCubeMap.cpp" />
@@ -91,6 +87,7 @@
     <ProjectGuid>{f6f649f8-2e55-4cbd-92d2-8d696a3f00c3}</ProjectGuid>
     <RootNamespace>NEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>NEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
