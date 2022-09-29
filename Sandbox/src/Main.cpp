@@ -1,17 +1,15 @@
+// dx11.cpp : Defines the entry point for the application.
+//
+
 #include "Sandbox/Game.h"
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Utils/Utils.h"
 
 #include <shellapi.h>
 #include <winuser.h>
 
-#if WITH_VLD
-#include <vld.h>
-#endif
-
 #if WITH_IMGUI
-#include "imgui/imgui_impl_win32.h"
+#include <imgui/imgui_impl_win32.h>
 #endif
 
 using namespace NEngine::Input;
@@ -22,8 +20,7 @@ using namespace NEngine::Input;
 HINSTANCE hInst; // current instance
 constexpr wchar_t szTitle[MAX_LOADSTRING] = L"Sandbox"; // The title bar text
 constexpr wchar_t szWindowClass[MAX_LOADSTRING] =
-	L"SandboxWindowClass"; // the main window class name
-FILE *hLog = nullptr;
+	L"SandboxShadowsWindowClass"; // the main window class name
 
 // Forward declarations of functions included in this code module:
 ATOM MyRegisterClass(HINSTANCE hInstance);
@@ -53,7 +50,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	fopen_s(&hLog, "log.txt", "w");
 	// Initialize global strings
 	// LoadStringW(NULL, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	// LoadStringW(NULL, IDC_DX11, szWindowClass, MAX_LOADSTRING);
@@ -67,6 +63,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
+	// HACCEL hAccelTable =
+	// 	LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_DX11));
+
 	MSG msg = {};
 
 	// Main message loop:
@@ -79,7 +78,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
-	fclose(hLog);
 	return (int)msg.wParam;
 }
 
@@ -102,7 +100,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon = nullptr;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = nullptr;
+	wcex.lpszMenuName = L"Menu name";
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = nullptr;
 
@@ -183,8 +181,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message) {
 	case WM_COMMAND: {
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
+		int wmId = LOWORD(wParam);
+		// Parse the menu selections:
+		switch (wmId) {
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+	} break;
 	case WM_PAINT:
 		if (s_in_sizemove && gGame) {
 			gGame->Tick();

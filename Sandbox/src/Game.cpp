@@ -1,989 +1,719 @@
 #include "Sandbox/Game.h"
-#include "Camera.h"
-#include "DynamicConstBuffer.h"
-#include "MeshGenerator.h"
-#include "NEngine/Input/Keyboard.h"
-#include "NEngine/Input/Mouse.h"
-#include "Texture.h"
-#include "NEngine/Utils/Utils.h"
 
 #include <d3dcompiler.h>
 
+#include "NEngine/Helpers/DynamicConstBuffer.h"
+#include "NEngine/Input/Mouse.h"
+#include "NEngine/Math/Math.h"
+#include "NEngine/Helpers/Texture.h"
+#include "NEngine/Utils/Utils.h"
+
 #if WITH_IMGUI
-#include "imgui/imgui_impl_dx11.h"
-#include "imgui/imgui_impl_win32.h"
-#include "imgui/imgui.h"
+#include <imgui/imgui_impl_dx11.h>
+#include <imgui/imgui_impl_win32.h>
+#include <imgui/imgui.h>
 #endif
+
+#include <stdexcept>
 
 using namespace Microsoft::WRL;
+using namespace NEngine::Helpers;
+using namespace NEngine::Utils;
 using namespace NEngine::Math;
+using namespace NEngine::Input;
 
-namespace
-{
-Vec3D cubePositions[] = {
-	{ 2.794f, 0.441f, 0.294f },
-	{ -0.735f, 1.324f, 3.088f },
-	{ -1.0f, -1.324f, -1.765f },
+struct SponzaSettings {
+    ParticleSystemOptions firePSOpts;
 };
 
-Vec3D cubeRotations[] = {
-	{ MathToRadians(-42.0f), MathToRadians(53.0f), 0.0f },
-	{ MathToRadians(45.0f), 0.0f, MathToRadians(45.0f) },
-	{ MathToRadians(11.0f), MathToRadians(-37.0f), MathToRadians(15.0f) },
+namespace {
+SponzaSettings gSettings;
 };
 
-float cubeScales[] = {
-	0.854f,
-	0.8f,
-	1.357f,
-};
-
-Vec4D g_PointLightColors[] = { { 1, 1, 0, 1 },
-			       { 1, 0, 1, 1 },
-			       { 1, 0, 1, 1 },
-			       { 1, 1, 0, 1 } };
-
-D3D11_RASTERIZER_DESC g_rasterizerDesc = { CD3D11_RASTERIZER_DESC{
-	CD3D11_DEFAULT{} } };
-
-std::unique_ptr<Texture> g_OffscreenRTV;
-std::unique_ptr<Texture> g_BrightessRTV;
-std::unique_ptr<Texture> g_BlurRTV;
-std::unique_ptr<Texture> g_BlurRTV2;
-std::unique_ptr<DynamicConstBuffer> g_FogCBuf;
-std::unique_ptr<DynamicConstBuffer> g_LightCBuf;
-std::unique_ptr<DynamicConstBuffer> g_BlurCBuf;
-
-struct BloomSettings {
-	bool isEnabled;
-	bool isOnlyBrightness;
-	bool isOnlyColor;
-	bool isOnlyBlur;
-	float threshold;
-};
-
-BloomSettings g_BloomSettings = { false, false, false, false, 1.0f };
-};
-
-static void GameUpdateConstantBuffer(ID3D11DeviceContext *context,
-				     size_t bufferSize, void *data,
-				     ID3D11Buffer *dest)
-{
-	D3D11_MAPPED_SUBRESOURCE mapped = {};
-
-	if (FAILED(context->Map((ID3D11Resource *)dest, 0,
-				D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
-		UtilsFatalError("ERROR: Failed to map constant buffer\n");
-	}
-	memcpy(mapped.pData, data, bufferSize);
-	context->Unmap((ID3D11Resource *)dest, 0);
+static void
+InitSponzaSettings() {
+    ParticleSystemOptions &fire1 = gSettings.firePSOpts;
+    fire1.isEnabled = true;
+    fire1.maxParticles = 100;
+    fire1.initVelRandFact = 2;
+    fire1.burst = 5;
+    fire1.accel = {0, 1.5f, 0};
+    fire1.origin = {112, 12, 45};
+    fire1.particleSize = {12, 12};
 }
 
-static void GameCreateConstantBuffer(ID3D11Device *device, size_t byteWidth,
-				     ID3D11Buffer **pDest)
-{
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.ByteWidth = byteWidth;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-
-	if (FAILED(device->CreateBuffer(&bufferDesc, NULL, pDest))) {
-		UtilsFatalError(
-			"ERROR: Failed to create per frame constants cbuffer\n");
-	}
-}
-
-Actor *Game::FindActorByName(const std::string &name)
-{
-	auto it = std::find_if(std::begin(m_Actors), std::end(m_Actors),
-			       [&name](const Actor &actor) {
-				       return actor.GetName() == name;
-			       });
-	return it == std::end(m_Actors) ? nullptr : &*it;
-}
-
-// TODO: Update this to get list of actors to draw
-void Game::DrawScene()
-{
-	m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-				      m_PerFrameCB.Get(), 1);
-	m_Renderer.BindConstantBuffer(BindTargets::PixelShader,
-				      m_PerFrameCB.Get(), 1);
-
-	m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-				      m_PerSceneCB.Get(), 2);
-	m_Renderer.BindConstantBuffer(BindTargets::PixelShader,
-				      m_PerSceneCB.Get(), 2);
-
-	for (size_t i = 0; i < m_Actors.size(); ++i) {
-		Actor &actor = m_Actors[i];
-		if (actor.GetName() == "Cube") {
-			for (int i = 0; i < 3; ++i) {
-				actor.Scale(cubeScales[i]);
-				actor.Translate(cubePositions[i]);
-				const float pitch = cubeRotations[i].X;
-				const float yaw = cubeRotations[i].Y;
-				const float roll = cubeRotations[i].Z;
-				actor.Rotate(pitch, yaw, roll);
-				DrawActor(actor);
-			}
-		} else {
-			DrawActor(actor);
-		}
-	}
-}
-
-void Game::DrawSky()
-{
-	m_DR->PIXBeginEvent(L"Draw sky");
-	m_Renderer.SetRasterizerState(m_CubeMap.GetRasterizerState());
-	m_Renderer.SetDepthStencilState(m_CubeMap.GetDepthStencilState());
-	m_Renderer.BindVertexShader(m_shaderManager.GetVertexShader("SkyVS"));
-	m_Renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-	m_Renderer.BindPixelShader(m_shaderManager.GetPixelShader("SkyPS"));
-	m_Renderer.BindShaderResource(BindTargets::PixelShader,
-				      m_CubeMap.GetCubeMap(), 0);
-	m_Renderer.SetSamplerState(m_CubeMap.GetCubeMapSampler(), 0);
-	m_Renderer.SetVertexBuffer(m_CubeMap.GetVertexBuffer(),
-				   m_shaderManager.GetStrides(), 0);
-	m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-				      m_PerObjectCB.Get(), 0);
-	m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-				      m_PerFrameCB.Get(), 1);
-	m_Renderer.SetIndexBuffer(m_CubeMap.GetIndexBuffer(), 0);
-	m_Renderer.DrawIndexed(m_CubeMap.GetNumIndices(), 0, 0);
-	m_DR->PIXEndEvent();
-}
-
-void Game::CreateRasterizerState()
-{
-	if (FAILED(m_DR->GetDevice()->CreateRasterizerState(
-		    &g_rasterizerDesc,
-		    m_rasterizerState.ReleaseAndGetAddressOf()))) {
-		OutputDebugStringA(
-			"ERROR: Failed to create rasterizer state\n");
-		ExitProcess(EXIT_FAILURE);
-	}
+void
+Game::CreateRasterizerState() {
+    throw std::runtime_error("Not implemented");
 }
 
 #if WITH_IMGUI
-void Game::UpdateImgui()
-{
-	// Any application code here
-	{
-		static_assert(sizeof(float) * 3 == sizeof(Vec3D),
-			      "ERROR: Cannot cast Vec3D to float[3]");
-		static float zNear = 0.1f;
-		static float zFar = 1000.0f;
-		ImGui::PushItemWidth(150.0f);
-		ImGui::InputFloat("Z near", &zNear);
-		ImGui::SameLine();
-		ImGui::InputFloat("Z far", &zFar);
-		ImGui::PopItemWidth();
-		ImGui::InputFloat3("Dir light pos",
-				   reinterpret_cast<float *>(
-					   &m_PerSceneData.dirLight.Position));
-		m_Camera.SetZFar(zFar);
-		m_Camera.SetZNear(zNear);
-	}
+void
+Game::UpdateImgui() {
+    if (ImGui::Button("Recompile all shaders")) {
+        m_shaderManager.Recompile(m_deviceResources->GetDevice());
+    }
 
-	if (ImGui::CollapsingHeader("Bloom settings")) {
-		ImGui::Checkbox("Enabled", &g_BloomSettings.isEnabled);
-		ImGui::Checkbox("Only brightness",
-				&g_BloomSettings.isOnlyBrightness);
-		ImGui::Checkbox("Only blur", &g_BloomSettings.isOnlyBlur);
-		ImGui::Checkbox("Only color", &g_BloomSettings.isOnlyColor);
-		ImGui::SliderFloat("Threshold", &g_BloomSettings.threshold,
-				   0.0f, 5.0f);
-	}
+    if (ImGui::CollapsingHeader("Camera settings")) {
+        static float zFar = m_camera.GetZFar();
+        static float zNear = m_camera.GetZNear();
 
-	if (ImGui::CollapsingHeader("Rasterizer settings")) {
-		ImGui::PushItemWidth(150.0f);
-		ImGui::SliderInt(
-			"FillMode",
-			reinterpret_cast<int *>(&g_rasterizerDesc.FillMode), 2,
-			3);
-		ImGui::Checkbox(
-			"FrontCounterClockwise",
-			reinterpret_cast<bool *>(
-				&g_rasterizerDesc.FrontCounterClockwise));
-		ImGui::SliderInt("DepthBias", &g_rasterizerDesc.DepthBias, 0,
-				 10000);
-		ImGui::SliderInt(
-			"CullMode",
-			reinterpret_cast<int *>(&g_rasterizerDesc.CullMode), 1,
-			3);
-		ImGui::SliderFloat("DepthBiasClamp",
-				   &g_rasterizerDesc.DepthBiasClamp, -1000.0f,
-				   1000.0f);
-		ImGui::SliderFloat("SlopeScaledDepthBias",
-				   &g_rasterizerDesc.SlopeScaledDepthBias,
-				   -1000.0f, 1000.0f);
-		ImGui::Checkbox("DepthClipEnable",
-				reinterpret_cast<bool *>(
-					&g_rasterizerDesc.DepthClipEnable));
-		ImGui::Checkbox("ScissorEnable",
-				reinterpret_cast<bool *>(
-					&g_rasterizerDesc.ScissorEnable));
-		ImGui::Checkbox("MultisampleEnable",
-				reinterpret_cast<bool *>(
-					&g_rasterizerDesc.MultisampleEnable));
-		ImGui::Checkbox(
-			"AntialiasedLineEnable",
-			reinterpret_cast<bool *>(
-				&g_rasterizerDesc.AntialiasedLineEnable));
-		ImGui::PopItemWidth();
-		CreateRasterizerState();
-	}
+        ImGui::InputFloat("z far", &zFar);
+        ImGui::InputFloat("z near", &zNear);
+        if (ImGui::Button("Apply##Camera")) {
+            m_camera.SetZFar(zFar);
+            m_camera.SetZNear(zNear);
+        }
+    }
 
-	if (ImGui::Button("Compile")) {
-		m_shaderManager.Recompile(m_DR->GetDevice());
-	}
+    if (ImGui::CollapsingHeader("Lights setting")) {
+        if (ImGui::CollapsingHeader("Directional light settings")) {
+            ImGui::InputFloat4(
+                "Position##PointLight",
+                reinterpret_cast<float *>(
+                    m_perSceneCB->GetValue<Vec4D>("dirLight.Position")));
+        }
 
-	for (int i = 0; i < 3; ++i) {
-		if (ImGui::CollapsingHeader(
-			    UtilsFormatStr("Cube %d", i).c_str())) {
-			ImGui::PushItemWidth(150.0f);
-			ImGui::SliderFloat(
-				UtilsFormatStr("Cube %d scale", i).c_str(),
-				&cubeScales[i], 0.1f, 2.0f);
-			ImGui::SliderFloat(
-				UtilsFormatStr("Cube %d Pos.X", i).c_str(),
-				&cubePositions[i].X, -10.0f, 10.0f);
-			ImGui::SameLine();
-			ImGui::SliderFloat(
-				UtilsFormatStr("Cube %d Pos.Y", i).c_str(),
-				&cubePositions[i].Y, -10.0f, 10.0f);
-			ImGui::SameLine();
-			ImGui::SliderFloat(
-				UtilsFormatStr("Cube %d Pos.Z", i).c_str(),
-				&cubePositions[i].Z, -10.0f, 10.0f);
-			ImGui::SliderAngle(
-				UtilsFormatStr("Cube %d Pitch", i).c_str(),
-				&cubeRotations[i].X);
-			ImGui::SameLine();
-			ImGui::SliderAngle(
-				UtilsFormatStr("Cube %d Yaw", i).c_str(),
-				&cubeRotations[i].Y);
-			ImGui::SameLine();
-			ImGui::SliderAngle(
-				UtilsFormatStr("Cube %d Roll", i).c_str(),
-				&cubeRotations[i].Z);
-			ImGui::PopItemWidth();
-		}
-	}
+        if (ImGui::CollapsingHeader("Point light settings")) {
+            static int e = 0;
+            ImGui::RadioButton("First", &e, 0);
+            ImGui::SameLine();
+            ImGui::RadioButton("Second", &e, 1);
+            ImGui::SameLine();
+            ImGui::RadioButton("Third", &e, 2);
+            ImGui::SameLine();
+            ImGui::RadioButton("Fourth", &e, 3);
+            //            ImGui::ColorPicker4(
+            //                "Ambient",
+            //                reinterpret_cast<float *>(
+            //                    m_perSceneCB->GetValue<Vec4D>("pointLights[0].Ambient")));
+            //
+            //            ImGui::ColorPicker4(
+            //                "Diffuse",
+            //                reinterpret_cast<float *>(
+            //                    m_perSceneCB->GetValue<Vec4D>("pointLights[0].Diffuse")));
+            //
+            //            ImGui::ColorPicker4(
+            //                "Specular",
+            //                reinterpret_cast<float *>(
+            //                    m_perSceneCB->GetValue<Vec4D>("pointLights[0].Specular")));
+
+            ImGui::InputFloat4(
+                UtilsFormatStr("Position##PointLight_No_%s", e).c_str(),
+                reinterpret_cast<float *>(m_perSceneCB->GetValue<Vec4D>(
+                    UtilsFormatStr("pointLights[%d].Position", e))));
+        }
+
+        if (ImGui::CollapsingHeader("Spot lights settings")) {
+            static float spot = 10;
+            static float range = 10;
+            ImGui::InputFloat("Range##Spot1", &range);
+            ImGui::InputFloat("Spot##Spot1", &spot);
+            if (ImGui::Button("Apply##Spot1")) {
+                Vec4D pos =
+                    *m_perSceneCB->GetValue<Vec4D>("spotLights[0].Position");
+                pos.W = range;
+                m_perSceneCB->SetValue("spotLights[0].Position", pos);
+
+                Vec4D dir =
+                    *m_perSceneCB->GetValue<Vec4D>("spotLights[0].Direction");
+                dir.W = spot;
+                m_perSceneCB->SetValue("spotLights[0].Direction", dir);
+            }
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Fire")) {
+        ImGui::Checkbox("Enable fire", &m_firePS.GetOptions().isEnabled);
+        ImGui::InputFloat("Lifespan##FirePS", &m_firePS.GetOptions().lifespan);
+        ImGui::ColorEdit4(
+            "Color##FirePS",
+            reinterpret_cast<float *>(&gSettings.firePSOpts.color));
+
+        ImGui::InputInt("Fire num particles",
+                        &m_firePS.GetOptions().maxParticles);
+        ImGui::InputFloat("Fire accel random factor",
+                          &m_firePS.GetOptions().accelRandFact);
+        ImGui::InputFloat("Fire init vel random factor",
+                          &m_firePS.GetOptions().initVelRandFact);
+        ImGui::InputInt("Fire burst (n per 100 ms)",
+                        &m_firePS.GetOptions().burst);
+        ImGui::InputFloat3(
+            "Fire init vel",
+            reinterpret_cast<float *>(&m_firePS.GetOptions().initVel));
+        ImGui::InputFloat3(
+            "Fire accel",
+            reinterpret_cast<float *>(&m_firePS.GetOptions().accel));
+        ImGui::InputFloat3(
+            "Fire pos",
+            reinterpret_cast<float *>(&m_firePS.GetOptions().origin));
+        ImGui::InputFloat2(
+            "Fire size",
+            reinterpret_cast<float *>(&m_firePS.GetOptions().particleSize));
+
+        if (ImGui::Button("Update")) {
+            m_firePS.Reset();
+        }
+    }
 }
 #endif
 
-void Game::CreateDefaultSampler()
-{
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_GREATER;
-	samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+void
+Game::CreateDefaultSampler() {
+    D3D11_SAMPLER_DESC samplerDesc = {};
+    samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
+    samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MinLOD = 0;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	if (FAILED(m_DR->GetDevice()->CreateSamplerState(
-		    &samplerDesc, m_DefaultSampler.ReleaseAndGetAddressOf()))) {
-		UtilsDebugPrint(
-			"ERROR: Failed to create default sampler state\n");
-		ExitProcess(EXIT_FAILURE);
-	}
-}
-
-void Game::InitPerSceneConstants()
-{
-	struct PointLight pl = {};
-	const Vec3D positions[] = {
-		{ -4.0f, 0.4f, -4.0f },
-		{ -4.0f, 1.5f, 4.0f },
-		{ 4.0f, 1.5f, 4.0f },
-		{ 4.0f, 0.5f, -4.0f },
-	};
-
-	for (uint32_t i = 0; i < 4; ++i) {
-		pl.Position = positions[i];
-		pl.Ambient = ColorFromRGBA(0.03f, 0.03f, 0.03f, 1.0f);
-		pl.Diffuse = *reinterpret_cast<Color *>(&g_PointLightColors[i]);
-		pl.Specular = ColorFromRGBA(0.2f, 0.2f, 0.2f, 1.0f);
-		pl.Att = MathVec3DFromXYZ(1.0f, 0.09f, 0.032f);
-		pl.Range = 5.0f;
-		m_PerSceneData.pointLights[i] = pl;
-	}
-
-	DirectionalLight dirLight = {};
-	dirLight.Ambient = ColorFromRGBA(0.1f, 0.1f, 0.1f, 1.0f);
-	dirLight.Diffuse = ColorFromRGBA(0.5f, 0.5f, 0.5f, 1.0f);
-	dirLight.Specular = ColorFromRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	dirLight.Position = MathVec3DFromXYZ(5.0f, 5.0f, 5.0f);
-	m_PerSceneData.dirLight = dirLight;
-
-	SpotLight spotLight = {};
-	spotLight.Position = m_Camera.GetPos();
-	spotLight.Direction = m_Camera.GetAt();
-	spotLight.Ambient = ColorFromRGBA(0.1f, 0.1f, 0.1f, 1.0f);
-	spotLight.Diffuse = ColorFromRGBA(1.0f, 0.0f, 0.0f, 1.0f);
-	spotLight.Specular = ColorFromRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	spotLight.Att = MathVec3DFromXYZ(1.0f, 0.09f, 0.032f);
-	spotLight.Range = 5.0f;
-	spotLight.Spot = 32.0f;
-	m_PerSceneData.spotLights[0] = spotLight;
+    if (FAILED(m_deviceResources->GetDevice()->CreateSamplerState(
+        &samplerDesc, m_defaultSampler.ReleaseAndGetAddressOf()))) {
+        UtilsDebugPrint("ERROR: Failed to create default sampler state\n");
+        ExitProcess(EXIT_FAILURE);
+    }
 }
 
 Game::Game()
-	: m_Camera{ { 0.0f, 0.0f, -5.0f } }
-{
-	m_DR = std::make_unique<DeviceResources>();
+    : m_camera({0, 10, -5}),
+      m_firePS("fire", {0, 0, 0}, {0, 10, 0}, {0, 0, 0}, m_camera) {
+    m_deviceResources = std::make_unique<DeviceResources>();
 }
 
-Game::~Game()
-{
+Game::~Game() {
 #if WITH_IMGUI
-	ImGui_ImplDX11_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 #endif
 }
 
-void Game::Clear()
-{
-	ID3D11DeviceContext *ctx = m_DR->GetDeviceContext();
-	ID3D11RenderTargetView *rtv = m_DR->GetRenderTargetView();
-	ID3D11DepthStencilView *dsv = m_DR->GetDepthStencilView();
+void
+Game::Clear() {
+    ID3D11DeviceContext *ctx = m_deviceResources->GetDeviceContext();
+    ID3D11RenderTargetView *rtv = m_deviceResources->GetRenderTargetView();
+    ID3D11DepthStencilView *dsv = m_deviceResources->GetDepthStencilView();
 
-	static const float CLEAR_COLOR[4] = { 0.392156899f, 0.584313750f,
-					      0.929411829f, 1.000000000f };
+    static const float CLEAR_COLOR[4] = {
+        0.392156899f, 0.584313750f, 0.929411829f, 1.000000000f};
 
-	ctx->Flush();
+    ctx->Flush();
 
-	ctx->ClearRenderTargetView(rtv, CLEAR_COLOR);
-	ctx->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-				   1.0f, 0);
-	ctx->OMSetRenderTargets(1, &rtv, dsv);
-	ctx->RSSetViewports(1, &m_DR->GetViewport());
+    ctx->ClearRenderTargetView(rtv, CLEAR_COLOR);
+    ctx->ClearDepthStencilView(
+        dsv,
+        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+        1.0f,
+        0);
+    ctx->OMSetRenderTargets(1, &rtv, dsv);
+    ctx->RSSetViewports(1, &m_deviceResources->GetViewport());
 }
 
-void Game::Update()
-{
-	m_Camera.ProcessKeyboard(m_Timer.DeltaMillis);
-	m_Camera.ProcessMouse(m_Timer.DeltaMillis);
+void
+Game::Update() {
+    m_camera.ProcessKeyboard(m_timer.DeltaMillis);
+    m_camera.ProcessMouse(m_timer.DeltaMillis);
 
-	m_PerFrameData.view = m_Camera.GetViewMat();
-	m_PerFrameData.proj = m_Camera.GetProjMat();
-	m_PerFrameData.cameraPosW = m_Camera.GetPos();
+    m_perFrameCB->SetValue("view", m_camera.GetViewMat());
+    m_perFrameCB->SetValue("proj", m_camera.GetProjMat());
+    m_perFrameCB->SetValue("cameraPosW", Vec4D(m_camera.GetPos(), 0));
 
-	GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-				 sizeof(PerFrameConstants), &m_PerFrameData,
-				 m_PerFrameCB.Get());
-	GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-				 sizeof(PerSceneConstants), &m_PerSceneData,
-				 m_PerSceneCB.Get());
+    m_perSceneCB->SetValue("spotLights[0].Position",
+                           Vec4D(m_camera.GetPos(), 10));
+    m_perSceneCB->SetValue("spotLights[0].Direction",
+                           Vec4D(m_camera.GetAt(), 10));
 
-	static float elapsedTime = 0.0f;
-	const float deltaSeconds =
-		static_cast<float>(m_Timer.DeltaMillis / 1000.0);
-	elapsedTime += deltaSeconds;
+    static float elapsedTime = 0.0f;
+    const auto deltaSeconds = static_cast<float>(m_timer.DeltaMillis / 1000.0);
+    elapsedTime += deltaSeconds;
 
-	if (elapsedTime >= 1.0f) {
-		SetWindowText(m_DR->GetWindow(),
-			      UtilsFormatStr("bloom -- FPS: %d, frame: %f s",
-					     static_cast<int>(elapsedTime /
-							      deltaSeconds),
-					     deltaSeconds)
-				      .c_str());
-		elapsedTime = 0.0f;
-	}
+    if (m_firePS.GetOptions().isEnabled) {
+        m_firePS.Tick(deltaSeconds);
+        m_firePS.UpdateVertexBuffer(m_deviceResources->GetDeviceContext());
+    }
 
-	g_FogCBuf->SetValue("viewInverse",
-			    MathMat4X4Inverse(m_Camera.GetViewMat()));
-	g_FogCBuf->SetValue("projInverse",
-			    MathMat4X4Inverse(m_Camera.GetProjMat()));
-	Vec4D camPos = { m_Camera.GetPos(), 1 };
-	const Mat4X4 vp = m_Camera.GetViewMat() * m_Camera.GetProjMat();
-	camPos = MathMat4X4MultVec4DByMat4X4(&camPos, &vp);
-	camPos = camPos / camPos.W;
-	g_FogCBuf->SetValue("cameraPos", Vec3D(camPos.X, camPos.Y, camPos.Z));
-	g_FogCBuf->SetValue("fogColor", *reinterpret_cast<Vec4D *>(
-						&m_PerSceneData.fogColor));
-	g_FogCBuf->SetValue("fogEnd", m_PerSceneData.fogEnd);
-	g_FogCBuf->SetValue("fogStart", m_PerSceneData.fogStart);
-	g_FogCBuf->UpdateConstantBuffer(m_DR->GetDeviceContext());
-
-#if WITH_IMGUI
-	static float totalTime = 0.0f;
-	totalTime += deltaSeconds;
-#endif
+    if (elapsedTime >= 1.0f) {
+        const std::string title = UtilsFormatStr(
+            "Sandbox -- FPS: %d, frame: %f s",
+            static_cast<int>(elapsedTime / deltaSeconds),
+            deltaSeconds);
+        SetWindowText(
+            m_deviceResources->GetWindow(),
+            UtilsStrToWstr(title).c_str()
+            );
+        elapsedTime = 0.0f;
+    }
 }
 
-void Game::Render()
-{
+void
+Game::Render() {
 #if WITH_IMGUI
-	ImGui_ImplDX11_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
 #endif
 
 #if WITH_IMGUI
-	UpdateImgui();
+    UpdateImgui();
 #endif
 
-	static constexpr float BLACK_COLOR[] = { 0, 0, 0, 1 };
-	m_Renderer.SetRenderTargets(m_DR->GetRenderTargetView(),
-				    m_DR->GetDepthStencilView());
-	m_Renderer.SetViewport(m_DR->GetViewport());
-	m_Renderer.Clear(nullptr);
-	m_Renderer.SetBlendState(nullptr);
-	m_Renderer.SetDepthStencilState(nullptr);
-	m_Renderer.SetPrimitiveTopology(R_DEFAULT_PRIMTIVE_TOPOLOGY);
-	m_Renderer.SetRasterizerState(m_rasterizerState.Get());
-	m_Renderer.SetSamplerState(m_DefaultSampler.Get(), 0);
+    static constexpr float CLEAR_COLOR[] = {0.2f, 0.2f, 0.2f, 1};
+    m_renderer.SetRenderTargets(m_deviceResources->GetRenderTargetView(),
+                                m_deviceResources->GetDepthStencilView());
+    m_renderer.SetViewport(m_deviceResources->GetViewport());
+    m_renderer.Clear(CLEAR_COLOR);
+    m_renderer.SetBlendState(nullptr);
+    m_renderer.SetDepthStencilState(nullptr);
+    m_renderer.SetPrimitiveTopology(R_DEFAULT_PRIMTIVE_TOPOLOGY);
+    m_renderer.SetRasterizerState(m_rasterizerState.Get());
+    m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
 
-	m_DR->PIXBeginEvent(L"Color pass");
-	// reset view proj matrix back to camera
-	{
-		// draw to offscreen texture
-		m_Renderer.SetRenderTargets(g_OffscreenRTV->GetRTV(),
-					    g_OffscreenRTV->GetDSV());
-		m_Renderer.Clear(nullptr);
-		m_PerFrameData.view = m_Camera.GetViewMat();
-		m_PerFrameData.proj = m_Camera.GetProjMat();
-		m_PerFrameData.cameraPosW = m_Camera.GetPos();
-		GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-					 sizeof(PerFrameConstants),
-					 &m_PerFrameData, m_PerFrameCB.Get());
-		m_Renderer.BindVertexShader(
-			m_shaderManager.GetVertexShader("ColorVS"));
-		m_Renderer.BindPixelShader(
-			m_shaderManager.GetPixelShader("PhongPS"));
-		m_Renderer.SetSamplerState(m_DefaultSampler.Get(), 0);
-		m_Renderer.SetSamplerState(m_ShadowMap.GetShadowSampler(), 1);
-		m_Renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-		m_Renderer.BindShaderResource(BindTargets::PixelShader,
-					      m_ShadowMap.GetDepthMapSRV(), 4);
+    Mat4X4 shadowView = {};
+    Mat4X4 shadowProj = {};
+    BuildShadowTransform(shadowView, shadowProj);
+    m_deviceResources->PIXBeginEvent(L"Shadow pass");
+    {
+        m_shadowMap.Bind(m_deviceResources->GetDeviceContext());
 
-		DrawScene();
-	}
-	m_DR->PIXEndEvent();
-	m_DR->PIXBeginEvent(L"Light");
-	// Light properties
-	for (uint32_t i = 0; i < _countof(m_PerSceneData.pointLights); ++i) {
-		const Vec3D scale = { 0.5f, 0.5f, 0.5f };
-		Mat4X4 world = MathMat4X4ScaleFromVec3D(&scale);
-		world = world *
-			MathMat4X4TranslateFromVec3D(
-				&m_PerSceneData.pointLights[i].Position);
-		m_PerObjectData.world = world;
-		GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-					 sizeof(PerObjectConstants),
-					 &m_PerObjectData, m_PerObjectCB.Get());
+        m_renderer.BindPixelShader(nullptr);
+        m_renderer.BindVertexShader(
+            m_shaderManager.GetVertexShader("ShadowVS"));
+        m_renderer.BindConstantBuffer(
+            BindTargets::VertexShader,
+            m_perObjectCB->Get(),
+            0);
+        m_renderer.BindConstantBuffer(
+            BindTargets::VertexShader,
+            m_perFrameCB->Get(),
+            1);
+        m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
+        m_renderer.SetSamplerState(m_shadowMap.GetShadowSampler(), 1);
+        m_perFrameCB->SetValue("proj", shadowProj);
+        m_perFrameCB->SetValue("view", shadowView);
+        m_perFrameCB->UpdateConstantBuffer();
+        m_renderer.SetRasterizerState(m_shadowMap.GetRasterizerState());
+        DrawActors();
+        m_renderer.SetRasterizerState(nullptr);
+        m_shadowMap.Unbind(m_deviceResources->GetDeviceContext());
+        m_perFrameCB->SetValue("proj", m_camera.GetProjMat());
+        m_perFrameCB->SetValue("view", m_camera.GetViewMat());
+        m_perFrameCB->UpdateConstantBuffer();
+    }
+    m_deviceResources->PIXEndEvent();
 
-		g_LightCBuf->SetValue("color",
-				      m_PerSceneData.pointLights[i].Diffuse);
-		g_LightCBuf->UpdateConstantBuffer(m_DR->GetDeviceContext());
-		m_Renderer.BindConstantBuffer(BindTargets::PixelShader,
-					      g_LightCBuf->Get(), 0);
-		m_Renderer.BindPixelShader(
-			m_shaderManager.GetPixelShader("LightPS"));
-		m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-					      m_PerObjectCB.Get(), 0);
-		m_Renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-		const auto lightSource = FindActorByName("Cube");
-		m_Renderer.SetIndexBuffer(lightSource->GetIndexBuffer(), 0);
-		m_Renderer.SetVertexBuffer(lightSource->GetVertexBuffer(),
-					   m_shaderManager.GetStrides(), 0);
-		m_Renderer.DrawIndexed(lightSource->GetNumIndices(), 0, 0);
-	}
+    m_deviceResources->PIXBeginEvent(L"Dynamic cube map pass");
+    {
+        m_renderer.SetDepthStencilState(nullptr);
+        m_renderer.SetViewport(m_dynamicCubeMap.GetViewport());
+        //m_actors[1].SetVisible(false);
+        m_renderer.BindVertexShader(m_shaderManager.GetVertexShader("ColorVS"));
+        m_renderer.BindPixelShader(m_shaderManager.GetPixelShader("PhongPS"));
+        m_perPassCB->SetValue("calcReflection", 0);
+        m_perPassCB->UpdateConstantBuffer();
+        m_renderer.BindConstantBuffer(
+            BindTargets::PixelShader,
+            m_perPassCB->Get(),
+            3);
 
-	{
-		const Vec3D scale = { 0.5f, 0.5f, 0.5f };
-		Mat4X4 world = MathMat4X4ScaleFromVec3D(&scale);
-		world = world * MathMat4X4TranslateFromVec3D(
-					&m_PerSceneData.dirLight.Position);
-		m_PerObjectData.world = world;
-		GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-					 sizeof(PerObjectConstants),
-					 &m_PerObjectData, m_PerObjectCB.Get());
+        for (int i = 0; i < 6; ++i) {
+            // Bind cube map face as render target.
+            m_renderer.SetRenderTargets(m_dynamicCubeMap.GetRTV(i),
+                                        m_dynamicCubeMap.GetDSV());
+            // Clear cube map face and depth buffer.
+            m_renderer.Clear(CLEAR_COLOR);
+            m_perFrameCB->SetValue(
+                "cameraPosW",
+                Vec4D(m_dynamicCubeMap.GetCamera(i).GetPos(), 0));
+            m_perFrameCB->SetValue("view",
+                                   m_dynamicCubeMap.GetCamera(i).GetViewMat());
+            m_perFrameCB->SetValue("proj",
+                                   m_dynamicCubeMap.GetCamera(i).GetProjMat());
+            m_perFrameCB->UpdateConstantBuffer();
+            DrawActors();
+            m_renderer.SetDepthStencilState(nullptr);
+        }
 
-		g_LightCBuf->SetValue("color", Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
-		g_LightCBuf->UpdateConstantBuffer(m_DR->GetDeviceContext());
-		m_Renderer.BindConstantBuffer(BindTargets::PixelShader,
-					      g_LightCBuf->Get(), 0);
-		m_Renderer.BindPixelShader(
-			m_shaderManager.GetPixelShader("LightPS"));
-		m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-					      m_PerObjectCB.Get(), 0);
-		const auto lightSource = FindActorByName("Cube");
-		m_Renderer.SetIndexBuffer(lightSource->GetIndexBuffer(), 0);
-		m_Renderer.SetVertexBuffer(lightSource->GetVertexBuffer(),
-					   m_shaderManager.GetStrides(), 0);
-		m_Renderer.DrawIndexed(lightSource->GetNumIndices(), 0, 0);
-	}
-	m_DR->PIXEndEvent();
+        // reset viewport
+        m_renderer.SetViewport(m_deviceResources->GetViewport());
+        m_renderer.SetRenderTargets(m_deviceResources->GetRenderTargetView(),
+                                    m_deviceResources->GetDepthStencilView());
+        m_renderer.Clear(CLEAR_COLOR);
+        //m_actors[1].SetVisible(true);
+        m_renderer.SetRasterizerState(nullptr);
+        m_renderer.SetDepthStencilState(nullptr);
+        m_perFrameCB->SetValue("proj", m_camera.GetProjMat());
+        m_perFrameCB->SetValue("view", m_camera.GetViewMat());
+        m_perFrameCB->SetValue("cameraPosW", Vec4D(m_camera.GetPos(), 0));
+        m_perFrameCB->UpdateConstantBuffer();
+    }
+    m_deviceResources->PIXEndEvent();
 
-	// draw sky
-	// DrawSky();
+    m_deviceResources->PIXBeginEvent(L"Color pass");
+    // reset view proj matrix back to camera
+    {
+        m_perPassCB->SetValue("calcReflection", 1);
+        m_perPassCB->UpdateConstantBuffer();
+        m_renderer.BindConstantBuffer(
+            BindTargets::PixelShader,
+            m_perPassCB->Get(),
+            3);
 
-	// Brightness pass
-	m_DR->PIXBeginEvent(L"Brightness");
-	{
-		m_Renderer.SetRenderTargets(g_BrightessRTV->GetRTV(), nullptr);
-		m_Renderer.Clear(BLACK_COLOR);
-		m_Renderer.BindVertexShader(
-			m_shaderManager.GetVertexShader("FogVS"));
-		m_Renderer.BindPixelShader(
-			m_shaderManager.GetPixelShader("BrightPS"));
-		m_Renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-		m_Renderer.BindShaderResource(BindTargets::PixelShader,
-					      g_OffscreenRTV->GetSRV(), 0);
-		m_Renderer.SetSamplerState(m_DefaultSampler.Get(), 0);
+        m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
+        m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
 
-		const auto fogPlane = FindActorByName("FogPlane");
-		m_Renderer.SetVertexBuffer(fogPlane->GetVertexBuffer(),
-					   sizeof(Vertex), 0);
-		m_Renderer.SetIndexBuffer(fogPlane->GetIndexBuffer(), 0);
-		m_Renderer.DrawIndexed(fogPlane->GetNumIndices(), 0, 0);
-	}
-	m_DR->PIXEndEvent();
+        m_perFrameCB->UpdateConstantBuffer();
+        m_perSceneCB->UpdateConstantBuffer();
+        m_perObjectCB->UpdateConstantBuffer();
 
-	// Blur pass
-	m_DR->PIXBeginEvent(L"Blur");
-	{
-		m_Renderer.ClearRenderTargetView(g_BlurRTV->GetRTV(),
-						 BLACK_COLOR);
-		m_Renderer.ClearRenderTargetView(g_BlurRTV2->GetRTV(),
-						 BLACK_COLOR);
-		m_Renderer.BindPixelShader(
-			m_shaderManager.GetPixelShader("BlurPS"));
-		const auto fogPlane = FindActorByName("FogPlane");
-		m_Renderer.SetVertexBuffer(fogPlane->GetVertexBuffer(),
-					   sizeof(Vertex), 0);
-		m_Renderer.SetIndexBuffer(fogPlane->GetIndexBuffer(), 0);
-		g_BlurCBuf->SetValue(
-			"width",
-			static_cast<float>(m_DR->GetOutputSize().right));
-		g_BlurCBuf->SetValue(
-			"height",
-			static_cast<float>(m_DR->GetOutputSize().bottom));
+        m_renderer.BindConstantBuffer(
+            BindTargets::VertexShader,
+            m_perObjectCB->Get(),
+            0);
+        m_renderer.BindConstantBuffer(
+            BindTargets::VertexShader,
+            m_perFrameCB->Get(),
+            1);
+        m_renderer.BindConstantBuffer(
+            BindTargets::VertexShader,
+            m_perSceneCB->Get(),
+            2);
+        m_renderer.BindConstantBuffer(
+            BindTargets::PixelShader,
+            m_perObjectCB->Get(),
+            0);
+        m_renderer.BindConstantBuffer(
+            BindTargets::PixelShader,
+            m_perFrameCB->Get(),
+            1);
+        m_renderer.BindConstantBuffer(
+            BindTargets::PixelShader,
+            m_perSceneCB->Get(),
+            2);
+        m_renderer.BindShaderResource(
+            BindTargets::PixelShader,
+            m_shadowMap.GetDepthMapSRV(),
+            4);
+        m_renderer.SetSamplerState(m_shadowMap.GetShadowSampler(), 1);
+        m_renderer.BindShaderResource(
+            BindTargets::PixelShader,
+            m_dynamicCubeMap.GetSRV(),
+            6);
+        DrawActors();
+        m_renderer.SetSamplerState(nullptr, 1);
+        m_renderer.BindShaderResource(BindTargets::PixelShader, nullptr, 6);
+    }
+    m_deviceResources->PIXEndEvent();
 
-		bool isHorizontal = true;
-		bool isFirstRun = true;
-		for (int i = 0; i < 10; ++i) {
-			g_BlurCBuf->SetValue("isHorizontal",
-					     isHorizontal ? 1 : 0);
-			g_BlurCBuf->UpdateConstantBuffer(
-				m_DR->GetDeviceContext());
-			m_Renderer.BindConstantBuffer(BindTargets::PixelShader,
-						      g_BlurCBuf->Get(), 0);
-			if (isHorizontal) {
-				m_Renderer.SetRenderTargets(g_BlurRTV->GetRTV(),
-							    nullptr);
-				if (isFirstRun) {
-					isFirstRun = false;
-					m_Renderer.BindShaderResource(
-						BindTargets::PixelShader,
-						g_BrightessRTV->GetSRV(), 0);
-				} else {
-					m_Renderer.BindShaderResource(
-						BindTargets::PixelShader,
-						g_BlurRTV2->GetSRV(), 0);
-				}
-			} else {
-				m_Renderer.SetRenderTargets(
-					g_BlurRTV2->GetRTV(), nullptr);
-				m_Renderer.BindShaderResource(
-					BindTargets::PixelShader,
-					g_BlurRTV->GetSRV(), 0);
-			}
-			m_Renderer.DrawIndexed(fogPlane->GetNumIndices(), 0, 0);
-			m_Renderer.BindShaderResource(BindTargets::PixelShader,
-						      nullptr, 0);
-			m_Renderer.SetRenderTargets(nullptr, nullptr);
-			isHorizontal = !isHorizontal;
-		}
-	}
-	m_DR->PIXEndEvent();
-
-	m_DR->PIXBeginEvent(L"Bloom");
-	{
-		g_FogCBuf->SetValue("world", MathMat4X4RotateX(90.0f));
-		g_FogCBuf->UpdateConstantBuffer(m_DR->GetDeviceContext());
-		m_Renderer.SetRenderTargets(m_DR->GetRenderTargetView(),
-					    m_DR->GetDepthStencilView());
-		m_Renderer.BindVertexShader(
-			m_shaderManager.GetVertexShader("FogVS"));
-		m_Renderer.BindPixelShader(
-			m_shaderManager.GetPixelShader("BloomPS"));
-		m_Renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-		m_Renderer.BindShaderResource(BindTargets::PixelShader,
-					      g_OffscreenRTV->GetSRV(), 0);
-		m_Renderer.BindShaderResource(BindTargets::PixelShader,
-					      g_BlurRTV->GetSRV(), 1);
-		m_Renderer.BindShaderResource(BindTargets::PixelShader,
-					      g_BlurRTV2->GetSRV(), 2);
-		m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-					      g_FogCBuf->Get(), 0);
-
-		const auto fogPlane = FindActorByName("FogPlane");
-		m_Renderer.SetVertexBuffer(fogPlane->GetVertexBuffer(),
-					   sizeof(Vertex), 0);
-		m_Renderer.SetIndexBuffer(fogPlane->GetIndexBuffer(), 0);
-
-		m_Renderer.DrawIndexed(fogPlane->GetNumIndices(), 0, 0);
-
-		// unbind resources
-		m_Renderer.BindShaderResource(BindTargets::PixelShader, nullptr,
-					      0);
-		m_Renderer.BindShaderResource(BindTargets::PixelShader, nullptr,
-					      1);
-		m_Renderer.BindShaderResource(BindTargets::PixelShader, nullptr,
-					      2);
-	}
-	m_DR->PIXEndEvent();
+    if (m_firePS.GetOptions().isEnabled) {
+        m_deviceResources->PIXBeginEvent(L"Draw fire");
+        m_renderer.SetBlendState(m_firePS.GetBlendState());
+        m_renderer.SetDepthStencilState(m_firePS.GetDepthStencilState());
+        m_renderer.BindVertexShader(
+            m_shaderManager.GetVertexShader("ParticleVS"));
+        m_renderer.SetVertexBuffer(
+            m_firePS.GetVertexBuffer(),
+            m_shaderManager.GetStrides(),
+            0);
+        m_renderer.SetIndexBuffer(m_firePS.GetIndexBuffer(), 0);
+        m_renderer.BindPixelShader(
+            m_shaderManager.GetPixelShader("ParticlePS"));
+        m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
+        m_renderer.BindConstantBuffer(
+            BindTargets::VertexShader,
+            m_perFrameCB->Get(),
+            0);
+        m_renderer.BindShaderResource(
+            BindTargets::PixelShader,
+            m_firePS.GetSRV(),
+            0);
+        m_renderer.SetSamplerState(m_firePS.GetSamplerState(), 0);
+        const Vec4D prevCamVal = *m_perFrameCB->GetValue<Vec4D>("cameraPosW");
+        m_perFrameCB->SetValue("cameraPosW", gSettings.firePSOpts.color);
+        m_perFrameCB->UpdateConstantBuffer();
+        m_renderer.BindConstantBuffer(
+            BindTargets::PixelShader,
+            m_perFrameCB->Get(),
+            0);
+        m_renderer.DrawIndexed(m_firePS.GetNumIndices(), 0, 0);
+        m_perFrameCB->SetValue("cameraPosW", prevCamVal);
+        m_deviceResources->PIXEndEvent();
+    }
 
 #if WITH_IMGUI
-	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+    ImGui::Render();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 #endif
 
-	m_Renderer.Present();
+    m_renderer.Present();
 }
 
-void Game::Tick()
-{
-	TimerTick(&m_Timer);
-	Update();
-	Render();
+void
+Game::Tick() {
+    TimerTick(&m_timer);
+    Update();
+    Render();
 }
 
-void Game::CreateActors()
-{
-	const Material material = { { 0.24725f, 0.1995f, 0.0745f, 1.0f },
-				    { 0.75164f, 0.60648f, 0.22648f, 1.0f },
-				    { 0.628281f, 0.555802f, 0.366065f, 32.0f },
-				    { 0.0f, 0.0f, 0.0f, 0.0f } };
-
-	// load cube
-	{
-		Actor actor = Actor();
-		actor.LoadModel(
-			UtilsFormatStr("%s/meshes/cube.obj", ASSETS_ROOT)
-				.c_str());
-		actor.CreateIndexBuffer(m_DR->GetDevice());
-		actor.CreateVertexBuffer(m_DR->GetDevice());
-		actor.SetName("Cube");
-		actor.SetIsVisible(true);
-		actor.SetMaterial(&material);
-		m_Actors.emplace_back(actor);
-	}
-
-	// load plane
-	{
-		const Vec3D origin = { 0.0f, 0.0f, 0.0f };
-		std::unique_ptr<Mesh> mesh =
-			MGGeneratePlane(&origin, 500.0f, 500.0f);
-		Actor plane = Actor(mesh.get());
-		plane.CreateIndexBuffer(m_DR->GetDevice());
-		plane.CreateVertexBuffer(m_DR->GetDevice());
-		const Vec3D offset = { 0.0f, -1.0f, 0.0f };
-		plane.Translate(offset);
-
-		plane.LoadTexture(
-			UtilsFormatStr("%s/textures/bricks_diffuse.jpg",
-				       ASSETS_ROOT)
-				.c_str(),
-			TextureType::Diffuse, m_DR->GetDevice(),
-			m_DR->GetDeviceContext());
-		plane.LoadTexture(
-			UtilsFormatStr("%s/textures/bricks_normal.png",
-				       ASSETS_ROOT)
-				.c_str(),
-			TextureType::Normal, m_DR->GetDevice(),
-			m_DR->GetDeviceContext());
-		plane.LoadTexture(UtilsFormatStr("%s/textures/bricks_gloss.jpg",
-						 ASSETS_ROOT)
-					  .c_str(),
-				  TextureType::Gloss, m_DR->GetDevice(),
-				  m_DR->GetDeviceContext());
-		plane.LoadTexture(
-			UtilsFormatStr("%s/textures/bricks_reflection.jpg",
-				       ASSETS_ROOT)
-				.c_str(),
-			TextureType::Specular, m_DR->GetDevice(),
-			m_DR->GetDeviceContext());
-		plane.SetMaterial(&material);
-		plane.SetIsVisible(true);
-		plane.SetName("Plane");
-		m_Actors.emplace_back(plane);
-	}
-
-	{
-		Mesh mesh = {};
-		mesh.Positions.push_back({ -1.0f, 1.0f, 0.0f });
-		mesh.Positions.push_back({ 1.0f, 1.0f, 0.0f });
-		mesh.Positions.push_back({ -1.0f, -1.0f, 0.0f });
-		mesh.Positions.push_back({ 1.0f, -1.0f, 0.0f });
-		mesh.TexCoords.push_back({ 0.0f, 0.0f });
-		mesh.TexCoords.push_back({ 1.0f, 0.0f });
-		mesh.TexCoords.push_back({ 0.0f, 1.0f });
-		mesh.TexCoords.push_back({ 1.0f, 1.0f });
-		mesh.Faces.push_back({ 0, 0, 0 });
-		mesh.Faces.push_back({ 1, 1, 0 });
-		mesh.Faces.push_back({ 2, 2, 0 });
-		mesh.Faces.push_back({ 2, 2, 0 });
-		mesh.Faces.push_back({ 1, 1, 0 });
-		mesh.Faces.push_back({ 3, 3, 0 });
-		mesh.Normals.push_back({});
-		Actor plane = Actor(&mesh);
-		plane.CreateIndexBuffer(m_DR->GetDevice());
-		plane.CreateVertexBuffer(m_DR->GetDevice());
-		plane.SetIsVisible(false);
-		plane.SetName("FogPlane");
-		m_Actors.emplace_back(plane);
-	}
-
-	Actor *p = FindActorByName("Plane");
-	Actor *c = FindActorByName("Cube");
-	c->SetTextures(p->GetShaderResources());
-}
-
-void Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
-{
-	using namespace Microsoft::WRL;
+void
+Game::Initialize(HWND hWnd, uint32_t width, uint32_t height) {
+    using namespace Microsoft::WRL;
 #ifdef MATH_TEST
-	MathTest();
+    MathTest();
 #endif
-	m_DR->SetWindow(hWnd, width, height);
-	m_DR->CreateDeviceResources();
-	m_DR->CreateWindowSizeDependentResources();
-	TimerInitialize(&m_Timer);
-	Mouse::Get().SetWindowDimensions(m_DR->GetBackBufferWidth(),
-					 m_DR->GetBackBufferHeight());
-	ID3D11Device *device = m_DR->GetDevice();
+    m_deviceResources->SetWindow(hWnd, width, height);
+    m_deviceResources->CreateDeviceResources();
+    m_deviceResources->CreateWindowSizeDependentResources();
+    InitSponzaSettings();
+    TimerInitialize(&m_timer);
+    Mouse::Get().SetWindowDimensions(m_deviceResources->GetBackBufferWidth(),
+                                     m_deviceResources->GetBackBufferHeight());
+    ID3D11Device *device = m_deviceResources->GetDevice();
 
-	m_ShadowMap.InitResources(device, 1024, 1024);
-	m_Camera.SetViewDimensions(m_DR->GetBackBufferWidth(),
-				   m_DR->GetBackBufferHeight());
-	m_CubeMap.LoadCubeMap(
-		device,
-		{
-			UtilsFormatStr("%s/textures/right.jpg", ASSETS_ROOT)
-				.c_str(),
-			UtilsFormatStr("%s/textures/left.jpg", ASSETS_ROOT)
-				.c_str(),
-			UtilsFormatStr("%s/textures/top.jpg", ASSETS_ROOT)
-				.c_str(),
-			UtilsFormatStr("%s/textures/bottom.jpg", ASSETS_ROOT)
-				.c_str(),
-			UtilsFormatStr("%s/textures/front.jpg", ASSETS_ROOT)
-				.c_str(),
-			UtilsFormatStr("%s/textures/back.jpg", ASSETS_ROOT)
-				.c_str(),
-		});
+    m_shaderManager.Initialize(
+        device,
+        SHADER_BINARY_ROOT,
+        UtilsFormatStr("%s/shader", SHADER_SRC_ROOT));
 
-	m_dynamicCubeMap.Init(device);
-	m_dynamicCubeMap.BuildCubeFaceCamera({ 0.0f, 0.0f, 0.0f });
-	// init actors
-	CreateActors();
-	m_CubeMap.CreateCube(*FindActorByName("Cube"), device);
-	InitPerSceneConstants();
-	m_shaderManager.Initialize(device, SHADERS_ROOT,
-				   UtilsFormatStr("%s/shader", SRC_ROOT));
+    CreateDefaultSampler();
+    // CreateRasterizerState();
 
-	GameCreateConstantBuffer(device, sizeof(PerSceneConstants),
-				 &m_PerSceneCB);
-	GameCreateConstantBuffer(device, sizeof(PerObjectConstants),
-				 &m_PerObjectCB);
-	GameCreateConstantBuffer(device, sizeof(PerFrameConstants),
-				 &m_PerFrameCB);
-	GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-				 sizeof(PerSceneConstants), &m_PerSceneData,
-				 m_PerSceneCB.Get());
+    m_camera.SetZFar(10000);
+    m_camera.SetZNear(10);
 
-	CreateDefaultSampler();
-	g_rasterizerDesc.DepthBias = 500;
-	CreateRasterizerState();
+    m_renderer.SetDeviceResources(m_deviceResources.get());
+    m_assetManager = std::make_unique<AssetManager>(*m_deviceResources);
+    //m_actors.emplace_back(m_assetManager->LoadModel(
+    //    UtilsFormatStr("%s/Sponza.gltf", SPONZA_ROOT)));
+    //m_actors.emplace_back(m_assetManager->LoadModel(
+    //    UtilsFormatStr("%s/Suzanne/glTF/Suzanne.gltf", ASSETS_ROOT)));
+    //m_actors[0].SetWorld(MathMat4X4ScaleFromVec3D({0.1f, 0.1f, 0.1f}));
+    //m_actors[1].SetRoughness(0.1f);
+    //m_actors[1].SetWorld(MathMat4X4ScaleFromVec3D({10, 10, 10}) *
+    //                     MathMat4X4TranslateFromVec3D({0, 20, 0}));
 
-	m_Renderer.SetDeviceResources(m_DR.get());
+    //m_firePS.Init(m_deviceResources->GetDevice(),
+    //              m_deviceResources->GetDeviceContext(),
+    //              UtilsFormatStr("%s/textures/particlePack_1.1/flame_05.png",
+    //                             ASSETS_ROOT));
+    //m_firePS.SetOptions(gSettings.firePSOpts);
 
-	g_OffscreenRTV = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-						   m_DR->GetOutputSize().right,
-						   m_DR->GetOutputSize().bottom,
-						   m_DR->GetDevice());
+    const int shadowMapSize = 2048;
+    m_shadowMap.InitResources(
+        m_deviceResources->GetDevice(),
+        shadowMapSize,
+        shadowMapSize);
 
-	g_BrightessRTV = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-						   m_DR->GetOutputSize().right,
-						   m_DR->GetOutputSize().bottom,
-						   m_DR->GetDevice());
+    m_dynamicCubeMap.Init(m_deviceResources->GetDevice());
+    m_dynamicCubeMap.BuildCubeFaceCamera({0, 0, 0});
 
-	g_BlurRTV = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-					      m_DR->GetOutputSize().right,
-					      m_DR->GetOutputSize().bottom,
-					      m_DR->GetDevice());
+    {
+        DynamicConstBufferDesc perObjectDesc;
+        perObjectDesc.AddNode(Node("worldInvTranspose", NodeType::Float4X4));
+        perObjectDesc.AddNode(Node("world", NodeType::Float4X4));
+        perObjectDesc.AddNode(Node("shadowTransform", NodeType::Float4X4));
+        Node material("material", NodeType::Struct);
+        material.AddChild("roughness", NodeType::Float);
+        perObjectDesc.AddNode(material);
 
-	g_BlurRTV2 = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-					       m_DR->GetOutputSize().right,
-					       m_DR->GetOutputSize().bottom,
-					       m_DR->GetDevice());
+        m_perObjectCB = std::make_unique<DynamicConstBuffer>(
+            perObjectDesc,
+            *m_deviceResources);
 
-	{
-		DynamicConstBufferDesc desc = {};
-		desc.AddNode({ "fogEnd", NodeType::Float });
-		desc.AddNode({ "fogStart", NodeType::Float });
-		desc.AddNode({ "width", NodeType::Float });
-		desc.AddNode({ "height", NodeType::Float });
-		desc.AddNode({ "fogColor", NodeType::Float4 });
-		desc.AddNode({ "world", NodeType::Float4X4 });
-		desc.AddNode({ "viewInverse", NodeType::Float4X4 });
-		desc.AddNode({ "projInverse", NodeType::Float4X4 });
-		desc.AddNode({ "cameraPos", NodeType::Float3 });
-		desc.AddNode({ "_pad1", NodeType::Float });
-		g_FogCBuf = std::make_unique<DynamicConstBuffer>(desc);
-		g_FogCBuf->SetValue("width", m_DR->GetOutputSize().right);
-		g_FogCBuf->SetValue("height", m_DR->GetOutputSize().bottom);
-		g_FogCBuf->CreateConstantBuffer(m_DR->GetDevice());
-	}
+        DynamicConstBufferDesc perSceneDesc;
+        Node dirLight = Node("dirLight", NodeType::Struct);
+        dirLight.AddChild("Ambient", NodeType::Float4);
+        dirLight.AddChild("Diffuse", NodeType::Float4);
+        dirLight.AddChild("Specular", NodeType::Float4);
+        dirLight.AddChild("Position", NodeType::Float4);
 
-	{
-		DynamicConstBufferDesc desc = {};
-		desc.AddNode({ "color", NodeType::Float4 });
-		// desc.AddNode({"world", NodeType::Float4X4});
-		// desc.AddNode({"view", NodeType::Float4X4});
-		// desc.AddNode({"projection", NodeType::Float4X4});
-		g_LightCBuf = std::make_unique<DynamicConstBuffer>(desc);
-		g_LightCBuf->CreateConstantBuffer(m_DR->GetDevice());
-	}
+        Node pointLight = Node("pointLight", NodeType::Struct);
+        pointLight.AddChild("Ambient", NodeType::Float4);
+        pointLight.AddChild("Diffuse", NodeType::Float4);
+        pointLight.AddChild("Specular", NodeType::Float4);
+        pointLight.AddChild("Position", NodeType::Float4);
+        Node pointLightsArr = Node("pointLights", NodeType::Array);
+        pointLightsArr.AddChildN(pointLight, 6);
 
-	{
-		DynamicConstBufferDesc desc = {};
-		desc.AddNode({ "width", NodeType::Float });
-		desc.AddNode({ "height", NodeType::Float });
-		desc.AddNode({ "isHorizontal", NodeType::Bool });
-		desc.AddNode({ "pad", NodeType::Float });
-		g_BlurCBuf = std::make_unique<DynamicConstBuffer>(desc);
-		g_BlurCBuf->CreateConstantBuffer(m_DR->GetDevice());
-	}
+        Node spotLight = Node("spotLight", NodeType::Struct);
+        spotLight.AddChild("Ambient", NodeType::Float4);
+        spotLight.AddChild("Diffuse", NodeType::Float4);
+        spotLight.AddChild("Specular", NodeType::Float4);
+        spotLight.AddChild("Position", NodeType::Float4);
+        spotLight.AddChild("Direction", NodeType::Float4);
+        Node spotLightsArr = Node("spotLights", NodeType::Array);
+        spotLightsArr.AddChildN(spotLight, 2);
 
-	m_PerSceneData.fogColor = { 0.8f, 0.8f, 0.8f, 1.0f };
-	m_PerSceneData.fogStart = 0;
-	m_PerSceneData.fogEnd = 1;
+        perSceneDesc.AddNode(dirLight);
+        perSceneDesc.AddNode(pointLightsArr);
+        perSceneDesc.AddNode(spotLightsArr);
+
+        m_perSceneCB = std::make_unique<DynamicConstBuffer>(perSceneDesc,
+            *m_deviceResources);
+
+        DynamicConstBufferDesc perFrameDesc;
+        perFrameDesc.AddNode(Node("view", NodeType::Float4X4));
+        perFrameDesc.AddNode(Node("proj", NodeType::Float4X4));
+        perFrameDesc.AddNode(Node("cameraPosW", NodeType::Float4));
+
+        m_perFrameCB = std::make_unique<DynamicConstBuffer>(perFrameDesc,
+            *m_deviceResources);
+
+        m_perSceneCB->SetValue("dirLight.Diffuse",
+                               Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
+        m_perSceneCB->SetValue("dirLight.Position", Vec4D(10, 150, 10, 150));
+
+        DynamicConstBufferDesc perPassDesc;
+        perPassDesc.AddNode(Node("calcReflection", NodeType::Float));
+
+        m_perPassCB = std::make_unique<DynamicConstBuffer>(perPassDesc,
+            *m_deviceResources);
+
+        m_perSceneCB->SetValue("pointLights[0].Position",
+                               Vec4D(100, 10, 0, 100));
+        m_perSceneCB->SetValue("pointLights[1].Position",
+                               Vec4D(-100, 10, 0, 100));
+        m_perSceneCB->SetValue("pointLights[2].Position",
+                               Vec4D(0, 10, 50, 100));
+        m_perSceneCB->SetValue("pointLights[3].Position",
+                               Vec4D(0, 10, 7 - 50, 100));
+        m_perSceneCB->SetValue("pointLights[4].Position",
+                               Vec4D(40, 50, 50, 100));
+        m_perSceneCB->SetValue("pointLights[5].Position",
+                               Vec4D(-40, 50, -50, 100));
+    }
 
 #if WITH_IMGUI
-	ImGui::CreateContext();
-	ImGuiIO &io = ImGui::GetIO();
-	const std::string droidSansTtf = UtilsFormatStr(
-		"%s/../imgui-1.87/misc/fonts/DroidSans.ttf", SRC_ROOT);
-	io.Fonts->AddFontFromFileTTF(droidSansTtf.c_str(), 16.0f);
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    //const std::string droidSansTtf = UtilsFormatStr(
+    //    "%s/../imgui-1.87/misc/fonts/DroidSans.ttf",
+    //    SOURCE_ROOT);
+    //io.Fonts->AddFontFromFileTTF(droidSansTtf.c_str(), 16.0f);
 
-	ImGui_ImplWin32_Init(hWnd);
-	ImGui_ImplDX11_Init(m_DR->GetDevice(), m_DR->GetDeviceContext());
+    ImGui_ImplWin32_Init(hWnd);
+    ImGui_ImplDX11_Init(m_deviceResources->GetDevice(),
+                        m_deviceResources->GetDeviceContext());
 #endif
 }
 
-void Game::GetDefaultSize(uint32_t *width, uint32_t *height)
-{
-	*width = DEFAULT_WIN_WIDTH;
-	*height = DEFAULT_WIN_HEIGHT;
+void
+Game::GetDefaultSize(uint32_t *width, uint32_t *height) {
+    *width = DEFAULT_WIN_WIDTH;
+    *height = DEFAULT_WIN_HEIGHT;
 }
 
-void Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj)
-{
-	// Only the first "main" light casts a shadow.
-	const Vec3D lightPos = m_PerSceneData.dirLight.Position;
-	const Vec3D targetPos = { 0.0f, 0.0f, 0.0f };
-	const Vec3D worldUp = { 0.0f, 1.0f, 0.0f };
-	const float radius = MathVec3DLength(lightPos);
+void
+Game::OnWindowSizeChanged(int width, int height) {
+    if (!m_deviceResources->WindowSizeChanged(width, height))
+        return;
 
-	const Vec3D right = (targetPos - lightPos).Cross(worldUp);
-	const Vec3D up = right.Cross(targetPos - lightPos);
-
-	view = MathMat4X4ViewAt(&lightPos, &targetPos, &up);
-	proj = MathMat4X4OrthographicOffCenter(-radius, radius, -radius, radius,
-					       m_Camera.GetZNear(),
-					       m_Camera.GetZFar());
+    CreateWindowSizeDependentResources();
 }
 
-void Game::DrawActor(const Actor &actor)
-{
-	if (actor.IsVisible()) {
-		m_Renderer.BindShaderResources(BindTargets::PixelShader,
-					       actor.GetShaderResources(),
-					       ACTOR_NUM_TEXTURES);
-		m_PerObjectData.material = actor.GetMaterial();
-		m_PerObjectData.world = actor.GetWorld();
-		m_PerObjectData.worldInvTranspose =
-			MathMat4X4Inverse(actor.GetWorld());
-		GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-					 sizeof(PerObjectConstants),
-					 &m_PerObjectData, m_PerObjectCB.Get());
-		Mat4X4 view = {};
-		Mat4X4 proj = {};
-		BuildShadowTransform(view, proj);
-		const Mat4X4 toLightSpace = actor.GetWorld() * view * proj;
-		m_PerFrameData.shadowTransform = toLightSpace;
-		GameUpdateConstantBuffer(m_DR->GetDeviceContext(),
-					 sizeof(PerFrameConstants),
-					 &m_PerFrameData, m_PerFrameCB.Get());
-		m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-					      m_PerObjectCB.Get(), 0);
-		m_Renderer.BindConstantBuffer(BindTargets::PixelShader,
-					      m_PerObjectCB.Get(), 0);
-		m_Renderer.BindConstantBuffer(BindTargets::VertexShader,
-					      m_PerFrameCB.Get(), 1);
-		m_Renderer.BindConstantBuffer(BindTargets::PixelShader,
-					      m_PerFrameCB.Get(), 1);
+void
+Game::CreateWindowSizeDependentResources() {
+    const auto size = m_deviceResources->GetOutputSize();
+    const float aspectRatio =
+        static_cast<float>(size.right) / static_cast<float>(size.bottom);
+    float fovAngleY = 45.0f;
 
-		m_Renderer.SetIndexBuffer(actor.GetIndexBuffer(), 0);
-		m_Renderer.SetVertexBuffer(
-			actor.GetVertexBuffer(),
-			/*m_shaderManager.GetStrides()*/ sizeof(Vertex), 0);
+    // portrait or snapped view.
+    if (aspectRatio < 1.0f) {
+        fovAngleY *= 2.0f;
+    }
 
-		m_Renderer.DrawIndexed(actor.GetNumIndices(), 0, 0);
-	}
+    m_camera.SetFov(fovAngleY);
+    m_camera.SetViewDimensions(size.right, size.bottom);
 }
 
-void Game::OnWindowSizeChanged(int width, int height)
-{
-	if (!m_DR->WindowSizeChanged(width, height))
-		return;
-
-	CreateWindowSizeDependentResources();
+void
+Game::DrawMeshes(const std::vector<Mesh> &meshes) {
+    for (const Mesh &mesh : meshes) {
+        for (const TextureInfo &ti : mesh.GetTextures()) {
+            if (ti.Type == TextureType::Diffuse) {
+                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
+                    m_renderer.BindShaderResource(
+                        BindTargets::PixelShader,
+                        tex->GetSRV(),
+                        0);
+                }
+            }
+            if (ti.Type == TextureType::Normal) {
+                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
+                    m_renderer.BindShaderResource(
+                        BindTargets::PixelShader,
+                        tex->GetSRV(),
+                        3);
+                }
+            }
+            if (ti.Type == TextureType::Specular ||
+                ti.Type == TextureType::Metalness) {
+                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
+                    m_renderer.BindShaderResource(
+                        BindTargets::PixelShader,
+                        tex->GetSRV(),
+                        1);
+                }
+            }
+            if (ti.Type == TextureType::Shininess ||
+                ti.Type == TextureType::DiffuseRoughness) {
+                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
+                    m_renderer.BindShaderResource(
+                        BindTargets::PixelShader,
+                        tex->GetSRV(),
+                        2);
+                }
+            }
+        }
+        m_renderer.SetVertexBuffer(
+            mesh.GetVertexBuffer(),
+            mesh.GetVertexSize(),
+            0);
+        m_renderer.SetIndexBuffer(mesh.GetIndexBuffer(), 0);
+        m_renderer.DrawIndexed(mesh.GetIndexCount(), 0, 0);
+    }
 }
 
-void Game::CreateWindowSizeDependentResources()
-{
-	auto const size = m_DR->GetOutputSize();
-	const float aspectRatio = static_cast<float>(size.right) /
-				  static_cast<float>(size.bottom);
-	float fovAngleY = 45.0f;
+void
+Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj) {
+    // Only the first "main" light casts a shadow.
+    const Vec4D dirLightPos =
+        *m_perSceneCB->GetValue<Vec4D>("dirLight.Position");
+    const Vec3D lightPos = {dirLightPos.X, dirLightPos.Y, dirLightPos.Z};
+    const Vec3D targetPos = {0.0f, 0.0f, 0.0f};
+    const Vec3D worldUp = {0.0f, 1.0f, 0.0f};
+    const float radius = MathVec3DLength(lightPos);
 
-	// portrait or snapped view.
-	if (aspectRatio < 1.0f) {
-		fovAngleY *= 2.0f;
-	}
+    const Vec3D right = (targetPos - lightPos).Cross(worldUp);
+    const Vec3D up = right.Cross(targetPos - lightPos);
 
-	m_Camera.SetFov(fovAngleY);
-	m_Camera.SetViewDimensions(size.right, size.bottom);
+    view = MathMat4X4ViewAt(&lightPos, &targetPos, &up);
+    proj = MathMat4X4OrthographicOffCenter(-radius,
+                                           radius,
+                                           -radius,
+                                           radius,
+                                           m_camera.GetZNear(),
+                                           m_camera.GetZFar());
+}
 
-	g_OffscreenRTV = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-					       m_DR->GetOutputSize().right,
-					       m_DR->GetOutputSize().bottom,
-					       m_DR->GetDevice());
-	g_BrightessRTV = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-					       m_DR->GetOutputSize().right,
-					       m_DR->GetOutputSize().bottom,
-					       m_DR->GetDevice());
-	g_BlurRTV = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-					       m_DR->GetOutputSize().right,
-					       m_DR->GetOutputSize().bottom,
-					       m_DR->GetDevice());
-	g_BlurRTV2 = std::make_unique<Texture>(DXGI_FORMAT_B8G8R8A8_UNORM,
-					       m_DR->GetOutputSize().right,
-					       m_DR->GetOutputSize().bottom,
-					       m_DR->GetDevice());
+void
+Game::DrawActors() {
+    Mat4X4 shadowView = {};
+    Mat4X4 shadowProj = {};
+    BuildShadowTransform(shadowView, shadowProj);
+    for (const Actor &actor : m_actors) {
+        if (actor.IsVisible()) {
+            m_perObjectCB->SetValue("material.roughness", actor.GetRoughness());
+            m_perObjectCB->SetValue("world", actor.GetWorld());
+            m_perObjectCB->SetValue("worldInvTranspose", actor.GetWorld());
+            m_perObjectCB->SetValue("shadowTransform",
+                                    actor.GetWorld() * shadowView * shadowProj);
+            m_perObjectCB->UpdateConstantBuffer();
+            DrawMeshes(actor.GetMeshes());
+        }
+    }
 }
