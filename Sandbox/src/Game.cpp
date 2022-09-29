@@ -122,39 +122,6 @@ Game::UpdateImgui() {
             }
         }
     }
-
-    if (ImGui::CollapsingHeader("Fire")) {
-        ImGui::Checkbox("Enable fire", &m_firePS.GetOptions().isEnabled);
-        ImGui::InputFloat("Lifespan##FirePS", &m_firePS.GetOptions().lifespan);
-        ImGui::ColorEdit4(
-            "Color##FirePS",
-            reinterpret_cast<float *>(&gSettings.firePSOpts.color));
-
-        ImGui::InputInt("Fire num particles",
-                        &m_firePS.GetOptions().maxParticles);
-        ImGui::InputFloat("Fire accel random factor",
-                          &m_firePS.GetOptions().accelRandFact);
-        ImGui::InputFloat("Fire init vel random factor",
-                          &m_firePS.GetOptions().initVelRandFact);
-        ImGui::InputInt("Fire burst (n per 100 ms)",
-                        &m_firePS.GetOptions().burst);
-        ImGui::InputFloat3(
-            "Fire init vel",
-            reinterpret_cast<float *>(&m_firePS.GetOptions().initVel));
-        ImGui::InputFloat3(
-            "Fire accel",
-            reinterpret_cast<float *>(&m_firePS.GetOptions().accel));
-        ImGui::InputFloat3(
-            "Fire pos",
-            reinterpret_cast<float *>(&m_firePS.GetOptions().origin));
-        ImGui::InputFloat2(
-            "Fire size",
-            reinterpret_cast<float *>(&m_firePS.GetOptions().particleSize));
-
-        if (ImGui::Button("Update")) {
-            m_firePS.Reset();
-        }
-    }
 }
 #endif
 
@@ -230,11 +197,6 @@ Game::Update() {
     static float elapsedTime = 0.0f;
     const auto deltaSeconds = static_cast<float>(m_timer.DeltaMillis / 1000.0);
     elapsedTime += deltaSeconds;
-
-    if (m_firePS.GetOptions().isEnabled) {
-        m_firePS.Tick(deltaSeconds);
-        m_firePS.UpdateVertexBuffer(m_deviceResources->GetDeviceContext());
-    }
 
     if (elapsedTime >= 1.0f) {
         const std::string title = UtilsFormatStr(
@@ -408,41 +370,6 @@ Game::Render() {
     }
     m_deviceResources->PIXEndEvent();
 
-    if (m_firePS.GetOptions().isEnabled) {
-        m_deviceResources->PIXBeginEvent(L"Draw fire");
-        m_renderer.SetBlendState(m_firePS.GetBlendState());
-        m_renderer.SetDepthStencilState(m_firePS.GetDepthStencilState());
-        m_renderer.BindVertexShader(
-            m_shaderManager.GetVertexShader("ParticleVS"));
-        m_renderer.SetVertexBuffer(
-            m_firePS.GetVertexBuffer(),
-            m_shaderManager.GetStrides(),
-            0);
-        m_renderer.SetIndexBuffer(m_firePS.GetIndexBuffer(), 0);
-        m_renderer.BindPixelShader(
-            m_shaderManager.GetPixelShader("ParticlePS"));
-        m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-        m_renderer.BindConstantBuffer(
-            BindTargets::VertexShader,
-            m_perFrameCB->Get(),
-            0);
-        m_renderer.BindShaderResource(
-            BindTargets::PixelShader,
-            m_firePS.GetSRV(),
-            0);
-        m_renderer.SetSamplerState(m_firePS.GetSamplerState(), 0);
-        const Vec4D prevCamVal = *m_perFrameCB->GetValue<Vec4D>("cameraPosW");
-        m_perFrameCB->SetValue("cameraPosW", gSettings.firePSOpts.color);
-        m_perFrameCB->UpdateConstantBuffer();
-        m_renderer.BindConstantBuffer(
-            BindTargets::PixelShader,
-            m_perFrameCB->Get(),
-            0);
-        m_renderer.DrawIndexed(m_firePS.GetNumIndices(), 0, 0);
-        m_perFrameCB->SetValue("cameraPosW", prevCamVal);
-        m_deviceResources->PIXEndEvent();
-    }
-
 #if WITH_IMGUI
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -486,20 +413,6 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height) {
 
     m_renderer.SetDeviceResources(m_deviceResources.get());
     m_assetManager = std::make_unique<AssetManager>(*m_deviceResources);
-    //m_actors.emplace_back(m_assetManager->LoadModel(
-    //    UtilsFormatStr("%s/Sponza.gltf", SPONZA_ROOT)));
-    //m_actors.emplace_back(m_assetManager->LoadModel(
-    //    UtilsFormatStr("%s/Suzanne/glTF/Suzanne.gltf", ASSETS_ROOT)));
-    //m_actors[0].SetWorld(MathMat4X4ScaleFromVec3D({0.1f, 0.1f, 0.1f}));
-    //m_actors[1].SetRoughness(0.1f);
-    //m_actors[1].SetWorld(MathMat4X4ScaleFromVec3D({10, 10, 10}) *
-    //                     MathMat4X4TranslateFromVec3D({0, 20, 0}));
-
-    //m_firePS.Init(m_deviceResources->GetDevice(),
-    //              m_deviceResources->GetDeviceContext(),
-    //              UtilsFormatStr("%s/textures/particlePack_1.1/flame_05.png",
-    //                             ASSETS_ROOT));
-    //m_firePS.SetOptions(gSettings.firePSOpts);
 
     const int shadowMapSize = 2048;
     m_shadowMap.InitResources(
