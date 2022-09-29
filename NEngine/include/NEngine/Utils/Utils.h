@@ -7,33 +7,36 @@
 #include <string>
 #include <vector>
 
-namespace NEngine
-{
-	namespace Utils
-	{
-		static const WORD MAX_CONSOLE_LINES = 500;
+namespace NEngine {
+namespace Utils {
+static const WORD MAX_CONSOLE_LINES = 500;
 
-		void UtilsDebugPrint(const char* fmt, ...);
+void UtilsDebugPrint(const char *fmt, ...);
 
-		void UtilsFatalError(const char* fmt, ...);
+void UtilsFatalError(const char *fmt, ...);
 
-		std::string UtilsFormatStr(const char* fmt, ...);
+std::string UtilsFormatStr(const char *fmt, ...);
 
 #define UTILS_FATAL_ERROR(msg, ...)                             \
 	UtilsFatalError("ERROR: %s:%d: %s", __FILE__, __LINE__, \
 			UtilsFormatStr(msg, __VA_ARGS__).c_str())
 
-		int UtilStrFindLastChar(const char* str, const char ch);
+int UtilStrFindLastChar(const char *str, const char ch);
 
-		void UtilsStrSub(const char* str, uint32_t start, uint32_t end, char out[],
-			uint32_t maxSize);
+void UtilsStrSub(const char *str,
+                 uint32_t start,
+                 uint32_t end,
+                 char out[],
+                 uint32_t maxSize);
 
-		std::vector<uint8_t> UtilsReadData(const char* filepath);
+std::vector<uint8_t> UtilsReadData(const char *filepath);
 
-		void UtilsWriteData(const char* filepath, const char* bytes, const size_t sz,
-			const bool isBinary = false);
+void UtilsWriteData(const char *filepath,
+                    const char *bytes,
+                    const size_t sz,
+                    const bool isBinary = false);
 
-		/* Dynamic Array */
+/* Dynamic Array */
 
 #define DEFINE_ARRAY_TYPE(DataType, ClassSuffix)                          \
                                                                           \
@@ -100,18 +103,26 @@ namespace NEngine
 				__LINE__);                               \
 	}
 
-		void UtilsCreateIndexBuffer(ID3D11Device* device, const void* data, size_t num,
-			ID3D11Buffer** ppBuffer);
-		void UtilsCreateVertexBuffer(ID3D11Device* device, const void* data, size_t num,
-			size_t structSize, ID3D11Buffer** ppBuffer);
-		void UtilsUpdateConstantBuffer(ID3D11DeviceContext* context, size_t bufferSize,
-			void* data, ID3D11Buffer* dest);
+void UtilsCreateIndexBuffer(ID3D11Device *device,
+                            const void *data,
+                            size_t num,
+                            ID3D11Buffer **ppBuffer);
+void UtilsCreateVertexBuffer(ID3D11Device *device,
+                             const void *data,
+                             size_t num,
+                             size_t structSize,
+                             ID3D11Buffer **ppBuffer);
+void UtilsUpdateConstantBuffer(ID3D11DeviceContext *context,
+                               size_t bufferSize,
+                               void *data,
+                               ID3D11Buffer *dest);
 
-		void UtilsCreateConstantBuffer(ID3D11Device* device, size_t byteWidth,
-			ID3D11Buffer** pDest);
+void UtilsCreateConstantBuffer(ID3D11Device *device,
+                               size_t byteWidth,
+                               ID3D11Buffer **pDest);
 
-		std::wstring UtilsStrToWstr(const std::string& str);
-		std::string UtilsWstrToStr(const std::wstring& wstr);
+std::wstring UtilsStrToWstr(const std::string &str);
+std::string UtilsWstrToStr(const std::wstring &wstr);
 
-	}
+}
 }
