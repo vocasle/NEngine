@@ -702,18 +702,4 @@ Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj) {
 
 void
 Game::DrawActors() {
-    Mat4X4 shadowView = {};
-    Mat4X4 shadowProj = {};
-    BuildShadowTransform(shadowView, shadowProj);
-    for (const Actor &actor : m_actors) {
-        if (actor.IsVisible()) {
-            m_perObjectCB->SetValue("material.roughness", actor.GetRoughness());
-            m_perObjectCB->SetValue("world", actor.GetWorld());
-            m_perObjectCB->SetValue("worldInvTranspose", actor.GetWorld());
-            m_perObjectCB->SetValue("shadowTransform",
-                                    actor.GetWorld() * shadowView * shadowProj);
-            m_perObjectCB->UpdateConstantBuffer();
-            DrawMeshes(actor.GetMeshes());
-        }
-    }
 }

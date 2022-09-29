@@ -20,7 +20,6 @@
 #include "NEngine/Helpers/ShaderManager.h"
 #include "NEngine/Helpers/ShadowMap.h"
 #include "NEngine/Utils/Timer.h"
-#include "NEngine/Helpers/Actor.h"
 
 class Game {
 public:
@@ -55,7 +54,6 @@ private:
     NEngine::Helpers::Renderer m_renderer;
     NEngine::Helpers::ShaderManager m_shaderManager;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
-    std::vector<NEngine::Helpers::Actor> m_actors;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perFrameCB;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perSceneCB;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perObjectCB;
