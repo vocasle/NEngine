@@ -28,6 +28,25 @@ struct SponzaSettings {
 
 namespace {
 SponzaSettings gSettings;
+
+struct VertexPositionNormalTangent {
+    Vec4D Position;
+    Vec4D Normal;
+    Vec4D Tangent;
+};
+
+const std::vector<Vertex> gVertices = {
+    {{0, 0.5f, 0, 0}, {}, {}},
+    {{0.5f, -0.5f, 0, 0}, {}, {}},
+    {{-0.5f, -0.5f, 0, 0}, {}, {}},
+};
+
+const std::vector<unsigned int> gIndices = {
+    0, 1, 2,
+};
+
+ComPtr<ID3D11Buffer> gVertexBuffer;
+ComPtr<ID3D11Buffer> gIndexBuffer;
 };
 
 static void
@@ -186,7 +205,8 @@ Game::Update() {
     m_camera.ProcessMouse(m_timer.DeltaMillis);
 
     m_perFrameCB->SetValue("view", m_camera.GetViewMat());
-    m_perFrameCB->SetValue("proj", m_camera.GetProjMat());
+    auto projMat = m_camera.GetProjMat();
+    m_perFrameCB->SetValue("proj", projMat);
     m_perFrameCB->SetValue("cameraPosW", Vec4D(m_camera.GetPos(), 0));
 
     m_perSceneCB->SetValue("spotLights[0].Position",
@@ -237,82 +257,6 @@ Game::Render() {
     Mat4X4 shadowView = {};
     Mat4X4 shadowProj = {};
     BuildShadowTransform(shadowView, shadowProj);
-    m_deviceResources->PIXBeginEvent(L"Shadow pass");
-    {
-        m_shadowMap.Bind(m_deviceResources->GetDeviceContext());
-
-        m_renderer.BindPixelShader(nullptr);
-        m_renderer.BindVertexShader(
-            m_shaderManager.GetVertexShader("ShadowVS"));
-        m_renderer.BindConstantBuffer(
-            BindTargets::VertexShader,
-            m_perObjectCB->Get(),
-            0);
-        m_renderer.BindConstantBuffer(
-            BindTargets::VertexShader,
-            m_perFrameCB->Get(),
-            1);
-        m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-        m_renderer.SetSamplerState(m_shadowMap.GetShadowSampler(), 1);
-        m_perFrameCB->SetValue("proj", shadowProj);
-        m_perFrameCB->SetValue("view", shadowView);
-        m_perFrameCB->UpdateConstantBuffer();
-        m_renderer.SetRasterizerState(m_shadowMap.GetRasterizerState());
-        DrawActors();
-        m_renderer.SetRasterizerState(nullptr);
-        m_shadowMap.Unbind(m_deviceResources->GetDeviceContext());
-        m_perFrameCB->SetValue("proj", m_camera.GetProjMat());
-        m_perFrameCB->SetValue("view", m_camera.GetViewMat());
-        m_perFrameCB->UpdateConstantBuffer();
-    }
-    m_deviceResources->PIXEndEvent();
-
-    m_deviceResources->PIXBeginEvent(L"Dynamic cube map pass");
-    {
-        m_renderer.SetDepthStencilState(nullptr);
-        m_renderer.SetViewport(m_dynamicCubeMap.GetViewport());
-        //m_actors[1].SetVisible(false);
-        m_renderer.BindVertexShader(m_shaderManager.GetVertexShader("ColorVS"));
-        m_renderer.BindPixelShader(m_shaderManager.GetPixelShader("PhongPS"));
-        m_perPassCB->SetValue("calcReflection", 0);
-        m_perPassCB->UpdateConstantBuffer();
-        m_renderer.BindConstantBuffer(
-            BindTargets::PixelShader,
-            m_perPassCB->Get(),
-            3);
-
-        for (int i = 0; i < 6; ++i) {
-            // Bind cube map face as render target.
-            m_renderer.SetRenderTargets(m_dynamicCubeMap.GetRTV(i),
-                                        m_dynamicCubeMap.GetDSV());
-            // Clear cube map face and depth buffer.
-            m_renderer.Clear(CLEAR_COLOR);
-            m_perFrameCB->SetValue(
-                "cameraPosW",
-                Vec4D(m_dynamicCubeMap.GetCamera(i).GetPos(), 0));
-            m_perFrameCB->SetValue("view",
-                                   m_dynamicCubeMap.GetCamera(i).GetViewMat());
-            m_perFrameCB->SetValue("proj",
-                                   m_dynamicCubeMap.GetCamera(i).GetProjMat());
-            m_perFrameCB->UpdateConstantBuffer();
-            DrawActors();
-            m_renderer.SetDepthStencilState(nullptr);
-        }
-
-        // reset viewport
-        m_renderer.SetViewport(m_deviceResources->GetViewport());
-        m_renderer.SetRenderTargets(m_deviceResources->GetRenderTargetView(),
-                                    m_deviceResources->GetDepthStencilView());
-        m_renderer.Clear(CLEAR_COLOR);
-        //m_actors[1].SetVisible(true);
-        m_renderer.SetRasterizerState(nullptr);
-        m_renderer.SetDepthStencilState(nullptr);
-        m_perFrameCB->SetValue("proj", m_camera.GetProjMat());
-        m_perFrameCB->SetValue("view", m_camera.GetViewMat());
-        m_perFrameCB->SetValue("cameraPosW", Vec4D(m_camera.GetPos(), 0));
-        m_perFrameCB->UpdateConstantBuffer();
-    }
-    m_deviceResources->PIXEndEvent();
 
     m_deviceResources->PIXBeginEvent(L"Color pass");
     // reset view proj matrix back to camera
@@ -324,8 +268,14 @@ Game::Render() {
             m_perPassCB->Get(),
             3);
 
+        m_renderer.BindVertexShader(
+            m_shaderManager.GetVertexShader("ColorVS.cso"));
+        m_renderer.BindPixelShader(
+            m_shaderManager.GetPixelShader("PhongPS.cso"));
         m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
         m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
+        m_perObjectCB->SetValue("world", MathMat4X4Identity());
+        m_perObjectCB->SetValue("worldInvTranspose", MathMat4X4Identity());
 
         m_perFrameCB->UpdateConstantBuffer();
         m_perSceneCB->UpdateConstantBuffer();
@@ -364,7 +314,11 @@ Game::Render() {
             BindTargets::PixelShader,
             m_dynamicCubeMap.GetSRV(),
             6);
-        DrawActors();
+
+        m_renderer.SetVertexBuffer(gVertexBuffer.Get(), sizeof(VertexPositionNormalTangent), 0);
+        m_renderer.SetIndexBuffer(gIndexBuffer.Get(), 0);
+        m_renderer.DrawIndexed(gIndices.size(), 0, 0);
+
         m_renderer.SetSamplerState(nullptr, 1);
         m_renderer.BindShaderResource(BindTargets::PixelShader, nullptr, 6);
     }
@@ -394,6 +348,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height) {
     m_deviceResources->SetWindow(hWnd, width, height);
     m_deviceResources->CreateDeviceResources();
     m_deviceResources->CreateWindowSizeDependentResources();
+    CreateWindowSizeDependentResources();
     InitSponzaSettings();
     TimerInitialize(&m_timer);
     Mouse::Get().SetWindowDimensions(m_deviceResources->GetBackBufferWidth(),
@@ -497,6 +452,41 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height) {
                                Vec4D(40, 50, 50, 100));
         m_perSceneCB->SetValue("pointLights[5].Position",
                                Vec4D(-40, 50, -50, 100));
+    }
+
+    {
+        const CD3D11_BUFFER_DESC desc(
+            sizeof(VertexPositionNormalTangent) * gVertices.size(),
+            D3D11_BIND_VERTEX_BUFFER,
+            D3D11_USAGE_IMMUTABLE,
+            0,
+            0,
+            sizeof(VertexPositionNormalTangent));
+
+        D3D11_SUBRESOURCE_DATA data = {};
+        data.pSysMem = &gVertices[0];
+
+        HR(m_deviceResources->GetDevice()->CreateBuffer(
+            &desc,
+            &data,
+            gVertexBuffer.ReleaseAndGetAddressOf()))
+    }
+
+    {
+        const CD3D11_BUFFER_DESC desc(sizeof(unsigned int) * gIndices.size(),
+                                      D3D11_BIND_INDEX_BUFFER,
+                                      D3D11_USAGE_IMMUTABLE,
+                                      0,
+                                      0,
+                                      0);
+
+        D3D11_SUBRESOURCE_DATA data = {};
+        data.pSysMem = &gIndices[0];
+
+        HR(m_deviceResources->GetDevice()->CreateBuffer(
+            &desc,
+            &data,
+            gIndexBuffer.ReleaseAndGetAddressOf()))
     }
 
 #if WITH_IMGUI
