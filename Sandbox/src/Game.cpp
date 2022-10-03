@@ -22,14 +22,16 @@ using namespace NEngine::Utils;
 using namespace NEngine::Math;
 using namespace NEngine::Input;
 
-struct SponzaSettings {
+struct SponzaSettings
+{
     ParticleSystemOptions firePSOpts;
 };
 
 namespace {
 SponzaSettings gSettings;
 
-struct VertexPositionNormalTangent {
+struct VertexPositionNormalTangent
+{
     Vec4D Position;
     Vec4D Normal;
     Vec4D Tangent;
@@ -50,7 +52,8 @@ ComPtr<ID3D11Buffer> gIndexBuffer;
 };
 
 static void
-InitSponzaSettings() {
+InitSponzaSettings()
+{
     ParticleSystemOptions &fire1 = gSettings.firePSOpts;
     fire1.isEnabled = true;
     fire1.maxParticles = 100;
@@ -62,13 +65,15 @@ InitSponzaSettings() {
 }
 
 void
-Game::CreateRasterizerState() {
+Game::CreateRasterizerState()
+{
     throw std::runtime_error("Not implemented");
 }
 
 #if WITH_IMGUI
 void
-Game::UpdateImgui() {
+Game::UpdateImgui()
+{
     if (ImGui::Button("Recompile all shaders")) {
         m_shaderManager.Recompile(m_deviceResources->GetDevice());
     }
@@ -145,7 +150,8 @@ Game::UpdateImgui() {
 #endif
 
 void
-Game::CreateDefaultSampler() {
+Game::CreateDefaultSampler()
+{
     D3D11_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -166,11 +172,13 @@ Game::CreateDefaultSampler() {
 
 Game::Game()
     : m_camera({0, 10, -5}),
-      m_firePS("fire", {0, 0, 0}, {0, 10, 0}, {0, 0, 0}, m_camera) {
+      m_firePS("fire", {0, 0, 0}, {0, 10, 0}, {0, 0, 0}, m_camera)
+{
     m_deviceResources = std::make_unique<DeviceResources>();
 }
 
-Game::~Game() {
+Game::~Game()
+{
 #if WITH_IMGUI
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -179,13 +187,15 @@ Game::~Game() {
 }
 
 void
-Game::Clear() {
+Game::Clear()
+{
     ID3D11DeviceContext *ctx = m_deviceResources->GetDeviceContext();
     ID3D11RenderTargetView *rtv = m_deviceResources->GetRenderTargetView();
     ID3D11DepthStencilView *dsv = m_deviceResources->GetDepthStencilView();
 
     static const float CLEAR_COLOR[4] = {
-        0.392156899f, 0.584313750f, 0.929411829f, 1.000000000f};
+        0.392156899f, 0.584313750f, 0.929411829f, 1.000000000f
+    };
 
     ctx->Flush();
 
@@ -200,7 +210,8 @@ Game::Clear() {
 }
 
 void
-Game::Update() {
+Game::Update()
+{
     m_camera.ProcessKeyboard(m_timer.DeltaMillis);
     m_camera.ProcessMouse(m_timer.DeltaMillis);
 
@@ -232,7 +243,8 @@ Game::Update() {
 }
 
 void
-Game::Render() {
+Game::Render()
+{
 #if WITH_IMGUI
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -315,7 +327,9 @@ Game::Render() {
             m_dynamicCubeMap.GetSRV(),
             6);
 
-        m_renderer.SetVertexBuffer(gVertexBuffer.Get(), sizeof(VertexPositionNormalTangent), 0);
+        m_renderer.SetVertexBuffer(gVertexBuffer.Get(),
+                                   sizeof(VertexPositionNormalTangent),
+                                   0);
         m_renderer.SetIndexBuffer(gIndexBuffer.Get(), 0);
         m_renderer.DrawIndexed(gIndices.size(), 0, 0);
 
@@ -333,14 +347,16 @@ Game::Render() {
 }
 
 void
-Game::Tick() {
+Game::Tick()
+{
     TimerTick(&m_timer);
     Update();
     Render();
 }
 
 void
-Game::Initialize(HWND hWnd, uint32_t width, uint32_t height) {
+Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
+{
     using namespace Microsoft::WRL;
 #ifdef MATH_TEST
     MathTest();
@@ -504,13 +520,15 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height) {
 }
 
 void
-Game::GetDefaultSize(uint32_t *width, uint32_t *height) {
+Game::GetDefaultSize(uint32_t *width, uint32_t *height)
+{
     *width = DEFAULT_WIN_WIDTH;
     *height = DEFAULT_WIN_HEIGHT;
 }
 
 void
-Game::OnWindowSizeChanged(int width, int height) {
+Game::OnWindowSizeChanged(int width, int height)
+{
     if (!m_deviceResources->WindowSizeChanged(width, height))
         return;
 
@@ -518,7 +536,8 @@ Game::OnWindowSizeChanged(int width, int height) {
 }
 
 void
-Game::CreateWindowSizeDependentResources() {
+Game::CreateWindowSizeDependentResources()
+{
     const auto size = m_deviceResources->GetOutputSize();
     const float aspectRatio =
         static_cast<float>(size.right) / static_cast<float>(size.bottom);
@@ -534,7 +553,8 @@ Game::CreateWindowSizeDependentResources() {
 }
 
 void
-Game::DrawMeshes(const std::vector<Mesh> &meshes) {
+Game::DrawMeshes(const std::vector<Mesh> &meshes)
+{
     for (const Mesh &mesh : meshes) {
         for (const TextureInfo &ti : mesh.GetTextures()) {
             if (ti.Type == TextureType::Diffuse) {
@@ -582,7 +602,8 @@ Game::DrawMeshes(const std::vector<Mesh> &meshes) {
 }
 
 void
-Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj) {
+Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj)
+{
     // Only the first "main" light casts a shadow.
     const Vec4D dirLightPos =
         *m_perSceneCB->GetValue<Vec4D>("dirLight.Position");
@@ -604,5 +625,6 @@ Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj) {
 }
 
 void
-Game::DrawActors() {
+Game::DrawActors()
+{
 }
