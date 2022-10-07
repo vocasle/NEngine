@@ -51,6 +51,9 @@
     <ClInclude Include="thirdparty\imgui\include\imgui\imstb_textedit.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imstb_truetype.h" />
     <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
+    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\json.hpp" />
+    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\stb_image_write.h" />
+    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\tiny_gltf.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Helpers\AssetManager.cpp" />
@@ -80,6 +83,7 @@
     <ClCompile Include="thirdparty\imgui\src\imgui_tables.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp" />
     <ClCompile Include="thirdparty\stb_image\src\stb_image.cpp" />
+    <ClCompile Include="thirdparty\tinygltf\src\stb_image_write.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -135,7 +139,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -172,11 +178,16 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
