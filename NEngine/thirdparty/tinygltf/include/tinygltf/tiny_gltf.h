@@ -1583,7 +1583,7 @@ class TinyGLTF {
 
 #ifndef TINYGLTF_NO_STB_IMAGE_WRITE
 #ifndef TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE
-#include "stb_image_write.h"
+#include "stb_image_write/stb_image_write.h"
 #endif
 #endif
 

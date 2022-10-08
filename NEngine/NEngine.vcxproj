@@ -25,6 +25,7 @@
     <ClInclude Include="include\NEngine\Helpers\DeviceResources.h" />
     <ClInclude Include="include\NEngine\Helpers\DynamicConstBuffer.h" />
     <ClInclude Include="include\NEngine\Helpers\DynamicCubeMap.h" />
+    <ClInclude Include="include\NEngine\Helpers\GLTFLoader.h" />
     <ClInclude Include="include\NEngine\Helpers\InputLayout.h" />
     <ClInclude Include="include\NEngine\Helpers\LightHelper.h" />
     <ClInclude Include="include\NEngine\Helpers\MeshGenerator.h" />
@@ -52,7 +53,7 @@
     <ClInclude Include="thirdparty\imgui\include\imgui\imstb_truetype.h" />
     <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
     <ClInclude Include="thirdparty\tinygltf\include\tinygltf\json.hpp" />
-    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\stb_image_write.h" />
+    <ClInclude Include="thirdparty\stb_image_write\include\stb_image_write\stb_image_write.h" />
     <ClInclude Include="thirdparty\tinygltf\include\tinygltf\tiny_gltf.h" />
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +62,7 @@
     <ClCompile Include="src\Helpers\DeviceResources.cpp" />
     <ClCompile Include="src\Helpers\DynamicConstBuffer.cpp" />
     <ClCompile Include="src\Helpers\DynamicCubeMap.cpp" />
+    <ClCompile Include="src\Helpers\GLTFLoader.cpp" />
     <ClCompile Include="src\Helpers\InputLayout.cpp" />
     <ClCompile Include="src\Helpers\MeshGenerator.cpp" />
     <ClCompile Include="src\Helpers\ModelLoader.cpp" />
@@ -83,7 +85,8 @@
     <ClCompile Include="thirdparty\imgui\src\imgui_tables.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp" />
     <ClCompile Include="thirdparty\stb_image\src\stb_image.cpp" />
-    <ClCompile Include="thirdparty\tinygltf\src\stb_image_write.cpp" />
+    <ClCompile Include="thirdparty\stb_image_write\src\stb_image_write.cpp" />
+    <ClCompile Include="thirdparty\tinygltf\src\tiny_gltf.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -139,7 +142,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
@@ -175,7 +178,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;NOMINMAX;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>

@@ -114,10 +114,13 @@
     <ClInclude Include="thirdparty\tinygltf\include\tinygltf\json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\stb_image_write.h">
+    <ClInclude Include="thirdparty\stb_image_write\include\stb_image_write\stb_image_write.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\tinygltf\include\tinygltf\tiny_gltf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NEngine\Helpers\GLTFLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -203,7 +206,13 @@
     <ClCompile Include="src\Helpers\objloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\tinygltf\src\stb_image_write.cpp">
+    <ClCompile Include="thirdparty\tinygltf\src\tiny_gltf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Helpers\GLTFLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\stb_image_write\src\stb_image_write.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
