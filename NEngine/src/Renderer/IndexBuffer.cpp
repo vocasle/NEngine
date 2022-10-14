@@ -32,3 +32,9 @@ NEngine::Renderer::IndexBuffer::Unbind(
     Helpers::DeviceResources &deviceResources)
 {
 }
+
+size_t
+NEngine::Renderer::IndexBuffer::GetIndexCount() const
+{
+    return mIndexData.size();
+}

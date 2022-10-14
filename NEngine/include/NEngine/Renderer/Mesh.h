@@ -5,6 +5,7 @@
 
 #include "Drawable.h"
 #include "Bindable.h"
+#include "IndexBuffer.h"
 #include "NEngine/Helpers/DeviceResources.h"
 
 
@@ -18,6 +19,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<Bindable>> mBinds;
+    std::unique_ptr<IndexBuffer> mIndexBuffer;
 
 
 };

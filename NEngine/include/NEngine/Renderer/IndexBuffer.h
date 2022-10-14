@@ -20,6 +20,8 @@ public:
     void Bind(Helpers::DeviceResources &deviceResources) override;
     void Unbind(Helpers::DeviceResources &deviceResources) override;
 
+    [[nodiscard]] size_t GetIndexCount() const;
+
 private:
     std::vector<unsigned int> mIndexData;
     Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;

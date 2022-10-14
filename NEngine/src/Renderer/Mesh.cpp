@@ -13,5 +13,8 @@ NEngine::Renderer::Mesh::Draw(Helpers::DeviceResources &deviceResources)
         bind->Bind(deviceResources);
     }
 
-    deviceResources.GetDeviceContext()->DrawIndexed(3, 0, 0);
+    deviceResources.GetDeviceContext()->DrawIndexed(
+        mIndexBuffer->GetIndexCount(),
+        0,
+        0);
 }
