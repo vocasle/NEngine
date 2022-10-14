@@ -28,6 +28,8 @@ struct BufferDescription {
 template <typename T>
 class Buffer {
 public:
+    Buffer() = default;
+
     Buffer(std::vector<typename T> data, const BufferDescription &description)
         : m_data(data),
           m_description(description),

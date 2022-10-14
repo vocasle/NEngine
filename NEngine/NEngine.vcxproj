@@ -39,9 +39,15 @@
     <ClInclude Include="include\NEngine\Input\Keyboard.h" />
     <ClInclude Include="include\NEngine\Input\Mouse.h" />
     <ClInclude Include="include\NEngine\Math\Math.h" />
+    <ClInclude Include="include\NEngine\Renderer\IndexBuffer.h" />
+    <ClInclude Include="include\NEngine\Renderer\InputLayout.h" />
+    <ClInclude Include="include\NEngine\Renderer\VertexBuffer.h" />
     <ClInclude Include="include\NEngine\Utils\Image.h" />
     <ClInclude Include="include\NEngine\Utils\Timer.h" />
     <ClInclude Include="include\NEngine\Utils\Utils.h" />
+    <ClInclude Include="include\NEngine\Renderer\Bindable.h" />
+    <ClInclude Include="include\NEngine\Renderer\Drawable.h" />
+    <ClInclude Include="include\NEngine\Renderer\Mesh.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx11.h" />
@@ -63,7 +69,7 @@
     <ClCompile Include="src\Helpers\DynamicConstBuffer.cpp" />
     <ClCompile Include="src\Helpers\DynamicCubeMap.cpp" />
     <ClCompile Include="src\Helpers\GLTFLoader.cpp" />
-    <ClCompile Include="src\Helpers\InputLayout.cpp" />
+    <ClCompile Include="src\Helpers\InputLayoutOld.cpp" />
     <ClCompile Include="src\Helpers\MeshGenerator.cpp" />
     <ClCompile Include="src\Helpers\ModelLoader.cpp" />
     <ClCompile Include="src\Helpers\objloader.cpp" />
@@ -76,6 +82,9 @@
     <ClCompile Include="src\Input\Keyboard.cpp" />
     <ClCompile Include="src\Input\Mouse.cpp" />
     <ClCompile Include="src\Math\Math.cpp" />
+    <ClCompile Include="src\Renderer\IndexBuffer.cpp" />
+    <ClCompile Include="src\Renderer\InputLayout.cpp" />
+    <ClCompile Include="src\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Utils\Utils.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
