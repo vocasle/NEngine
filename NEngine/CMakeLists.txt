@@ -54,7 +54,7 @@ set(header_file_list
         include/NEngine/Utils/Timer.h
         include/NEngine/Utils/Utils.h)
 
-add_library(${library_name} ${source_file_list} ${header_file_list})
+add_library(${library_name} STATIC ${source_file_list} ${header_file_list})
 
 target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -62,4 +62,10 @@ add_subdirectory(thirdparty)
 
 target_compile_definitions(${library_name} PRIVATE NOMINMAX=1 UNICODE=1 _UNICODE=1)
 
-target_link_libraries(${library_name} STATIC tinygltf)
+# TODO make tinygltf a private dependency
+target_link_libraries(${library_name}
+        PUBLIC tinygltf
+        PUBLIC d3d11.lib
+        PUBLIC dxgi.lib
+        PUBLIC dxguid.lib
+        PRIVATE stb_image)
