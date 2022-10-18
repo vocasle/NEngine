@@ -78,23 +78,27 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
             const auto &bufferView = model.bufferViews[accessor.bufferView];
             const auto &buffer = model.buffers[bufferView.buffer];
             const size_t byteStride = accessor.ByteStride(bufferView);
+
+            size_t count = accessor.count;
+            const void *source = reinterpret_cast<const void *>(buffer.data.data() + bufferView.byteOffset);
+
             if (name == "POSITION") {
-                positions.resize(accessor.count);
-                memcpy(&positions[0],
-                       buffer.data.data() + bufferView.byteOffset,
-                       buffer.data.size() - bufferView.byteOffset);
+                assert(byteStride == sizeof(Math::Vec3D));
+                size_t size = std::min(buffer.data.size() - bufferView.byteOffset, accessor.count * sizeof(Math::Vec3D));
+                positions.resize(count);
+                memcpy(&positions[0], source, size);
             }
             else if (name == "NORMAL") {
-                normals.resize(accessor.count);
-                memcpy(&normals[0],
-                       buffer.data.data() + bufferView.byteOffset,
-                       buffer.data.size() - bufferView.byteOffset);
+                assert(byteStride == sizeof(Math::Vec3D));
+                size_t size = std::min(buffer.data.size() - bufferView.byteOffset, accessor.count * sizeof(Math::Vec3D));
+                normals.resize(count);
+                memcpy(&normals[0], source, size);
             }
             else if (name == "TANGENT") {
-                tangents.resize(accessor.count);
-                memcpy(&tangents[0],
-                       buffer.data.data() + bufferView.byteOffset,
-                       buffer.data.size() - bufferView.byteOffset);
+                assert(byteStride == sizeof(Math::Vec4D));
+                size_t size = std::min(buffer.data.size() - bufferView.byteOffset, accessor.count * sizeof(Math::Vec4D));
+                tangents.resize(count);
+                memcpy(&tangents[0], source, size);
             }
             else if (name == "TEXCOORD_0") {
             }
