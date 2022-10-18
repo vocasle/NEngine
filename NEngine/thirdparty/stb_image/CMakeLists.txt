@@ -9,4 +9,3 @@ set(header_file_list
 add_library(${library_name} ${source_file_list} ${header_file_list})
 
 target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_include_directories(${library_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/stb_image)
