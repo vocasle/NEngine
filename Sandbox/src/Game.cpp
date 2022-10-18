@@ -16,6 +16,8 @@
 
 #include <stdexcept>
 
+#include "NEngine/Helpers/GLTFLoader.h"
+
 using namespace Microsoft::WRL;
 using namespace NEngine::Helpers;
 using namespace NEngine::Utils;
@@ -271,70 +273,73 @@ Game::Render()
     BuildShadowTransform(shadowView, shadowProj);
 
     m_deviceResources->PIXBeginEvent(L"Color pass");
+    {
+        m_model->Draw(*m_deviceResources);
+    }
     // reset view proj matrix back to camera
     {
-        m_perPassCB->SetValue("calcReflection", 1);
-        m_perPassCB->UpdateConstantBuffer();
-        m_renderer.BindConstantBuffer(
-            BindTargets::PixelShader,
-            m_perPassCB->Get(),
-            3);
+        //m_perPassCB->SetValue("calcReflection", 1);
+        //m_perPassCB->UpdateConstantBuffer();
+        //m_renderer.BindConstantBuffer(
+        //    BindTargets::PixelShader,
+        //    m_perPassCB->Get(),
+        //    3);
 
-        m_renderer.BindVertexShader(
-            m_shaderManager.GetVertexShader("ColorVS.cso"));
-        m_renderer.BindPixelShader(
-            m_shaderManager.GetPixelShader("PhongPS.cso"));
-        m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
-        m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-        m_perObjectCB->SetValue("world", MathMat4X4Identity());
-        m_perObjectCB->SetValue("worldInvTranspose", MathMat4X4Identity());
+        //m_renderer.BindVertexShader(
+        //    m_shaderManager.GetVertexShader("ColorVS.cso"));
+        //m_renderer.BindPixelShader(
+        //    m_shaderManager.GetPixelShader("PhongPS.cso"));
+        //m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
+        //m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
+        //m_perObjectCB->SetValue("world", MathMat4X4Identity());
+        //m_perObjectCB->SetValue("worldInvTranspose", MathMat4X4Identity());
 
-        m_perFrameCB->UpdateConstantBuffer();
-        m_perSceneCB->UpdateConstantBuffer();
-        m_perObjectCB->UpdateConstantBuffer();
+        //m_perFrameCB->UpdateConstantBuffer();
+        //m_perSceneCB->UpdateConstantBuffer();
+        //m_perObjectCB->UpdateConstantBuffer();
 
-        m_renderer.BindConstantBuffer(
-            BindTargets::VertexShader,
-            m_perObjectCB->Get(),
-            0);
-        m_renderer.BindConstantBuffer(
-            BindTargets::VertexShader,
-            m_perFrameCB->Get(),
-            1);
-        m_renderer.BindConstantBuffer(
-            BindTargets::VertexShader,
-            m_perSceneCB->Get(),
-            2);
-        m_renderer.BindConstantBuffer(
-            BindTargets::PixelShader,
-            m_perObjectCB->Get(),
-            0);
-        m_renderer.BindConstantBuffer(
-            BindTargets::PixelShader,
-            m_perFrameCB->Get(),
-            1);
-        m_renderer.BindConstantBuffer(
-            BindTargets::PixelShader,
-            m_perSceneCB->Get(),
-            2);
-        m_renderer.BindShaderResource(
-            BindTargets::PixelShader,
-            m_shadowMap.GetDepthMapSRV(),
-            4);
-        m_renderer.SetSamplerState(m_shadowMap.GetShadowSampler(), 1);
-        m_renderer.BindShaderResource(
-            BindTargets::PixelShader,
-            m_dynamicCubeMap.GetSRV(),
-            6);
+        //m_renderer.BindConstantBuffer(
+        //    BindTargets::VertexShader,
+        //    m_perObjectCB->Get(),
+        //    0);
+        //m_renderer.BindConstantBuffer(
+        //    BindTargets::VertexShader,
+        //    m_perFrameCB->Get(),
+        //    1);
+        //m_renderer.BindConstantBuffer(
+        //    BindTargets::VertexShader,
+        //    m_perSceneCB->Get(),
+        //    2);
+        //m_renderer.BindConstantBuffer(
+        //    BindTargets::PixelShader,
+        //    m_perObjectCB->Get(),
+        //    0);
+        //m_renderer.BindConstantBuffer(
+        //    BindTargets::PixelShader,
+        //    m_perFrameCB->Get(),
+        //    1);
+        //m_renderer.BindConstantBuffer(
+        //    BindTargets::PixelShader,
+        //    m_perSceneCB->Get(),
+        //    2);
+        //m_renderer.BindShaderResource(
+        //    BindTargets::PixelShader,
+        //    m_shadowMap.GetDepthMapSRV(),
+        //    4);
+        //m_renderer.SetSamplerState(m_shadowMap.GetShadowSampler(), 1);
+        //m_renderer.BindShaderResource(
+        //    BindTargets::PixelShader,
+        //    m_dynamicCubeMap.GetSRV(),
+        //    6);
 
-        m_renderer.SetVertexBuffer(gVertexBuffer.Get(),
-                                   sizeof(VertexPositionNormalTangent),
-                                   0);
-        m_renderer.SetIndexBuffer(gIndexBuffer.Get(), 0);
-        m_renderer.DrawIndexed(gIndices.size(), 0, 0);
+        //m_renderer.SetVertexBuffer(gVertexBuffer.Get(),
+        //                           sizeof(VertexPositionNormalTangent),
+        //                           0);
+        //m_renderer.SetIndexBuffer(gIndexBuffer.Get(), 0);
+        //m_renderer.DrawIndexed(gIndices.size(), 0, 0);
 
-        m_renderer.SetSamplerState(nullptr, 1);
-        m_renderer.BindShaderResource(BindTargets::PixelShader, nullptr, 6);
+        //m_renderer.SetSamplerState(nullptr, 1);
+        //m_renderer.BindShaderResource(BindTargets::PixelShader, nullptr, 6);
     }
     m_deviceResources->PIXEndEvent();
 
@@ -375,6 +380,9 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
         device,
         SHADER_BINARY_ROOT,
         UtilsFormatStr("%s/shader", SHADER_SRC_ROOT));
+
+    GLTFLoader loader(*m_deviceResources);
+    m_model = loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)");
 
     CreateDefaultSampler();
     // CreateRasterizerState();

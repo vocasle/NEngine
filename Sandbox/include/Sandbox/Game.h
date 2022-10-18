@@ -19,6 +19,7 @@
 #include "NEngine/Helpers/Renderer.h"
 #include "NEngine/Helpers/ShaderManager.h"
 #include "NEngine/Helpers/ShadowMap.h"
+#include "NEngine/Renderer/Model.h"
 #include "NEngine/Utils/Timer.h"
 
 class Game {
@@ -62,4 +63,6 @@ private:
     NEngine::Helpers::ParticleSystem m_firePS;
     NEngine::Helpers::ShadowMap m_shadowMap;
     NEngine::Helpers::DynamicCubeMap m_dynamicCubeMap;
+
+    std::unique_ptr<NEngine::Renderer::Model> m_model;
 };
