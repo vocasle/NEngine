@@ -1,6 +1,6 @@
 set(library_name NEngine)
 
-set(source_file_list src/Helpers/AssetManager.cpp
+set(source_file_list
         src/Helpers/Camera.cpp
         src/Helpers/DeviceResources.cpp
         src/Helpers/DynamicConstBuffer.cpp
@@ -8,7 +8,6 @@ set(source_file_list src/Helpers/AssetManager.cpp
         src/Helpers/GLTFLoader.cpp
         src/Helpers/InputLayoutOld.cpp
         src/Helpers/MeshGenerator.cpp
-        src/Helpers/ModelLoader.cpp
         src/Helpers/objloader.cpp
         src/Helpers/ParticleSystem.cpp
         src/Helpers/Renderer.cpp
@@ -25,7 +24,7 @@ set(source_file_list src/Helpers/AssetManager.cpp
         src/Renderer/Model.cpp
         src/Utils/Utils.cpp)
 
-set(header_file_list include/NEngine/Helpers/AssetManager.h
+set(header_file_list
         include/NEngine/Helpers/Buffer.h
         include/NEngine/Helpers/Camera.h
         include/NEngine/Helpers/DeviceResources.h
@@ -35,7 +34,6 @@ set(header_file_list include/NEngine/Helpers/AssetManager.h
         include/NEngine/Helpers/InputLayout.h
         include/NEngine/Helpers/LightHelper.h
         include/NEngine/Helpers/MeshGenerator.h
-        include/NEngine/Helpers/ModelLoader.h
         include/NEngine/Helpers/objloader.h
         include/NEngine/Helpers/ParticleSystem.h
         include/NEngine/Helpers/Renderer.h
@@ -61,3 +59,7 @@ add_library(${library_name} ${source_file_list} ${header_file_list})
 target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(thirdparty)
+
+target_compile_definitions(${library_name} PRIVATE NOMINMAX=1 UNICODE=1 _UNICODE=1)
+
+target_link_libraries(${library_name} STATIC tinygltf)
