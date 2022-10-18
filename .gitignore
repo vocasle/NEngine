@@ -364,3 +364,6 @@ FodyWeavers.xsd
 /Sandbox/imgui.ini
 /Sandbox/log.txt
 /cmake-build-debug/
+/cmake-build-minsizerel/
+/cmake-build-relwithdebinfo/
+/cmake-build-release/
