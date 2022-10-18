@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Sandbox/imgui.ini
 /Sandbox/log.txt
+/cmake-build-debug/
