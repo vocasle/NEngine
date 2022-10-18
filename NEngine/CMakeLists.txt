@@ -54,6 +54,12 @@ set(header_file_list
         include/NEngine/Utils/Timer.h
         include/NEngine/Utils/Utils.h)
 
+file(TO_CMAKE_PATH "${FXC_EXE}"            DFXCOMP_PATH)
+file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}" DENGINE_ROOT)
+
+add_definitions(-DFXCOMP_PATH="${DFXCOMP_PATH}")
+add_definitions(-DENGINE_ROOT="${DENGINE_ROOT}")
+
 add_library(${library_name} STATIC ${source_file_list} ${header_file_list})
 
 target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
