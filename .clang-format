@@ -22,7 +22,6 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
-  BraceWrappingAfterControlStatementStyle: BWACS_Never
   AfterEnum: false
   AfterFunction: true
   AfterNamespace: false
