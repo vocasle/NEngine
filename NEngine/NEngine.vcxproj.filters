@@ -141,6 +141,9 @@
     <ClInclude Include="include\NEngine\Renderer\InputLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NEngine\Renderer\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Math\Math.cpp">
@@ -240,6 +243,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer\InputLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

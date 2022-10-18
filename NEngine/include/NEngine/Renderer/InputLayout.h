@@ -32,26 +32,10 @@ struct VertexPositionNormalTangent
     Math::Vec4D Tangent;
 };
 
-template <typename Vertex>
-void
-CreateInputLayout(
-    Helpers::DeviceResources &deviceResources,
-    const std::vector<uint8_t> &data,
-    ID3D11InputLayout **pInputLayout)
-{
-}
-
 class InputLayout : public Bindable
 {
 public:
-    template <typename Vertex>
-    InputLayout(Helpers::DeviceResources &deviceResources,
-                const std::vector<uint8_t> &data)
-    {
-        CreateInputLayout<Vertex>(deviceResources,
-                                  data,
-                                  mInputLayout.ReleaseAndGetAddressOf());
-    }
+    InputLayout() = default;
 
     ~InputLayout() override = default;
 
@@ -60,15 +44,33 @@ public:
 
 private:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> mInputLayout;
+
+
+    template <typename Vertex>
+    friend std::unique_ptr<InputLayout>
+    CreateInputLayout(
+        Helpers::DeviceResources &deviceResources,
+        const std::vector<uint8_t> &vertexShaderBlob);
 };
 
+
+template <typename Vertex>
+std::unique_ptr<InputLayout>
+CreateInputLayout(
+    Helpers::DeviceResources &deviceResources,
+    const std::vector<uint8_t> &vertexShaderBlob)
+{
+    return nullptr;
+}
+
 template <>
-inline void
+inline std::unique_ptr<InputLayout>
 CreateInputLayout<VertexPositionOnly>(
     Helpers::DeviceResources &deviceResources,
-    const std::vector<uint8_t> &data,
-    ID3D11InputLayout **pInputLayout)
+    const std::vector<uint8_t> &vertexShaderBlob)
 {
+    auto il = std::make_unique<InputLayout>();
+
     constexpr D3D11_INPUT_ELEMENT_DESC desc[1] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,
          D3D11_INPUT_PER_VERTEX_DATA, 0}
@@ -77,19 +79,22 @@ CreateInputLayout<VertexPositionOnly>(
     deviceResources.GetDevice()->CreateInputLayout(
         desc,
         _countof(desc),
-        &data[0],
-        data.size(),
-        pInputLayout);
+        &vertexShaderBlob[0],
+        vertexShaderBlob.size(),
+        il->mInputLayout.ReleaseAndGetAddressOf());
+
+    return std::move(il);
 }
 
 
 template <>
-inline void
+inline std::unique_ptr<InputLayout>
 CreateInputLayout<VertexPositionNormal>(
     Helpers::DeviceResources &deviceResources,
-    const std::vector<uint8_t> &data,
-    ID3D11InputLayout **pInputLayout)
+    const std::vector<uint8_t> &vertexShaderBlob)
 {
+    auto il = std::make_unique<InputLayout>();
+
     const D3D11_INPUT_ELEMENT_DESC desc[2] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,
          D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -101,18 +106,21 @@ CreateInputLayout<VertexPositionNormal>(
     deviceResources.GetDevice()->CreateInputLayout(
         desc,
         _countof(desc),
-        &data[0],
-        data.size(),
-        pInputLayout);
+        &vertexShaderBlob[0],
+        vertexShaderBlob.size(),
+        il->mInputLayout.ReleaseAndGetAddressOf());
+
+    return std::move(il);
 }
 
 template <>
-inline void
+inline std::unique_ptr<InputLayout>
 CreateInputLayout<VertexPositionNormalTangent>(
     Helpers::DeviceResources &deviceResources,
-    const std::vector<uint8_t> &data,
-    ID3D11InputLayout **pInputLayout)
+    const std::vector<uint8_t> &vertexShaderBlob)
 {
+    auto il = std::make_unique<InputLayout>();
+
     const D3D11_INPUT_ELEMENT_DESC desc[3] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,
          D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -127,9 +135,11 @@ CreateInputLayout<VertexPositionNormalTangent>(
     deviceResources.GetDevice()->CreateInputLayout(
         desc,
         _countof(desc),
-        &data[0],
-        data.size(),
-        pInputLayout);
+        &vertexShaderBlob[0],
+        vertexShaderBlob.size(),
+        il->mInputLayout.ReleaseAndGetAddressOf());
+
+    return std::move(il);
 }
 
 }

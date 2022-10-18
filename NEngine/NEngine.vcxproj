@@ -41,6 +41,7 @@
     <ClInclude Include="include\NEngine\Math\Math.h" />
     <ClInclude Include="include\NEngine\Renderer\IndexBuffer.h" />
     <ClInclude Include="include\NEngine\Renderer\InputLayout.h" />
+    <ClInclude Include="include\NEngine\Renderer\Model.h" />
     <ClInclude Include="include\NEngine\Renderer\VertexBuffer.h" />
     <ClInclude Include="include\NEngine\Utils\Image.h" />
     <ClInclude Include="include\NEngine\Utils\Timer.h" />
@@ -85,6 +86,7 @@
     <ClCompile Include="src\Renderer\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer\InputLayout.cpp" />
     <ClCompile Include="src\Renderer\Mesh.cpp" />
+    <ClCompile Include="src\Renderer\Model.cpp" />
     <ClCompile Include="src\Utils\Utils.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
