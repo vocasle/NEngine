@@ -8,3 +8,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_program(FXC_EXE fxc REQUIRED)
 
 add_subdirectory(NEngine)
+add_subdirectory(Sandbox)

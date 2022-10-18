@@ -7,7 +7,6 @@
 #include <utility>
 #include <vector>
 
-#include "NEngine/Helpers/AssetManager.h"
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/DynamicConstBuffer.h"
@@ -37,10 +36,7 @@ private:
     void Clear();
     void Update();
     void Render();
-    void CreateRasterizerState();
     void CreateWindowSizeDependentResources();
-    void DrawMeshes(const std::vector<NEngine::Helpers::Mesh> &meshes);
-    void DrawActors();
     void BuildShadowTransform(NEngine::Math::Mat4X4 &view,
                               NEngine::Math::Mat4X4 &proj);
 
@@ -59,7 +55,6 @@ private:
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perSceneCB;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perObjectCB;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perPassCB;
-    std::unique_ptr<NEngine::Helpers::AssetManager> m_assetManager;
     NEngine::Helpers::ParticleSystem m_firePS;
     NEngine::Helpers::ShadowMap m_shadowMap;
     NEngine::Helpers::DynamicCubeMap m_dynamicCubeMap;

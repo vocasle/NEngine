@@ -24,53 +24,6 @@ using namespace NEngine::Utils;
 using namespace NEngine::Math;
 using namespace NEngine::Input;
 
-struct SponzaSettings
-{
-    ParticleSystemOptions firePSOpts;
-};
-
-namespace {
-SponzaSettings gSettings;
-
-struct VertexPositionNormalTangent
-{
-    Vec4D Position;
-    Vec4D Normal;
-    Vec4D Tangent;
-};
-
-const std::vector<Vertex> gVertices = {
-    {{0, 0.5f, 0, 0}, {}, {}},
-    {{0.5f, -0.5f, 0, 0}, {}, {}},
-    {{-0.5f, -0.5f, 0, 0}, {}, {}},
-};
-
-const std::vector<unsigned int> gIndices = {
-    0, 1, 2,
-};
-
-ComPtr<ID3D11Buffer> gVertexBuffer;
-ComPtr<ID3D11Buffer> gIndexBuffer;
-};
-
-static void
-InitSponzaSettings()
-{
-    ParticleSystemOptions &fire1 = gSettings.firePSOpts;
-    fire1.isEnabled = true;
-    fire1.maxParticles = 100;
-    fire1.initVelRandFact = 2;
-    fire1.burst = 5;
-    fire1.accel = {0, 1.5f, 0};
-    fire1.origin = {112, 12, 45};
-    fire1.particleSize = {12, 12};
-}
-
-void
-Game::CreateRasterizerState()
-{
-    throw std::runtime_error("Not implemented");
-}
 
 #if WITH_IMGUI
 void
@@ -370,16 +323,15 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
     m_deviceResources->CreateDeviceResources();
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
-    InitSponzaSettings();
     TimerInitialize(&m_timer);
     Mouse::Get().SetWindowDimensions(m_deviceResources->GetBackBufferWidth(),
                                      m_deviceResources->GetBackBufferHeight());
     ID3D11Device *device = m_deviceResources->GetDevice();
 
-    m_shaderManager.Initialize(
-        device,
-        SHADER_BINARY_ROOT,
-        UtilsFormatStr("%s/shader", SHADER_SRC_ROOT));
+//    m_shaderManager.Initialize(
+//        device,
+//        SHADER_BINARY_ROOT,
+//        UtilsFormatStr("%s/shader", SHADER_SRC_ROOT));
 
     GLTFLoader loader(*m_deviceResources);
     m_model = loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)");
@@ -391,7 +343,6 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
     m_camera.SetZNear(10);
 
     m_renderer.SetDeviceResources(m_deviceResources.get());
-    m_assetManager = std::make_unique<AssetManager>(*m_deviceResources);
 
     const int shadowMapSize = 2048;
     m_shadowMap.InitResources(
@@ -478,41 +429,6 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
                                Vec4D(-40, 50, -50, 100));
     }
 
-    {
-        const CD3D11_BUFFER_DESC desc(
-            sizeof(VertexPositionNormalTangent) * gVertices.size(),
-            D3D11_BIND_VERTEX_BUFFER,
-            D3D11_USAGE_IMMUTABLE,
-            0,
-            0,
-            sizeof(VertexPositionNormalTangent));
-
-        D3D11_SUBRESOURCE_DATA data = {};
-        data.pSysMem = &gVertices[0];
-
-        HR(m_deviceResources->GetDevice()->CreateBuffer(
-            &desc,
-            &data,
-            gVertexBuffer.ReleaseAndGetAddressOf()))
-    }
-
-    {
-        const CD3D11_BUFFER_DESC desc(sizeof(unsigned int) * gIndices.size(),
-                                      D3D11_BIND_INDEX_BUFFER,
-                                      D3D11_USAGE_IMMUTABLE,
-                                      0,
-                                      0,
-                                      0);
-
-        D3D11_SUBRESOURCE_DATA data = {};
-        data.pSysMem = &gIndices[0];
-
-        HR(m_deviceResources->GetDevice()->CreateBuffer(
-            &desc,
-            &data,
-            gIndexBuffer.ReleaseAndGetAddressOf()))
-    }
-
 #if WITH_IMGUI
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
@@ -561,55 +477,6 @@ Game::CreateWindowSizeDependentResources()
 }
 
 void
-Game::DrawMeshes(const std::vector<Mesh> &meshes)
-{
-    for (const Mesh &mesh : meshes) {
-        for (const TextureInfo &ti : mesh.GetTextures()) {
-            if (ti.Type == TextureType::Diffuse) {
-                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
-                    m_renderer.BindShaderResource(
-                        BindTargets::PixelShader,
-                        tex->GetSRV(),
-                        0);
-                }
-            }
-            if (ti.Type == TextureType::Normal) {
-                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
-                    m_renderer.BindShaderResource(
-                        BindTargets::PixelShader,
-                        tex->GetSRV(),
-                        3);
-                }
-            }
-            if (ti.Type == TextureType::Specular ||
-                ti.Type == TextureType::Metalness) {
-                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
-                    m_renderer.BindShaderResource(
-                        BindTargets::PixelShader,
-                        tex->GetSRV(),
-                        1);
-                }
-            }
-            if (ti.Type == TextureType::Shininess ||
-                ti.Type == TextureType::DiffuseRoughness) {
-                if (Texture *tex = m_assetManager->GetTexture(ti.Path)) {
-                    m_renderer.BindShaderResource(
-                        BindTargets::PixelShader,
-                        tex->GetSRV(),
-                        2);
-                }
-            }
-        }
-        m_renderer.SetVertexBuffer(
-            mesh.GetVertexBuffer(),
-            mesh.GetVertexSize(),
-            0);
-        m_renderer.SetIndexBuffer(mesh.GetIndexBuffer(), 0);
-        m_renderer.DrawIndexed(mesh.GetIndexCount(), 0, 0);
-    }
-}
-
-void
 Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj)
 {
     // Only the first "main" light casts a shadow.
@@ -630,9 +497,4 @@ Game::BuildShadowTransform(Mat4X4 &view, Mat4X4 &proj)
                                            radius,
                                            m_camera.GetZNear(),
                                            m_camera.GetZFar());
-}
-
-void
-Game::DrawActors()
-{
 }
