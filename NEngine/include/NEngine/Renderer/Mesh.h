@@ -15,7 +15,7 @@ namespace Renderer {
 class Mesh : public Drawable
 {
 public:
-    Mesh(Helpers::DeviceResources& deviceResources, std::vector<VertexPositionNormalTangent> vertices, std::vector<unsigned int> indices);
+    Mesh(Helpers::DeviceResources& deviceResources, const std::vector<VertexPositionNormalTangent> &vertices, const std::vector<unsigned int> &indices);
     void Draw(Helpers::DeviceResources &deviceResources) override;
 
 private:

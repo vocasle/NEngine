@@ -13,9 +13,12 @@ NEngine::Renderer::Model::Draw(Helpers::DeviceResources &deviceResources)
         mesh->Draw(deviceResources);
     }
 }
-
-void
-NEngine::Renderer::Model::AddMesh(std::unique_ptr<Mesh> mesh)
+NEngine::Renderer::Model::Model(
+    DeviceResources &deviceResources,
+    std::vector<std::unique_ptr<Renderer::Mesh>> &meshes)
+    : mDeviceResources(deviceResources)
 {
-    mMeshes.push_back(std::move(mesh));
+    for (auto &mesh : meshes) {
+        mMeshes.push_back(std::move(mesh));
+    }
 }

@@ -5,9 +5,9 @@
 #include "tinygltf/tiny_gltf.h"
 
 #include "NEngine/Renderer/Model.h"
+#include "NEngine/Renderer/Mesh.h"
 
-namespace NEngine {
-namespace Helpers {
+namespace NEngine::Helpers {
 class GLTFLoader
 {
 public:
@@ -17,19 +17,16 @@ public:
 private:
     void
     ProcessNode(const tinygltf::Node &node,
-                const tinygltf::Model &model);
+                const tinygltf::Model &model,
+                std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &outMeshes);
 
-    void ProcessMesh(const tinygltf::Mesh &mesh,
+    std::unique_ptr<NEngine::Renderer::Mesh> ProcessMesh(const tinygltf::Mesh &mesh,
                      const tinygltf::Model &model);
 
     std::vector<unsigned int> ExtractMeshIndices(
         const tinygltf::Accessor &indexAccessor,
         const tinygltf::Model &model);
 
-
-    tinygltf::TinyGLTF m_loader;
-    std::unique_ptr<NEngine::Renderer::Model> m_model;
     DeviceResources &m_deviceResources;
 };
-}
 }

@@ -8,12 +8,11 @@ using namespace NEngine::Helpers;
 using namespace NEngine::Utils;
 
 NEngine::Renderer::Mesh::Mesh(Helpers::DeviceResources &deviceResources,
-                              std::vector<VertexPositionNormalTangent> vertices,
-                              std::vector<unsigned int> indices)
-    : mVertices(std::move(vertices)),
-      mIndices(std::move(indices))
+                              const std::vector<VertexPositionNormalTangent> &vertices, const std::vector<unsigned int> &indices)
+    : mVertices(vertices),
+      mIndices(indices)
 {
-    mIndexBuffer = std::make_unique<IndexBuffer>(deviceResources, indices);
+    mIndexBuffer = std::make_unique<IndexBuffer>(deviceResources, mIndices);
     std::unique_ptr<VertexBuffer<VertexPositionNormalTangent>> vb =
         std::make_unique<VertexBuffer<VertexPositionNormalTangent>>(
             deviceResources,

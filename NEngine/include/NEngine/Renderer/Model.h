@@ -3,7 +3,6 @@
 
 #include "Drawable.h"
 #include "Mesh.h"
-
 #include "NEngine/Math/Math.h"
 
 namespace NEngine {
@@ -11,8 +10,9 @@ namespace Renderer {
 class Model : public Drawable
 {
 public:
+    Model(Helpers::DeviceResources &deviceResources,
+          std::vector<std::unique_ptr<Renderer::Mesh>> &meshes);
     void Draw(Helpers::DeviceResources &deviceResources) override;
-    void AddMesh(std::unique_ptr<Mesh> mesh);
 
     struct Vertex
     {
@@ -22,12 +22,11 @@ public:
     };
 
 private:
-    Model() = default;
-
+    Helpers::DeviceResources &mDeviceResources;
     std::vector<Vertex> mVertices;
     std::vector<unsigned int> mIndices;
     std::vector<std::string> mTextures;
-    std::vector<std::unique_ptr<Mesh>> mMeshes;
+    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> mMeshes;
 };
-}
-}
+}  // namespace Renderer
+}  // namespace NEngine

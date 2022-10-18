@@ -7,34 +7,45 @@
 
 namespace NEngine {
 namespace Math {
-struct Vec2D {
+struct Vec2D
+{
     Vec2D()
         : X{0},
-          Y{0} {
+          Y{0}
+    {
     }
 
     Vec2D(float x, float y)
         : X{x},
-          Y{y} {
+          Y{y}
+    {
     }
 #ifdef __cplusplus
     std::string ToString() const;
+
+    Vec2D(const Vec2D &rhs) = default;
+    Vec2D(Vec2D &&rhs) noexcept = default;
+    Vec2D &operator=(const Vec2D &rhs) = default;
+    Vec2D &operator=(Vec2D &&rhs) noexcept = default;
 #endif
     float X;
     float Y;
 };
 
-struct Vec3D {
+struct Vec3D
+{
     Vec3D()
         : X{0},
           Y{0},
-          Z{0} {
+          Z{0}
+    {
     }
 
     Vec3D(float x, float y, float z)
         : X{x},
           Y{y},
-          Z{z} {
+          Z{z}
+    {
     }
 #ifdef __cplusplus
     std::string ToString() const;
@@ -44,6 +55,11 @@ struct Vec3D {
     void Normalize();
     bool operator==(const Vec3D &rhs) const;
     bool operator!=(const Vec3D &rhs) const;
+
+    Vec3D(const Vec3D &rhs) = default;
+    Vec3D(Vec3D &&rhs) noexcept = default;
+    Vec3D &operator=(const Vec3D &rhs) = default;
+    Vec3D &operator=(Vec3D &&rhs) noexcept = default;
 #endif
     float X;
     float Y;
@@ -57,24 +73,33 @@ Vec3D operator*(const Vec3D &lhs, const float s);
 Vec3D operator*(const float s, const Vec3D &rhs);
 #endif
 
-struct Vec4D {
+struct Vec4D
+{
     Vec4D()
         : X{0},
           Y{0},
           Z{0},
-          W{0} {
+          W{0}
+    {
     }
 
     Vec4D(float x, float y, float z, float w)
         : X{x},
           Y{y},
           Z{z},
-          W{w} {
+          W{w}
+    {
     }
 #ifdef __cplusplus
     Vec4D(const Vec3D &v, float w)
-        : Vec4D(v.X, v.Y, v.Z, w) {
+        : Vec4D(v.X, v.Y, v.Z, w)
+    {
     }
+
+    Vec4D(const Vec4D &rhs) = default;
+    Vec4D(Vec4D &&rhs) noexcept = default;
+    Vec4D &operator=(const Vec4D &rhs) = default;
+    Vec4D &operator=(Vec4D &&rhs) noexcept = default;
 
     std::string ToString() const;
     Vec4D &operator*(const float scalar);
@@ -86,13 +111,17 @@ struct Vec4D {
     float W;
 };
 
-struct Mat3X3 {
-    Mat3X3() {
+struct Mat3X3
+{
+    Mat3X3()
+    {
         memset(this, 0, sizeof(Mat3X3));
     }
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             float A00, A01, A02;
             float A10, A11, A12;
             float A20, A21, A22;
@@ -107,7 +136,8 @@ struct Mat3X3 {
 #endif
 };
 
-struct Mat4X4 {
+struct Mat4X4
+{
     Mat4X4()
         : Mat4X4(0.0f,
                  0.0f,
@@ -124,7 +154,8 @@ struct Mat4X4 {
                  0.0f,
                  0.0f,
                  0.0f,
-                 0.0f) {
+                 0.0f)
+    {
     }
 
     Mat4X4(float a00,
@@ -158,7 +189,8 @@ struct Mat4X4 {
           A30{a30},
           A31{a31},
           A32{a32},
-          A33{a33} {
+          A33{a33}
+    {
     }
 
     Mat4X4(const float *data)
@@ -177,11 +209,14 @@ struct Mat4X4 {
                  data[12],
                  data[13],
                  data[14],
-                 data[15]) {
+                 data[15])
+    {
     }
 
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             float A00, A01, A02, A03;
             float A10, A11, A12, A13;
             float A20, A21, A22, A23;
@@ -365,6 +400,6 @@ float MathVec3DLength(const Vec3D &v);
 
 Mat4X4 MathMat4X4Inverse(const Mat4X4 &mat);
 #endif
-}
+}  // namespace Math
 
-}
+}  // namespace NEngine
