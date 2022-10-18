@@ -52,6 +52,11 @@
     <None Include="shader\LightingHelper.hlsli" />
     <None Include="shader\Particle.hlsli" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NEngine\NEngine.vcxproj">
+      <Project>{f6f649f8-2e55-4cbd-92d2-8d696a3f00c3}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -105,7 +110,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)include;$(SolutionDir)NEngine/thirdparty/imgui/include;$(SolutionDir)NEngine/include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)include;$(SolutionDir)NEngine/thirdparty/imgui/include;$(SolutionDir)NEngine/thirdparty/tinygltf/include;$(SolutionDir)NEngine/include</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
