@@ -59,3 +59,5 @@ set(header_file_list include/NEngine/Helpers/AssetManager.h
 add_library(${library_name} ${source_file_list} ${header_file_list})
 
 target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+add_subdirectory(thirdparty)
