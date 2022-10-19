@@ -12,17 +12,19 @@ NEngine::Renderer::Mesh::Mesh(Helpers::DeviceResources &deviceResources,
     : mVertices(vertices),
       mIndices(indices)
 {
-    mIndexBuffer = std::make_unique<IndexBuffer>(deviceResources, mIndices);
+    auto indexBuffer = std::make_unique<IndexBuffer>(deviceResources, mIndices);
+    mIndexBuffer = indexBuffer.get();
+    mBinds.push_back(std::move(indexBuffer));
+
     std::unique_ptr<VertexBuffer<VertexPositionNormalTangent>> vb =
         std::make_unique<VertexBuffer<VertexPositionNormalTangent>>(
             deviceResources,
             vertices);
-
     mBinds.push_back(std::move(vb));
 
+    // TODO: Remove this hardcoded shader
     auto binaryBlob = UtilsReadData(
         R"(C:\Users\vocasle\source\repos\NEngine\x64\Debug\ColorVS.cso)");
-
     auto il = CreateInputLayout<VertexPositionNormalTangent>(
         deviceResources,
         binaryBlob);

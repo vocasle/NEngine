@@ -20,7 +20,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<Bindable>> mBinds;
-    std::unique_ptr<IndexBuffer> mIndexBuffer;
+    IndexBuffer *mIndexBuffer;
 
     std::vector<VertexPositionNormalTangent> mVertices;
     std::vector<unsigned int> mIndices;
