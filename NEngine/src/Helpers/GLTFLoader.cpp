@@ -87,8 +87,8 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
             const auto &buffer = model.buffers[bufferView.buffer];
             const size_t byteStride = accessor.ByteStride(bufferView);
             if (name == "POSITION") {
-                assert(buffer.data.size() - bufferView.byteOffset ==
-                       sizeof(Vec3D) * accessor.count);
+                assert(sizeof(Vec3D) == byteStride);
+                assert(bufferView.byteLength >= sizeof(Vec3D) * accessor.count);
                 positions.reserve(accessor.count);
 
                 for (size_t i = bufferView.byteOffset;
@@ -98,8 +98,8 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                 }
             }
             else if (name == "NORMAL") {
-                assert(buffer.data.size() - bufferView.byteOffset ==
-                       sizeof(Vec3D) * accessor.count);
+                assert(sizeof(Vec3D) == byteStride);
+                assert(bufferView.byteLength >= sizeof(Vec3D) * accessor.count);
                 normals.reserve(accessor.count);
 
                 for (size_t i = bufferView.byteOffset;
@@ -109,8 +109,8 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                 }
             }
             else if (name == "TANGENT") {
-                assert(buffer.data.size() - bufferView.byteOffset ==
-                       sizeof(Vec4D) * accessor.count);
+                assert(sizeof(Vec3D) == byteStride);
+                assert(bufferView.byteLength >= sizeof(Vec4D) * accessor.count);
                 tangents.reserve(accessor.count);
 
                 for (size_t i = bufferView.byteOffset;
