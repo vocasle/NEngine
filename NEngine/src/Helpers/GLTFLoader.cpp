@@ -56,6 +56,14 @@ GLTFLoader::ExtractMeshIndices(const tinygltf::Accessor &indexAccessor,
     return indices;
 }
 
+template <typename Vec>
+Vec
+ReadNextVec(const std::vector<unsigned char> &data, size_t idx)
+{
+    Vec v = *reinterpret_cast<const Vec *>(data.data() + idx);
+    return v;
+}
+
 std::unique_ptr<NEngine::Renderer::Mesh>
 GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                         const tinygltf::Model &model)
@@ -79,22 +87,37 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
             const auto &buffer = model.buffers[bufferView.buffer];
             const size_t byteStride = accessor.ByteStride(bufferView);
             if (name == "POSITION") {
-                positions.resize(accessor.count);
-                memcpy(&positions[0],
-                       buffer.data.data() + bufferView.byteOffset,
-                       buffer.data.size() - bufferView.byteOffset);
+                assert(buffer.data.size() - bufferView.byteOffset ==
+                       sizeof(Vec3D) * accessor.count);
+                positions.reserve(accessor.count);
+
+                for (size_t i = bufferView.byteOffset;
+                     i < bufferView.byteLength;
+                     i += byteStride) {
+                    positions.push_back(ReadNextVec<Vec3D>(buffer.data, i));
+                }
             }
             else if (name == "NORMAL") {
-                normals.resize(accessor.count);
-                memcpy(&normals[0],
-                       buffer.data.data() + bufferView.byteOffset,
-                       buffer.data.size() - bufferView.byteOffset);
+                assert(buffer.data.size() - bufferView.byteOffset ==
+                       sizeof(Vec3D) * accessor.count);
+                normals.reserve(accessor.count);
+
+                for (size_t i = bufferView.byteOffset;
+                     i < bufferView.byteLength;
+                     i += byteStride) {
+                    normals.push_back(ReadNextVec<Vec3D>(buffer.data, i));
+                }
             }
             else if (name == "TANGENT") {
-                tangents.resize(accessor.count);
-                memcpy(&tangents[0],
-                       buffer.data.data() + bufferView.byteOffset,
-                       buffer.data.size() - bufferView.byteOffset);
+                assert(buffer.data.size() - bufferView.byteOffset ==
+                       sizeof(Vec4D) * accessor.count);
+                tangents.reserve(accessor.count);
+
+                for (size_t i = bufferView.byteOffset;
+                     i < bufferView.byteLength;
+                     i += byteStride) {
+                    tangents.push_back(ReadNextVec<Vec4D>(buffer.data, i));
+                }
             }
             else if (name == "TEXCOORD_0") {
             }
