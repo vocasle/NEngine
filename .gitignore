@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /cmake-build-minsizerel/
 /cmake-build-relwithdebinfo/
 /cmake-build-release/
+/.vim/
