@@ -22,7 +22,9 @@ set(source_file_list
         src/Renderer/InputLayout.cpp
         src/Renderer/Mesh.cpp
         src/Renderer/Model.cpp
-        src/Utils/Utils.cpp)
+        src/Utils/Utils.cpp
+		src/Renderer/VertexShader.cpp
+		src/Renderer/PixelShader.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -52,7 +54,9 @@ set(header_file_list
         include/NEngine/Renderer/VertexBuffer.h
         include/NEngine/Utils/Image.h
         include/NEngine/Utils/Timer.h
-        include/NEngine/Utils/Utils.h)
+        include/NEngine/Utils/Utils.h
+		include/NEngine/Renderer/VertexShader.h
+		include/NEngine/Renderer/PixelShader.h)
 
 add_library(${library_name} STATIC ${source_file_list} ${header_file_list})
 
