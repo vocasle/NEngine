@@ -7,5 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_program(FXC_EXE fxc REQUIRED)
 
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+        set(CMAKE_BUILD_TYPE Debug)
+endif()
+
 add_subdirectory(NEngine)
 add_subdirectory(Sandbox)
