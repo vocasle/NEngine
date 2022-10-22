@@ -6,14 +6,14 @@ using namespace NEngine::Utils;
 
 void
 NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
-                                  std::vector<Model> &models)
+                                  std::vector<Model *> &models)
 {
     mVertexShader->Bind(deviceResources);
     mPixelShader->Bind(deviceResources);
     mInputLayout->Bind(deviceResources);
 
     for (auto &model : models) {
-        model.Draw(deviceResources);
+        model->Draw(deviceResources);
     }
 }
 

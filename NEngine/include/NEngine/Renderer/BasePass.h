@@ -14,7 +14,7 @@ class BasePass
 public:
     explicit BasePass(Helpers::DeviceResources &deviceResources);
     virtual void Draw(Helpers::DeviceResources &deviceResources,
-                      std::vector<Model> &models);
+                      std::vector<Model *> &models);
 
     virtual ~BasePass() = default;
 
