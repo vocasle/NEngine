@@ -23,6 +23,7 @@ using namespace NEngine::Helpers;
 using namespace NEngine::Utils;
 using namespace NEngine::Math;
 using namespace NEngine::Input;
+using namespace NEngine::Renderer;
 
 
 #if WITH_IMGUI
@@ -227,7 +228,8 @@ Game::Render()
 
     m_deviceResources->PIXBeginEvent(L"Color pass");
     {
-        m_model->Draw(*m_deviceResources);
+        std::vector<Model *> models = {m_model.get()};
+        m_basePass->Draw(*m_deviceResources, models);
     }
     // reset view proj matrix back to camera
     {
@@ -335,6 +337,8 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
 
     GLTFLoader loader(*m_deviceResources);
     m_model = loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)");
+
+    m_basePass = std::make_unique<BasePass>(*m_deviceResources);
 
     CreateDefaultSampler();
     // CreateRasterizerState();

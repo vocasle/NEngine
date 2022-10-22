@@ -20,6 +20,7 @@
 #include "NEngine/Helpers/ShadowMap.h"
 #include "NEngine/Renderer/Model.h"
 #include "NEngine/Utils/Timer.h"
+#include "NEngine/Renderer/BasePass.h"
 
 class Game {
 public:
@@ -60,4 +61,5 @@ private:
     NEngine::Helpers::DynamicCubeMap m_dynamicCubeMap;
 
     std::unique_ptr<NEngine::Renderer::Model> m_model;
+    std::unique_ptr<NEngine::Renderer::BasePass> m_basePass;
 };
