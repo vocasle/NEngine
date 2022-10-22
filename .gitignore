@@ -369,3 +369,4 @@ FodyWeavers.xsd
 /cmake-build-release/
 /.vim/
 /build/
+/.vscode/
