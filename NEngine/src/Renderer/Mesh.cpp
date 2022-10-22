@@ -23,8 +23,8 @@ NEngine::Renderer::Mesh::Mesh(Helpers::DeviceResources &deviceResources,
     mBinds.push_back(std::move(vb));
 
     // TODO: Remove this hardcoded shader
-    auto binaryBlob = UtilsReadData(
-        R"(C:\Users\vocasle\source\repos\NEngine\x64\Debug\ColorVS.cso)");
+    const auto path = UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "ColorVS.cso");
+    auto binaryBlob = UtilsReadData(path.c_str());
     auto il = CreateInputLayout<VertexPositionNormalTangent>(
         deviceResources,
         binaryBlob);

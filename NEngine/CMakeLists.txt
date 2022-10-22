@@ -23,8 +23,8 @@ set(source_file_list
         src/Renderer/Mesh.cpp
         src/Renderer/Model.cpp
         src/Utils/Utils.cpp
-		src/Renderer/VertexShader.cpp
-		src/Renderer/PixelShader.cpp)
+        src/Renderer/VertexShader.cpp
+        src/Renderer/PixelShader.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -55,16 +55,57 @@ set(header_file_list
         include/NEngine/Utils/Image.h
         include/NEngine/Utils/Timer.h
         include/NEngine/Utils/Utils.h
-		include/NEngine/Renderer/VertexShader.h
-		include/NEngine/Renderer/PixelShader.h)
+        include/NEngine/Renderer/VertexShader.h
+        include/NEngine/Renderer/PixelShader.h)
 
-add_library(${library_name} STATIC ${source_file_list} ${header_file_list})
+set(vertex_shader_list
+        shader/ColorVS.hlsl
+        shader/ParticleVS.hlsl
+        shader/ShadowVS.hlsl)
+
+set(pixel_shader_list
+        shader/ParticlePS.hlsl
+        shader/PhongPS.hlsl)
+
+set(shader_header_list
+        shader/Common.hlsli
+        shader/LightingHelper.hlsli
+        shader/Particle.hlsli)
+
+set_source_files_properties(${pixel_shader_list} PROPERTIES
+        VS_SHADER_TYPE Pixel
+        VS_SHADER_ENTRYPOINT main
+        VS_SHADER_MODEL 5.0
+        VS_SHADER_FLAGS "/Fd \"$(OutDir)%(Filename).pdb\""
+        VS_SHADER_ENABLE_DEBUG true
+        VS_SHADER_DISABLE_OPTIMIZATIONS true)
+
+set_source_files_properties(${vertex_shader_list} PROPERTIES
+        VS_SHADER_TYPE Vertex
+        VS_SHADER_ENTRYPOINT main
+        VS_SHADER_MODEL 5.0
+        VS_SHADER_FLAGS "/Fd \"$(OutDir)%(Filename).pdb\""
+        VS_SHADER_ENABLE_DEBUG true
+        VS_SHADER_DISABLE_OPTIMIZATIONS true)
+
+add_library(${library_name} STATIC 
+        ${source_file_list} 
+        ${header_file_list}
+        #${shader_header_list}
+        ${vertex_shader_list}
+        ${pixel_shader_list})
 
 target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(thirdparty)
 
-target_compile_definitions(${library_name} PRIVATE NOMINMAX=1 UNICODE=1 _UNICODE=1)
+target_compile_definitions(${library_name} PRIVATE 
+        NOMINMAX=1 
+        UNICODE=1 
+        _UNICODE=1
+        NENGINE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}"
+        NENGINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+        NENGINE_SHADER_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
 
 # TODO make tinygltf a private dependency
 target_link_libraries(${library_name}
