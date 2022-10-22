@@ -24,7 +24,8 @@ set(source_file_list
         src/Renderer/Model.cpp
         src/Utils/Utils.cpp
         src/Renderer/VertexShader.cpp
-        src/Renderer/PixelShader.cpp)
+        src/Renderer/PixelShader.cpp
+        src/Renderer/BasePass.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -56,7 +57,8 @@ set(header_file_list
         include/NEngine/Utils/Timer.h
         include/NEngine/Utils/Utils.h
         include/NEngine/Renderer/VertexShader.h
-        include/NEngine/Renderer/PixelShader.h)
+        include/NEngine/Renderer/PixelShader.h
+        include/NEngine/Renderer/BasePass.h)
 
 set(vertex_shader_list
         shader/ColorVS.hlsl
