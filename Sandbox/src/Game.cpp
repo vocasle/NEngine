@@ -5,7 +5,6 @@
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Input/Mouse.h"
 #include "NEngine/Math/Math.h"
-#include "NEngine/Helpers/Texture.h"
 #include "NEngine/Utils/Utils.h"
 
 #if WITH_IMGUI

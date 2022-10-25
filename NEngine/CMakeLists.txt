@@ -13,7 +13,6 @@ set(source_file_list
         src/Helpers/Renderer.cpp
         src/Helpers/ShaderManager.cpp
         src/Helpers/ShadowMap.cpp
-        src/Helpers/Texture.cpp
         src/Helpers/VertexBuffer.cpp
         src/Input/Keyboard.cpp
         src/Input/Mouse.cpp
@@ -25,7 +24,8 @@ set(source_file_list
         src/Utils/Utils.cpp
         src/Renderer/VertexShader.cpp
         src/Renderer/PixelShader.cpp
-        src/Renderer/BasePass.cpp)
+        src/Renderer/BasePass.cpp
+        src/Renderer/Texture.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -42,7 +42,6 @@ set(header_file_list
         include/NEngine/Helpers/Renderer.h
         include/NEngine/Helpers/ShaderManager.h
         include/NEngine/Helpers/ShadowMap.h
-        include/NEngine/Helpers/Texture.h
         include/NEngine/Input/Keyboard.h
         include/NEngine/Input/Mouse.h
         include/NEngine/Math/Math.h
@@ -58,7 +57,8 @@ set(header_file_list
         include/NEngine/Utils/Utils.h
         include/NEngine/Renderer/VertexShader.h
         include/NEngine/Renderer/PixelShader.h
-        include/NEngine/Renderer/BasePass.h)
+        include/NEngine/Renderer/BasePass.h
+        include/NEngine/Renderer/Texture.h)
 
 set(vertex_shader_list
         shader/ColorVS.hlsl
