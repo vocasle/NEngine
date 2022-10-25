@@ -371,3 +371,4 @@ FodyWeavers.xsd
 /build/
 /.vscode/
 /build-debug/
+compile_commands.json
