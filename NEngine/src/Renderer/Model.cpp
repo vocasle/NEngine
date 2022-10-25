@@ -1,6 +1,5 @@
 #include "NEngine/Renderer/Model.h"
 
-#include "NEngine/Helpers/GLTFLoader.h"
 #include "NEngine/Utils/Utils.h"
 
 using namespace NEngine::Helpers;
