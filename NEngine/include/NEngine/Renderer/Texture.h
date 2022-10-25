@@ -8,7 +8,7 @@
 
 #include "Bindable.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "Nengine/Utils/Image.h"
+#include "NEngine/Utils/Image.h"
 
 namespace NEngine::Renderer {
 
