@@ -72,6 +72,7 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
     std::vector<Math::Vec3D> positions;
     std::vector<Math::Vec3D> normals;
     std::vector<Math::Vec4D> tangents;
+    std::vector<Math::Vec2D> texCoords;
 
     assert(mesh.primitives.size() == 1 &&
            "Mesh contains more than one primitive!");
@@ -109,7 +110,7 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                 }
             }
             else if (name == "TANGENT") {
-                assert(sizeof(Vec3D) == byteStride);
+                assert(sizeof(Vec4D) == byteStride);
                 assert(bufferView.byteLength >= sizeof(Vec4D) * accessor.count);
                 tangents.reserve(accessor.count);
 
@@ -120,6 +121,15 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                 }
             }
             else if (name == "TEXCOORD_0") {
+                assert(sizeof(Vec2D) == byteStride);
+                assert(bufferView.byteLength >= sizeof(Vec2D) * accessor.count);
+                texCoords.reserve(accessor.count);
+
+                for (size_t i = bufferView.byteOffset;
+                     i < bufferView.byteLength;
+                     i += byteStride) {
+                    texCoords.push_back(ReadNextVec<Vec2D>(buffer.data, i));
+                }
             }
             else if (name == "COLOR_0") {
                 UtilsDebugPrint("WARN: COLOR_0 is not supported yet\n");
@@ -131,18 +141,22 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                 UtilsDebugPrint("WARN: WEIGHTS_0 is not supported yet\n");
             }
         }
+
+        const auto &material = model.materials[primitive.material];
+        
     }
 
     std::vector<Renderer::VertexPositionNormalTangent> vertices;
 
-    for (const unsigned int idx : indices) {
-        if (!normals.empty()) {
-            assert(normals.size() > idx);
-        }
+    if (!normals.empty()) {
+        assert(normals.size() > indices.size() - 1);
+    }
 
-        if (!tangents.empty()) {
-            assert(tangents.size() > idx);
-        }
+    if (!tangents.empty()) {
+        assert(tangents.size() > indices.size() - 1);
+    }
+
+    for (const unsigned int idx : indices) {
         const Vec4D normal =
             normals.empty() ? Vec4D{0, 0, 0, 0} : Vec4D{normals[idx], 0};
         const Vec4D tangent =
