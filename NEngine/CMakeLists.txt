@@ -80,7 +80,6 @@ set_source_files_properties(${vertex_shader_list} PROPERTIES ShaderType vs Shade
 add_library(${library_name} STATIC 
         ${source_file_list} 
         ${header_file_list}
-        #${shader_header_list}
         ${vertex_shader_list}
         ${pixel_shader_list})
 
@@ -94,7 +93,7 @@ target_compile_definitions(${library_name} PRIVATE
         _UNICODE=1
         NENGINE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}"
         NENGINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
-        NENGINE_SHADER_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+        NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders")
 
 # TODO make tinygltf a private dependency
 target_link_libraries(${library_name}
