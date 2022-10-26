@@ -74,21 +74,8 @@ set(shader_header_list
         shader/LightingHelper.hlsli
         shader/Particle.hlsli)
 
-set_source_files_properties(${pixel_shader_list} PROPERTIES
-        VS_SHADER_TYPE Pixel
-        VS_SHADER_ENTRYPOINT main
-        VS_SHADER_MODEL 5.0
-        VS_SHADER_FLAGS "/Fd \"$(OutDir)%(Filename).pdb\""
-        VS_SHADER_ENABLE_DEBUG true
-        VS_SHADER_DISABLE_OPTIMIZATIONS true)
-
-set_source_files_properties(${vertex_shader_list} PROPERTIES
-        VS_SHADER_TYPE Vertex
-        VS_SHADER_ENTRYPOINT main
-        VS_SHADER_MODEL 5.0
-        VS_SHADER_FLAGS "/Fd \"$(OutDir)%(Filename).pdb\""
-        VS_SHADER_ENABLE_DEBUG true
-        VS_SHADER_DISABLE_OPTIMIZATIONS true)
+set_source_files_properties(${pixel_shader_list} PROPERTIES ShaderType ps ShaderModel 5_0)
+set_source_files_properties(${vertex_shader_list} PROPERTIES ShaderType vs ShaderModel 5_0)
 
 add_library(${library_name} STATIC 
         ${source_file_list} 
@@ -116,3 +103,32 @@ target_link_libraries(${library_name}
         PUBLIC dxgi.lib
         PUBLIC dxguid.lib
         PRIVATE stb_image)
+
+set(HLSL_SHADER_FILES)
+list(APPEND HLSL_SHADER_FILES ${pixel_shader_list})
+list(APPEND HLSL_SHADER_FILES ${vertex_shader_list})
+
+add_custom_target(shaders)
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
+
+foreach(FILE ${HLSL_SHADER_FILES})
+        get_filename_component(FILE_WE ${FILE} NAME_WE)
+        get_source_file_property(shadertype ${FILE} ShaderType)
+        get_source_file_property(shadermodel ${FILE} ShaderModel)
+        add_custom_command(TARGET shaders
+                        COMMAND ${FXC_EXE} /nologo 
+                                /Emain 
+                                /T${shadertype}_${shadermodel} 
+                                $<IF:$<CONFIG:DEBUG>,/Od,/O1> 
+                                /Zi 
+                                /Fo ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.cso 
+                                /Fd ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.pdb 
+                                ${FILE}
+                        MAIN_DEPENDENCY ${FILE}
+                        COMMENT "HLSL ${FILE}"
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        VERBATIM)
+endforeach()
+
+add_dependencies(${library_name} shaders)
