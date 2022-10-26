@@ -5,13 +5,12 @@
 using namespace NEngine::Helpers;
 using namespace NEngine::Utils;
 
-void
-NEngine::Renderer::Model::Draw(Helpers::DeviceResources &deviceResources)
+const std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &
+NEngine::Renderer::Model::GetMeshes() const
 {
-    for (const auto &mesh : mMeshes) {
-        mesh->Draw(deviceResources);
-    }
+    return mMeshes;
 }
+
 NEngine::Renderer::Model::Model(
     DeviceResources &deviceResources,
     std::vector<std::unique_ptr<Renderer::Mesh>> &meshes)

@@ -4,15 +4,18 @@
 #include "Drawable.h"
 #include "Mesh.h"
 #include "NEngine/Math/Math.h"
+#include "NEngine/Renderer/Mesh.h"
 
 namespace NEngine {
 namespace Renderer {
-class Model : public Drawable
+class Model
 {
 public:
     Model(Helpers::DeviceResources &deviceResources,
           std::vector<std::unique_ptr<Renderer::Mesh>> &meshes);
-    void Draw(Helpers::DeviceResources &deviceResources) override;
+
+    const std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &GetMeshes()
+        const;
 
     struct Vertex
     {

@@ -22,16 +22,3 @@ NEngine::Renderer::Mesh::Mesh(Helpers::DeviceResources &deviceResources,
             vertices);
     mBinds.push_back(std::move(vb));
 }
-
-void
-NEngine::Renderer::Mesh::Draw(Helpers::DeviceResources &deviceResources)
-{
-    for (auto &bind : mBinds) {
-        bind->Bind(deviceResources);
-    }
-
-    deviceResources.GetDeviceContext()->DrawIndexed(
-        mIndexBuffer->GetIndexCount(),
-        0,
-        0);
-}
