@@ -372,3 +372,5 @@ FodyWeavers.xsd
 /.vscode/
 /build-debug/
 compile_commands.json
+log.txt
+imgui.ini
