@@ -143,11 +143,11 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
         }
 
         // TODO: Extract textures from gLTF file
-        const auto &material = model.materials[primitive.material];
-        const auto baseColorTextureIdx = material.pbrMetallicRoughness.baseColorTexture.index;
-        const auto metallicRoughnessTextureIdx = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
-        const auto &tex = model.textures[metallicRoughnessTextureIdx];
-        const auto &image = model.images[tex.source];
+        // const auto &material = model.materials[primitive.material];
+        // const auto baseColorTextureIdx = material.pbrMetallicRoughness.baseColorTexture.index;
+        // const auto metallicRoughnessTextureIdx = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
+        // const auto &tex = model.textures[metallicRoughnessTextureIdx];
+        // const auto &image = model.images[tex.source];
         
     }
 
