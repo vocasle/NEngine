@@ -1,9 +1,12 @@
 #include "NEngine/Helpers/GLTFLoader.h"
 
+#include <algorithm>
+
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/InputLayout.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
 #include "NEngine/Utils/Utils.h"
+
 
 using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
@@ -59,12 +62,17 @@ GLTFLoader::ExtractMeshIndices(const tinygltf::Accessor &indexAccessor,
     return indices;
 }
 
-template <typename Vec>
-Vec
-ReadNextVec(const std::vector<unsigned char> &data, size_t idx)
+template <typename T>
+std::vector<T>
+ReadData(const std::vector<unsigned char> &data, size_t count, size_t offset)
 {
-    Vec v = *reinterpret_cast<const Vec *>(data.data() + idx);
-    return v;
+    std::vector<T> vec;
+    vec.reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        vec.push_back(
+            *reinterpret_cast<const T *>(&data[0] + offset + i * sizeof(T)));
+    }
+    return vec;
 }
 
 std::unique_ptr<NEngine::Renderer::MeshPrimitive>
@@ -91,49 +99,30 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
             const auto &bufferView = model.bufferViews[accessor.bufferView];
             const auto &buffer = model.buffers[bufferView.buffer];
             const size_t byteStride = accessor.ByteStride(bufferView);
+            const size_t byteOffset = accessor.byteOffset;
+
+            assert(bufferView.byteLength - byteOffset >=
+                   byteStride * accessor.count);
+
             if (name == "POSITION") {
                 assert(sizeof(Vec3D) == byteStride);
-                assert(bufferView.byteLength >= sizeof(Vec3D) * accessor.count);
-                positions.reserve(accessor.count);
-
-                for (size_t i = bufferView.byteOffset;
-                     i < bufferView.byteLength;
-                     i += byteStride) {
-                    positions.push_back(ReadNextVec<Vec3D>(buffer.data, i));
-                }
+                positions =
+                    ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
             }
             else if (name == "NORMAL") {
                 assert(sizeof(Vec3D) == byteStride);
-                assert(bufferView.byteLength >= sizeof(Vec3D) * accessor.count);
-                normals.reserve(accessor.count);
-
-                for (size_t i = bufferView.byteOffset;
-                     i < bufferView.byteLength;
-                     i += byteStride) {
-                    normals.push_back(ReadNextVec<Vec3D>(buffer.data, i));
-                }
+                normals =
+                    ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
             }
             else if (name == "TANGENT") {
                 assert(sizeof(Vec4D) == byteStride);
-                assert(bufferView.byteLength >= sizeof(Vec4D) * accessor.count);
-                tangents.reserve(accessor.count);
-
-                for (size_t i = bufferView.byteOffset;
-                     i < bufferView.byteLength;
-                     i += byteStride) {
-                    tangents.push_back(ReadNextVec<Vec4D>(buffer.data, i));
-                }
+                tangents =
+                    ReadData<Vec4D>(buffer.data, accessor.count, byteOffset);
             }
             else if (name == "TEXCOORD_0") {
                 assert(sizeof(Vec2D) == byteStride);
-                assert(bufferView.byteLength >= sizeof(Vec2D) * accessor.count);
-                texCoords.reserve(accessor.count);
-
-                for (size_t i = bufferView.byteOffset;
-                     i < bufferView.byteLength;
-                     i += byteStride) {
-                    texCoords.push_back(ReadNextVec<Vec2D>(buffer.data, i));
-                }
+                texCoords =
+                    ReadData<Vec2D>(buffer.data, accessor.count, byteOffset);
             }
             else if (name == "COLOR_0") {
                 UtilsDebugPrint("WARN: COLOR_0 is not supported yet\n");
@@ -182,14 +171,17 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
 
     std::vector<Renderer::VertexPositionNormalTangent> vertices;
 
+    const auto max = std::max_element(std::begin(indices), std::end(indices));
+
     if (!normals.empty()) {
-        assert(normals.size() > indices.size() - 1);
+        assert(normals.size() > *max);
     }
 
     if (!tangents.empty()) {
-        assert(tangents.size() > indices.size() - 1);
+        assert(tangents.size() > *max);
     }
 
+    vertices.reserve(indices.size());
     for (const unsigned int idx : indices) {
         const Vec4D normal =
             normals.empty() ? Vec4D{0, 0, 0, 0} : Vec4D{normals[idx], 0};
