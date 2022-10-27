@@ -121,6 +121,7 @@ DynamicConstBuffer::DynamicConstBuffer(const DynamicConstBufferDesc &desc,
 void
 DynamicConstBuffer::Bind(Helpers::DeviceResources &deviceResources)
 {
+    UpdateConstantBuffer();
     deviceResources.GetDeviceContext()->VSSetConstantBuffers(
         mBindSlot, 1, mBuffer.GetAddressOf());
     deviceResources.GetDeviceContext()->PSSetConstantBuffers(
