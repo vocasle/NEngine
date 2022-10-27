@@ -40,8 +40,7 @@ public:
                   std::vector<VertexPositionNormalTangent> vertices,
                   std::vector<unsigned int> indices);
 
-    void SetBaseColorFactor(const Math::Vec4D &baseColorFactor);
-    void SetMetallicFactor(float metallicFactor);
+    void SetMaterial(Material material);
 
 private:
     std::vector<std::unique_ptr<Bindable>> mBinds;

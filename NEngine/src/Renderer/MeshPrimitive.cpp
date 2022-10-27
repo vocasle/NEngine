@@ -25,14 +25,7 @@ NEngine::Renderer::MeshPrimitive::MeshPrimitive(
 }
 
 void
-NEngine::Renderer::MeshPrimitive::SetBaseColorFactor(
-    const Math::Vec4D &baseColorFactor)
+NEngine::Renderer::MeshPrimitive::SetMaterial(Material material)
 {
-    mMaterial.BaseColor = baseColorFactor;
-}
-
-void
-NEngine::Renderer::MeshPrimitive::SetMetallicFactor(float metallicFactor)
-{
-    mMaterial.Metalness = metallicFactor;
+    mMaterial = std::move(material);
 }
