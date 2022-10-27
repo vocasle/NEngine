@@ -76,6 +76,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
     std::vector<Math::Vec3D> normals;
     std::vector<Math::Vec4D> tangents;
     std::vector<Math::Vec2D> texCoords;
+    Material tmpMaterial;
 
     assert(mesh.primitives.size() == 1 &&
            "Mesh contains more than one primitive!");
@@ -145,8 +146,32 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
             }
         }
 
-        // TODO: Extract textures from gLTF file
-        // const auto &material = model.materials[primitive.material];
+        assert(primitive.material >= 0 &&
+               "ERROR: gLTF model does not contain material!");
+        const auto &material = model.materials[primitive.material];
+
+        tmpMaterial.BaseColor = {
+            static_cast<float>(
+                material.pbrMetallicRoughness.baseColorFactor[0]),
+            static_cast<float>(
+                material.pbrMetallicRoughness.baseColorFactor[1]),
+            static_cast<float>(
+                material.pbrMetallicRoughness.baseColorFactor[2]),
+            static_cast<float>(
+                material.pbrMetallicRoughness.baseColorFactor[3])};
+
+        tmpMaterial.Roughness = material.pbrMetallicRoughness.roughnessFactor;
+        tmpMaterial.Metalness = material.pbrMetallicRoughness.metallicFactor;
+        if (material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
+            UtilsDebugPrint(
+                "WARN: Extract baseColorTexture is not yet implemented");
+        }
+        if (material.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
+            UtilsDebugPrint(
+                "WARN: Extract metallicRoughnessTexture is not yet "
+                "implemented");
+        }
+
         // const auto baseColorTextureIdx =
         // material.pbrMetallicRoughness.baseColorTexture.index; const auto
         // metallicRoughnessTextureIdx =
@@ -177,8 +202,10 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
     assert(!vertices.empty() && "Vertices is empty! gLTF import failed!");
     assert(!indices.empty() && "Indices is empty! gLTF import failed!");
 
-    return std::make_unique<Renderer::MeshPrimitive>(
+    auto meshPrim = std::make_unique<Renderer::MeshPrimitive>(
         m_deviceResources, vertices, indices);
+    meshPrim->SetMaterial(std::move(tmpMaterial));
+    return std::move(meshPrim);
 }
 
 GLTFLoader::GLTFLoader(DeviceResources &deviceResources)
