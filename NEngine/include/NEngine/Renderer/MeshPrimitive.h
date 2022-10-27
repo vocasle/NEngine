@@ -41,6 +41,8 @@ public:
                   std::vector<unsigned int> indices);
 
     void SetMaterial(Material material);
+    void Bind(Helpers::DeviceResources &deviceResources) const;
+    size_t GetIndexNum() const;
 
 private:
     std::vector<std::unique_ptr<Bindable>> mBinds;

@@ -29,3 +29,17 @@ NEngine::Renderer::MeshPrimitive::SetMaterial(Material material)
 {
     mMaterial = std::move(material);
 }
+
+void
+NEngine::Renderer::MeshPrimitive::Bind(
+    Helpers::DeviceResources &deviceResources) const
+{
+    for (auto &bind : mBinds) {
+        bind->Bind(deviceResources);
+    }
+}
+size_t
+NEngine::Renderer::MeshPrimitive::GetIndexNum() const
+{
+    return mIndices.size();
+}
