@@ -215,6 +215,8 @@ private:
         void *Ptr;
     };
 
+    void InitializeDefaults();
+
     std::vector<uint8_t> mBytes;
     std::unordered_map<std::string, Value> mValues;
     Microsoft::WRL::ComPtr<ID3D11Buffer> mBuffer;

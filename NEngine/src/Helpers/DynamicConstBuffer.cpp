@@ -1,7 +1,12 @@
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 
+#include "NEngine/Math/Math.h"
+
 namespace NEngine {
 namespace Helpers {
+
+using namespace NEngine::Math;
+
 std::string
 NodeTypeToString(NodeType inType)
 {
@@ -108,6 +113,7 @@ DynamicConstBuffer::DynamicConstBuffer(const DynamicConstBufferDesc &desc,
         node.Visit(visitor);
     }
 
+    InitializeDefaults();
     CreateConstantBuffer();
     UpdateConstantBuffer();
 }
@@ -124,6 +130,38 @@ DynamicConstBuffer::Bind(Helpers::DeviceResources &deviceResources)
 void
 DynamicConstBuffer::Unbind(Helpers::DeviceResources &deviceResources)
 {
+}
+
+void
+DynamicConstBuffer::InitializeDefaults()
+{
+    for (const auto &[k, v] : mValues) {
+        switch (v.Type) {
+            case NodeType::Struct:
+            case NodeType::Array:
+                break;
+            case NodeType::Bool:
+                *reinterpret_cast<bool *>(v.Ptr) = false;
+                break;
+            case NodeType::Float2:
+                *reinterpret_cast<Vec2D *>(v.Ptr) = {0, 0};
+                break;
+            case NodeType::Float3:
+                *reinterpret_cast<Vec3D *>(v.Ptr) = {0, 0, 0};
+                break;
+            case NodeType::Float4:
+                *reinterpret_cast<Vec4D *>(v.Ptr) = {0, 0, 0, 0};
+                break;
+            case NodeType::Float3X3:
+                *reinterpret_cast<Mat3X3 *>(v.Ptr) = MathMat3X3Identity();
+                break;
+            case NodeType::Float4X4:
+                *reinterpret_cast<Mat4X4 *>(v.Ptr) = MathMat4X4Identity();
+                break;
+            case NodeType::None:
+                break;
+        }
+    }
 }
 
 }  // namespace Helpers
