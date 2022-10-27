@@ -33,6 +33,9 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
     // Get transform (world matrix), textures and samplers and set it to per
     // object const buffer
     mPerObjectBuffer->Bind(deviceResources);
+    meshPrimitive->Bind(deviceResources);
+    deviceResources.GetDeviceContext()->DrawIndexed(
+        meshPrimitive->GetIndexNum(), 0, 0);
 }
 
 NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
