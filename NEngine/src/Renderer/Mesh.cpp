@@ -7,8 +7,10 @@
 using namespace NEngine::Helpers;
 using namespace NEngine::Utils;
 
-NEngine::Renderer::Mesh::Mesh(Helpers::DeviceResources &deviceResources,
-                              const std::vector<VertexPositionNormalTangent> &vertices, const std::vector<unsigned int> &indices)
+NEngine::Renderer::Mesh::Mesh(
+    Helpers::DeviceResources &deviceResources,
+    const std::vector<VertexPositionNormalTangent> &vertices,
+    const std::vector<unsigned int> &indices)
     : mVertices(vertices),
       mIndices(indices)
 {
@@ -18,7 +20,18 @@ NEngine::Renderer::Mesh::Mesh(Helpers::DeviceResources &deviceResources,
 
     std::unique_ptr<VertexBuffer<VertexPositionNormalTangent>> vb =
         std::make_unique<VertexBuffer<VertexPositionNormalTangent>>(
-            deviceResources,
-            vertices);
+            deviceResources, vertices);
     mBinds.push_back(std::move(vb));
+}
+
+void
+NEngine::Renderer::Mesh::SetBaseColorFactor(const Math::Vec4D &baseColorFactor)
+{
+    mBaseColorFactor = baseColorFactor;
+}
+
+void
+NEngine::Renderer::Mesh::SetMetallicFactor(float metallicFactor)
+{
+    mMetallicFactor = metallicFactor;
 }
