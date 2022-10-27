@@ -3,7 +3,8 @@
 namespace NEngine {
 namespace Helpers {
 std::string
-NodeTypeToString(NodeType inType) {
+NodeTypeToString(NodeType inType)
+{
     switch (inType) {
         case NodeType::Struct:
             return "Struct";
@@ -27,11 +28,12 @@ NodeTypeToString(NodeType inType) {
 }
 
 void
-DynamicConstBuffer::UpdateConstantBuffer() {
+DynamicConstBuffer::UpdateConstantBuffer()
+{
     D3D11_MAPPED_SUBRESOURCE mapped = {};
 
     if (FAILED(mDeviceResources->GetDeviceContext()->Map(
-        mBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+            mBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
         UtilsFatalError("ERROR: Failed to map constant buffer\n");
     }
     memcpy(mapped.pData, mBytes.data(), mBytes.size());
@@ -39,7 +41,8 @@ DynamicConstBuffer::UpdateConstantBuffer() {
 }
 
 void
-DynamicConstBuffer::CreateConstantBuffer() {
+DynamicConstBuffer::CreateConstantBuffer()
+{
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bufferDesc.ByteWidth = mBytes.size();
@@ -50,28 +53,33 @@ DynamicConstBuffer::CreateConstantBuffer() {
     initData.pSysMem = mBytes.data();
 
     if (FAILED(mDeviceResources->GetDevice()->CreateBuffer(
-        &bufferDesc, &initData, mBuffer.ReleaseAndGetAddressOf()))) {
+            &bufferDesc, &initData, mBuffer.ReleaseAndGetAddressOf()))) {
         UtilsFatalError(
             "ERROR: Failed to create per frame constants cbuffer\n");
     }
 }
 
 [[nodiscard]] const std::vector<uint8_t> &
-DynamicConstBuffer::GetBytes() const {
+DynamicConstBuffer::GetBytes() const
+{
     return mBytes;
 }
 
 ID3D11Buffer *
-DynamicConstBuffer::Get() const {
+DynamicConstBuffer::Get() const
+{
     return mBuffer.Get();
 }
 
 DynamicConstBuffer::DynamicConstBuffer(const DynamicConstBufferDesc &desc,
                                        DeviceResources &deviceResources)
-    : mDeviceResources(&deviceResources) {
+    : mDeviceResources(&deviceResources),
+      mBindSlot(desc.GetBindSlot())
+{
     size_t sz = 0;
     for (auto &node : desc.GetNodes()) {
-        auto visitor = [&sz](const Node &node) -> void {
+        auto visitor = [&sz](const Node &node) -> void
+        {
             if (node.Type != NodeType::Array && node.Type != NodeType::Struct) {
                 sz += static_cast<size_t>(node.Type);
             }
@@ -87,11 +95,13 @@ DynamicConstBuffer::DynamicConstBuffer(const DynamicConstBufferDesc &desc,
 
     size_t offset = 0;
     for (auto &node : desc.GetNodes()) {
-        auto visitor = [this, &offset](const Node &node) -> void {
+        auto visitor = [this, &offset](const Node &node) -> void
+        {
             if (node.Type != NodeType::Struct && node.Type != NodeType::Array) {
                 mValues[node.Name] = {node.Type, &mBytes[offset]};
                 offset += static_cast<size_t>(node.Type);
-            } else {
+            }
+            else {
                 mValues[node.Name] = {node.Type, &mBytes[offset]};
             }
         };
@@ -102,5 +112,19 @@ DynamicConstBuffer::DynamicConstBuffer(const DynamicConstBufferDesc &desc,
     UpdateConstantBuffer();
 }
 
+void
+DynamicConstBuffer::Bind(Helpers::DeviceResources &deviceResources)
+{
+    deviceResources.GetDeviceContext()->VSSetConstantBuffers(
+        mBindSlot, 1, mBuffer.GetAddressOf());
+    deviceResources.GetDeviceContext()->PSSetConstantBuffers(
+        mBindSlot, 1, mBuffer.GetAddressOf());
 }
+
+void
+DynamicConstBuffer::Unbind(Helpers::DeviceResources &deviceResources)
+{
 }
+
+}  // namespace Helpers
+}  // namespace NEngine

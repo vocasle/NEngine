@@ -12,6 +12,7 @@
 
 #include "DeviceResources.h"
 #include "NEngine/Utils/Utils.h"
+#include "NEngine/Renderer/Bindable.h"
 
 namespace NEngine {
 namespace Helpers {
@@ -32,25 +33,29 @@ enum class NodeType {
 
 std::string NodeTypeToString(NodeType inType);
 
-struct Node {
+struct Node
+{
     std::string Name;
     NodeType Type;
     std::vector<Node> Children;
 
     Node()
-        : Node("", NodeType::None) {
+        : Node("", NodeType::None)
+    {
     }
 
     Node(const std::string &inName, NodeType inType)
         : Name(inName),
-          Type(inType) {
+          Type(inType)
+    {
     }
 
     void
-    AddChild(const std::string &inName, NodeType inType) {
+    AddChild(const std::string &inName, NodeType inType)
+    {
         assert(Type == NodeType::Array ||
-            Type == NodeType::Struct &&
-            "Only composite types allowed to have children");
+               Type == NodeType::Struct &&
+                   "Only composite types allowed to have children");
         Node n;
         n.Name = Type == NodeType::Struct
                      ? UtilsFormatStr("%s.%s", Name.c_str(), inName.c_str())
@@ -60,9 +65,10 @@ struct Node {
     }
 
     void
-    AddChildN(const Node &child, int repeat) {
+    AddChildN(const Node &child, int repeat)
+    {
         assert(Type == NodeType::Array &&
-            "Only array type allowed to use this function");
+               "Only array type allowed to use this function");
         Node n = Node(UtilsFormatStr("%s[%lu]", Name.c_str(), Children.size()),
                       child.Type);
         n.Children = child.Children;
@@ -79,7 +85,8 @@ struct Node {
     }
 
     void
-    Print() const {
+    Print() const
+    {
         UtilsDebugPrint("{ Name: %s, Type: %s }\n",
                         Name.c_str(),
                         NodeTypeToString(Type).c_str());
@@ -89,7 +96,8 @@ struct Node {
     }
 
     void
-    Visit(const std::function<void(const Node &node)> &inVisitor) const {
+    Visit(const std::function<void(const Node &node)> &inVisitor) const
+    {
         inVisitor(*this);
         for (auto &child : Children) {
             child.Visit(inVisitor);
@@ -97,39 +105,66 @@ struct Node {
     }
 };
 
-class DynamicConstBufferDesc {
+class DynamicConstBufferDesc
+{
 public:
+    DynamicConstBufferDesc()
+        : mBindSlot(0)
+    {
+    }
+
     void
-    AddNode(const Node &inNode) {
+    SetBindSlot(unsigned int bindSlot)
+    {
+        mBindSlot = bindSlot;
+    }
+
+    void
+    AddNode(const Node &inNode)
+    {
         mNodes.push_back(inNode);
     }
 
     void
-    Print() const {
+    Print() const
+    {
         for (const auto &node : mNodes) {
             node.Print();
         }
     }
 
+    unsigned int
+    GetBindSlot() const
+    {
+        return mBindSlot;
+    }
+
     const std::vector<Node> &
-    GetNodes() const {
+    GetNodes() const
+    {
         return mNodes;
     }
 
 private:
     std::vector<Node> mNodes;
+    unsigned int mBindSlot;
 };
 
-class DynamicConstBuffer {
+class DynamicConstBuffer : public NEngine::Renderer::Bindable
+{
 public:
     DynamicConstBuffer(const DynamicConstBufferDesc &desc,
                        DeviceResources &deviceResources);
+
+    virtual void Bind(Helpers::DeviceResources &deviceResources) override;
+    virtual void Unbind(Helpers::DeviceResources &deviceResources) override;
 
     [[nodiscard]] ID3D11Buffer *Get() const;
 
     template <typename T, typename S>
     T *
-    operator[](const S &inName) {
+    operator[](const S &inName)
+    {
         for (const auto &[key, value] : mValues) {
             if (key == inName) {
                 return static_cast<T *>(value.Ptr);
@@ -140,7 +175,8 @@ public:
 
     template <typename T, typename S>
     T *
-    GetValue(const S &inName) const {
+    GetValue(const S &inName) const
+    {
         for (const auto &[key, value] : mValues) {
             if (key == inName) {
                 return static_cast<T *>(value.Ptr);
@@ -151,7 +187,8 @@ public:
 
     template <typename T, typename S>
     void
-    SetValue(const S &inName, const T &inValue) {
+    SetValue(const S &inName, const T &inValue)
+    {
         bool isSet = false;
         for (const auto &[key, value] : mValues) {
             if (key == inName) {
@@ -172,7 +209,8 @@ public:
     [[nodiscard]] const std::vector<uint8_t> &GetBytes() const;
 
 private:
-    struct Value {
+    struct Value
+    {
         NodeType Type;
         void *Ptr;
     };
@@ -181,7 +219,8 @@ private:
     std::unordered_map<std::string, Value> mValues;
     Microsoft::WRL::ComPtr<ID3D11Buffer> mBuffer;
     DeviceResources *mDeviceResources;
+    unsigned int mBindSlot;
 };
 
-}
-}
+}  // namespace Helpers
+}  // namespace NEngine
