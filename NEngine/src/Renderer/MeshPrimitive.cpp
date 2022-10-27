@@ -28,11 +28,11 @@ void
 NEngine::Renderer::MeshPrimitive::SetBaseColorFactor(
     const Math::Vec4D &baseColorFactor)
 {
-    mBaseColorFactor = baseColorFactor;
+    mMaterial.BaseColor = baseColorFactor;
 }
 
 void
 NEngine::Renderer::MeshPrimitive::SetMetallicFactor(float metallicFactor)
 {
-    mMetallicFactor = metallicFactor;
+    mMaterial.Metalness = metallicFactor;
 }

@@ -8,9 +8,31 @@
 #include "IndexBuffer.h"
 #include "InputLayout.h"
 #include "NEngine/Helpers/DeviceResources.h"
+#include "Texture.h"
 
 namespace NEngine {
 namespace Renderer {
+
+enum class AlphaMode {
+    Opaque,
+    Mask,
+    Blend
+};
+
+struct Material
+{
+    Math::Vec4D BaseColor;
+    float Metalness;
+    float Roughness;
+    std::unique_ptr<Texture> BaseColorTexture;
+    // green is roughness, blue contains metalness
+    std::unique_ptr<Texture> MetallicRoughnessTexture;
+    std::unique_ptr<Texture> NormalTexture;
+    std::unique_ptr<Texture> OcclusionTexture;
+    std::unique_ptr<Texture> EmissiveTexture;
+    AlphaMode AlphaMode;
+};
+
 class MeshPrimitive
 {
 public:
@@ -28,8 +50,7 @@ private:
     std::vector<VertexPositionNormalTangent> mVertices;
     std::vector<unsigned int> mIndices;
 
-    Math::Vec4D mBaseColorFactor;
-    float mMetallicFactor;
+    Material mMaterial;
 };
 }  // namespace Renderer
 }  // namespace NEngine
