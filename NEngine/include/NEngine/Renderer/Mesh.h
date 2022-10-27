@@ -1,13 +1,10 @@
 #pragma once
-
-#include <memory>
 #include <vector>
 
-#include "Bindable.h"
 #include "Drawable.h"
-#include "IndexBuffer.h"
-#include "InputLayout.h"
-#include "NEngine/Helpers/DeviceResources.h"
+#include "Mesh.h"
+#include "NEngine/Math/Math.h"
+#include "NEngine/Renderer/MeshPrimitive.h"
 
 namespace NEngine {
 namespace Renderer {
@@ -15,21 +12,14 @@ class Mesh
 {
 public:
     Mesh(Helpers::DeviceResources &deviceResources,
-         const std::vector<VertexPositionNormalTangent> &vertices,
-         const std::vector<unsigned int> &indices);
+         std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshes);
 
-    void SetBaseColorFactor(const Math::Vec4D &baseColorFactor);
-    void SetMetallicFactor(float metallicFactor);
+    const std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
+        &GetMeshPrimitives() const;
 
 private:
-    std::vector<std::unique_ptr<Bindable>> mBinds;
-    IndexBuffer *mIndexBuffer;
-
-    std::vector<VertexPositionNormalTangent> mVertices;
-    std::vector<unsigned int> mIndices;
-
-    Math::Vec4D mBaseColorFactor;
-    float mMetallicFactor;
+    std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
+        mMeshPrimitives;
 };
 }  // namespace Renderer
 }  // namespace NEngine

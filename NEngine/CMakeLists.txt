@@ -19,8 +19,8 @@ set(source_file_list
         src/Math/Math.cpp
         src/Renderer/IndexBuffer.cpp
         src/Renderer/InputLayout.cpp
+        src/Renderer/MeshPrimitive.cpp
         src/Renderer/Mesh.cpp
-        src/Renderer/Model.cpp
         src/Utils/Utils.cpp
         src/Renderer/VertexShader.cpp
         src/Renderer/PixelShader.cpp
@@ -49,8 +49,8 @@ set(header_file_list
         include/NEngine/Renderer/Drawable.h
         include/NEngine/Renderer/IndexBuffer.h
         include/NEngine/Renderer/InputLayout.h
+        include/NEngine/Renderer/MeshPrimitive.h
         include/NEngine/Renderer/Mesh.h
-        include/NEngine/Renderer/Model.h
         include/NEngine/Renderer/VertexBuffer.h
         include/NEngine/Utils/Image.h
         include/NEngine/Utils/Timer.h

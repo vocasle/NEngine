@@ -3,20 +3,21 @@
 #include <memory>
 
 #include "InputLayout.h"
-#include "Model.h"
+#include "Mesh.h"
 #include "NEngine/Helpers/DeviceResources.h"
+#include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Helpers/Renderer.h"
 #include "PixelShader.h"
 #include "VertexShader.h"
-#include "NEngine/Helpers/DynamicConstBuffer.h"
 
 namespace NEngine::Renderer {
 class BasePass
 {
 public:
     explicit BasePass(Helpers::DeviceResources &deviceResources);
-    virtual void Draw(Helpers::DeviceResources &deviceResources,
-                      std::vector<Model *> &models);
+    virtual void Draw(
+        Helpers::DeviceResources &deviceResources,
+        std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes);
 
     virtual ~BasePass() = default;
 
@@ -28,6 +29,7 @@ protected:
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerSceneBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerObjectBuffer;
 
-    void DrawMesh(const Renderer::Mesh *mesh, Helpers::DeviceResources &deviceResources);
+    void DrawMeshPrimitive(const Renderer::MeshPrimitive *meshPrimitive,
+                           Helpers::DeviceResources &deviceResources);
 };
 }  // namespace NEngine::Renderer

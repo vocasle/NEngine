@@ -7,8 +7,9 @@ using namespace NEngine::Helpers;
 using namespace NEngine::Renderer;
 
 void
-NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
-                                  std::vector<Model *> &models)
+NEngine::Renderer::BasePass::Draw(
+    Helpers::DeviceResources &deviceResources,
+    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes)
 {
     mVertexShader->Bind(deviceResources);
     mPixelShader->Bind(deviceResources);
@@ -17,16 +18,17 @@ NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
     mPerSceneBuffer->Bind(deviceResources);
     mPerFrameBuffer->Bind(deviceResources);
 
-    for (auto &model : models) {
-        for (auto &mesh : model->GetMeshes()) {
-            DrawMesh(mesh.get(), deviceResources);
+    for (auto &mesh : meshes) {
+        for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {
+            DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
         }
     }
 }
 
 void
-NEngine::Renderer::BasePass::DrawMesh(const Renderer::Mesh *mesh,
-                                      Helpers::DeviceResources &deviceResources)
+NEngine::Renderer::BasePass::DrawMeshPrimitive(
+    const Renderer::MeshPrimitive *meshPrimitive,
+    Helpers::DeviceResources &deviceResources)
 {
     // Get transform (world matrix), textures and samplers and set it to per
     // object const buffer

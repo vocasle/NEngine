@@ -18,7 +18,7 @@
 #include "NEngine/Helpers/Renderer.h"
 #include "NEngine/Helpers/ShaderManager.h"
 #include "NEngine/Helpers/ShadowMap.h"
-#include "NEngine/Renderer/Model.h"
+#include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Utils/Timer.h"
 #include "NEngine/Renderer/BasePass.h"
 
@@ -60,6 +60,6 @@ private:
     NEngine::Helpers::ShadowMap m_shadowMap;
     NEngine::Helpers::DynamicCubeMap m_dynamicCubeMap;
 
-    std::unique_ptr<NEngine::Renderer::Model> m_model;
+    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> m_meshes;
     std::unique_ptr<NEngine::Renderer::BasePass> m_basePass;
 };

@@ -2,6 +2,7 @@
 
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/InputLayout.h"
+#include "NEngine/Renderer/MeshPrimitive.h"
 #include "NEngine/Utils/Utils.h"
 
 using namespace NEngine::Utils;
@@ -13,15 +14,17 @@ void
 GLTFLoader::ProcessNode(
     const tinygltf::Node &node,
     const tinygltf::Model &model,
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &outMeshes)
+    std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
+        &outMeshPrimitives)
 {
     if (node.mesh >= 0) {
-        auto mesh = ProcessMesh(model.meshes[node.mesh], model);
-        outMeshes.push_back(std::move(mesh));
+        auto meshPrimitive =
+            ProcessMeshPrimitive(model.meshes[node.mesh], model);
+        outMeshPrimitives.push_back(std::move(meshPrimitive));
     }
 
     for (const auto childIdx : node.children) {
-        ProcessNode(model.nodes[childIdx], model, outMeshes);
+        ProcessNode(model.nodes[childIdx], model, outMeshPrimitives);
     }
 }
 
@@ -64,9 +67,9 @@ ReadNextVec(const std::vector<unsigned char> &data, size_t idx)
     return v;
 }
 
-std::unique_ptr<NEngine::Renderer::Mesh>
-GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
-                        const tinygltf::Model &model)
+std::unique_ptr<NEngine::Renderer::MeshPrimitive>
+GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
+                                 const tinygltf::Model &model)
 {
     std::vector<unsigned int> indices;
     std::vector<Math::Vec3D> positions;
@@ -144,11 +147,12 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
 
         // TODO: Extract textures from gLTF file
         // const auto &material = model.materials[primitive.material];
-        // const auto baseColorTextureIdx = material.pbrMetallicRoughness.baseColorTexture.index;
-        // const auto metallicRoughnessTextureIdx = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
-        // const auto &tex = model.textures[metallicRoughnessTextureIdx];
-        // const auto &image = model.images[tex.source];
-        
+        // const auto baseColorTextureIdx =
+        // material.pbrMetallicRoughness.baseColorTexture.index; const auto
+        // metallicRoughnessTextureIdx =
+        // material.pbrMetallicRoughness.metallicRoughnessTexture.index; const
+        // auto &tex = model.textures[metallicRoughnessTextureIdx]; const auto
+        // &image = model.images[tex.source];
     }
 
     std::vector<Renderer::VertexPositionNormalTangent> vertices;
@@ -173,7 +177,7 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
     assert(!vertices.empty() && "Vertices is empty! gLTF import failed!");
     assert(!indices.empty() && "Indices is empty! gLTF import failed!");
 
-    return std::make_unique<Renderer::Mesh>(
+    return std::make_unique<Renderer::MeshPrimitive>(
         m_deviceResources, vertices, indices);
 }
 
@@ -182,7 +186,7 @@ GLTFLoader::GLTFLoader(DeviceResources &deviceResources)
 {
 }
 
-std::unique_ptr<NEngine::Renderer::Model>
+std::unique_ptr<NEngine::Renderer::Mesh>
 GLTFLoader::Load(const std::string &path)
 {
     tinygltf::Model model;
@@ -209,14 +213,14 @@ GLTFLoader::Load(const std::string &path)
 
     const auto &scene = model.scenes[model.defaultScene];
 
-    std::vector<std::unique_ptr<Renderer::Mesh>> meshes;
+    std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshPrimitives;
 
     for (const auto nodeIdx : scene.nodes) {
-        ProcessNode(model.nodes[nodeIdx], model, meshes);
+        ProcessNode(model.nodes[nodeIdx], model, meshPrimitives);
     }
 
-    std::unique_ptr<Renderer::Model> modelTmp =
-        std::make_unique<Renderer::Model>(m_deviceResources, meshes);
+    std::unique_ptr<Renderer::Mesh> modelTmp = std::make_unique<Renderer::Mesh>(
+        m_deviceResources, std::move(meshPrimitives));
 
     return std::move(modelTmp);
 }

@@ -8,9 +8,10 @@
 #include "NEngine/Utils/Utils.h"
 
 #if WITH_IMGUI
+#include <imgui/imgui.h>
 #include <imgui/imgui_impl_dx11.h>
 #include <imgui/imgui_impl_win32.h>
-#include <imgui/imgui.h>
+
 #endif
 
 #include <stdexcept>
@@ -23,7 +24,6 @@ using namespace NEngine::Utils;
 using namespace NEngine::Math;
 using namespace NEngine::Input;
 using namespace NEngine::Renderer;
-
 
 #if WITH_IMGUI
 void
@@ -119,7 +119,7 @@ Game::CreateDefaultSampler()
     samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
     if (FAILED(m_deviceResources->GetDevice()->CreateSamplerState(
-        &samplerDesc, m_defaultSampler.ReleaseAndGetAddressOf()))) {
+            &samplerDesc, m_defaultSampler.ReleaseAndGetAddressOf()))) {
         UtilsDebugPrint("ERROR: Failed to create default sampler state\n");
         ExitProcess(EXIT_FAILURE);
     }
@@ -149,17 +149,13 @@ Game::Clear()
     ID3D11DepthStencilView *dsv = m_deviceResources->GetDepthStencilView();
 
     static const float CLEAR_COLOR[4] = {
-        0.392156899f, 0.584313750f, 0.929411829f, 1.000000000f
-    };
+        0.392156899f, 0.584313750f, 0.929411829f, 1.000000000f};
 
     ctx->Flush();
 
     ctx->ClearRenderTargetView(rtv, CLEAR_COLOR);
     ctx->ClearDepthStencilView(
-        dsv,
-        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-        1.0f,
-        0);
+        dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     ctx->OMSetRenderTargets(1, &rtv, dsv);
     ctx->RSSetViewports(1, &m_deviceResources->GetViewport());
 }
@@ -185,14 +181,12 @@ Game::Update()
     elapsedTime += deltaSeconds;
 
     if (elapsedTime >= 1.0f) {
-        const std::string title = UtilsFormatStr(
-            "Sandbox -- FPS: %d, frame: %f s",
-            static_cast<int>(elapsedTime / deltaSeconds),
-            deltaSeconds);
-        SetWindowText(
-            m_deviceResources->GetWindow(),
-            UtilsStrToWstr(title).c_str()
-            );
+        const std::string title =
+            UtilsFormatStr("Sandbox -- FPS: %d, frame: %f s",
+                           static_cast<int>(elapsedTime / deltaSeconds),
+                           deltaSeconds);
+        SetWindowText(m_deviceResources->GetWindow(),
+                      UtilsStrToWstr(title).c_str());
         elapsedTime = 0.0f;
     }
 }
@@ -227,73 +221,72 @@ Game::Render()
 
     m_deviceResources->PIXBeginEvent(L"Color pass");
     {
-        std::vector<Model *> models = {m_model.get()};
-        m_basePass->Draw(*m_deviceResources, models);
+        m_basePass->Draw(*m_deviceResources, m_meshes);
     }
     // reset view proj matrix back to camera
     {
-        //m_perPassCB->SetValue("calcReflection", 1);
-        //m_perPassCB->UpdateConstantBuffer();
-        //m_renderer.BindConstantBuffer(
-        //    BindTargets::PixelShader,
-        //    m_perPassCB->Get(),
-        //    3);
+        // m_perPassCB->SetValue("calcReflection", 1);
+        // m_perPassCB->UpdateConstantBuffer();
+        // m_renderer.BindConstantBuffer(
+        //     BindTargets::PixelShader,
+        //     m_perPassCB->Get(),
+        //     3);
 
-        //m_renderer.BindVertexShader(
-        //    m_shaderManager.GetVertexShader("ColorVS.cso"));
-        //m_renderer.BindPixelShader(
-        //    m_shaderManager.GetPixelShader("PhongPS.cso"));
-        //m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
-        //m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
-        //m_perObjectCB->SetValue("world", MathMat4X4Identity());
-        //m_perObjectCB->SetValue("worldInvTranspose", MathMat4X4Identity());
+        // m_renderer.BindVertexShader(
+        //     m_shaderManager.GetVertexShader("ColorVS.cso"));
+        // m_renderer.BindPixelShader(
+        //     m_shaderManager.GetPixelShader("PhongPS.cso"));
+        // m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
+        // m_renderer.SetInputLayout(m_shaderManager.GetInputLayout());
+        // m_perObjectCB->SetValue("world", MathMat4X4Identity());
+        // m_perObjectCB->SetValue("worldInvTranspose", MathMat4X4Identity());
 
-        //m_perFrameCB->UpdateConstantBuffer();
-        //m_perSceneCB->UpdateConstantBuffer();
-        //m_perObjectCB->UpdateConstantBuffer();
+        // m_perFrameCB->UpdateConstantBuffer();
+        // m_perSceneCB->UpdateConstantBuffer();
+        // m_perObjectCB->UpdateConstantBuffer();
 
-        //m_renderer.BindConstantBuffer(
-        //    BindTargets::VertexShader,
-        //    m_perObjectCB->Get(),
-        //    0);
-        //m_renderer.BindConstantBuffer(
-        //    BindTargets::VertexShader,
-        //    m_perFrameCB->Get(),
-        //    1);
-        //m_renderer.BindConstantBuffer(
-        //    BindTargets::VertexShader,
-        //    m_perSceneCB->Get(),
-        //    2);
-        //m_renderer.BindConstantBuffer(
-        //    BindTargets::PixelShader,
-        //    m_perObjectCB->Get(),
-        //    0);
-        //m_renderer.BindConstantBuffer(
-        //    BindTargets::PixelShader,
-        //    m_perFrameCB->Get(),
-        //    1);
-        //m_renderer.BindConstantBuffer(
-        //    BindTargets::PixelShader,
-        //    m_perSceneCB->Get(),
-        //    2);
-        //m_renderer.BindShaderResource(
-        //    BindTargets::PixelShader,
-        //    m_shadowMap.GetDepthMapSRV(),
-        //    4);
-        //m_renderer.SetSamplerState(m_shadowMap.GetShadowSampler(), 1);
-        //m_renderer.BindShaderResource(
-        //    BindTargets::PixelShader,
-        //    m_dynamicCubeMap.GetSRV(),
-        //    6);
+        // m_renderer.BindConstantBuffer(
+        //     BindTargets::VertexShader,
+        //     m_perObjectCB->Get(),
+        //     0);
+        // m_renderer.BindConstantBuffer(
+        //     BindTargets::VertexShader,
+        //     m_perFrameCB->Get(),
+        //     1);
+        // m_renderer.BindConstantBuffer(
+        //     BindTargets::VertexShader,
+        //     m_perSceneCB->Get(),
+        //     2);
+        // m_renderer.BindConstantBuffer(
+        //     BindTargets::PixelShader,
+        //     m_perObjectCB->Get(),
+        //     0);
+        // m_renderer.BindConstantBuffer(
+        //     BindTargets::PixelShader,
+        //     m_perFrameCB->Get(),
+        //     1);
+        // m_renderer.BindConstantBuffer(
+        //     BindTargets::PixelShader,
+        //     m_perSceneCB->Get(),
+        //     2);
+        // m_renderer.BindShaderResource(
+        //     BindTargets::PixelShader,
+        //     m_shadowMap.GetDepthMapSRV(),
+        //     4);
+        // m_renderer.SetSamplerState(m_shadowMap.GetShadowSampler(), 1);
+        // m_renderer.BindShaderResource(
+        //     BindTargets::PixelShader,
+        //     m_dynamicCubeMap.GetSRV(),
+        //     6);
 
-        //m_renderer.SetVertexBuffer(gVertexBuffer.Get(),
-        //                           sizeof(VertexPositionNormalTangent),
-        //                           0);
-        //m_renderer.SetIndexBuffer(gIndexBuffer.Get(), 0);
-        //m_renderer.DrawIndexed(gIndices.size(), 0, 0);
+        // m_renderer.SetVertexBuffer(gVertexBuffer.Get(),
+        //                            sizeof(VertexPositionNormalTangent),
+        //                            0);
+        // m_renderer.SetIndexBuffer(gIndexBuffer.Get(), 0);
+        // m_renderer.DrawIndexed(gIndices.size(), 0, 0);
 
-        //m_renderer.SetSamplerState(nullptr, 1);
-        //m_renderer.BindShaderResource(BindTargets::PixelShader, nullptr, 6);
+        // m_renderer.SetSamplerState(nullptr, 1);
+        // m_renderer.BindShaderResource(BindTargets::PixelShader, nullptr, 6);
     }
     m_deviceResources->PIXEndEvent();
 
@@ -329,13 +322,14 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
                                      m_deviceResources->GetBackBufferHeight());
     ID3D11Device *device = m_deviceResources->GetDevice();
 
-//    m_shaderManager.Initialize(
-//        device,
-//        SHADER_BINARY_ROOT,
-//        UtilsFormatStr("%s/shader", SHADER_SRC_ROOT));
+    //    m_shaderManager.Initialize(
+    //        device,
+    //        SHADER_BINARY_ROOT,
+    //        UtilsFormatStr("%s/shader", SHADER_SRC_ROOT));
 
     GLTFLoader loader(*m_deviceResources);
-    m_model = loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)");
+    m_meshes.push_back(std::move(
+        loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)")));
 
     m_basePass = std::make_unique<BasePass>(*m_deviceResources);
 
@@ -349,9 +343,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
 
     const int shadowMapSize = 2048;
     m_shadowMap.InitResources(
-        m_deviceResources->GetDevice(),
-        shadowMapSize,
-        shadowMapSize);
+        m_deviceResources->GetDevice(), shadowMapSize, shadowMapSize);
 
     m_dynamicCubeMap.Init(m_deviceResources->GetDevice());
     m_dynamicCubeMap.BuildCubeFaceCamera({0, 0, 0});
@@ -366,8 +358,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
         perObjectDesc.AddNode(material);
 
         m_perObjectCB = std::make_unique<DynamicConstBuffer>(
-            perObjectDesc,
-            *m_deviceResources);
+            perObjectDesc, *m_deviceResources);
 
         DynamicConstBufferDesc perSceneDesc;
         Node dirLight = Node("dirLight", NodeType::Struct);
@@ -398,7 +389,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
         perSceneDesc.AddNode(spotLightsArr);
 
         m_perSceneCB = std::make_unique<DynamicConstBuffer>(perSceneDesc,
-            *m_deviceResources);
+                                                            *m_deviceResources);
 
         DynamicConstBufferDesc perFrameDesc;
         perFrameDesc.AddNode(Node("view", NodeType::Float4X4));
@@ -406,7 +397,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
         perFrameDesc.AddNode(Node("cameraPosW", NodeType::Float4));
 
         m_perFrameCB = std::make_unique<DynamicConstBuffer>(perFrameDesc,
-            *m_deviceResources);
+                                                            *m_deviceResources);
 
         m_perSceneCB->SetValue("dirLight.Diffuse",
                                Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
@@ -416,7 +407,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
         perPassDesc.AddNode(Node("calcReflection", NodeType::Float));
 
         m_perPassCB = std::make_unique<DynamicConstBuffer>(perPassDesc,
-            *m_deviceResources);
+                                                           *m_deviceResources);
 
         m_perSceneCB->SetValue("pointLights[0].Position",
                                Vec4D(100, 10, 0, 100));
@@ -435,10 +426,10 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
 #if WITH_IMGUI
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
-    //const std::string droidSansTtf = UtilsFormatStr(
-    //    "%s/../imgui-1.87/misc/fonts/DroidSans.ttf",
-    //    SOURCE_ROOT);
-    //io.Fonts->AddFontFromFileTTF(droidSansTtf.c_str(), 16.0f);
+    // const std::string droidSansTtf = UtilsFormatStr(
+    //     "%s/../imgui-1.87/misc/fonts/DroidSans.ttf",
+    //     SOURCE_ROOT);
+    // io.Fonts->AddFontFromFileTTF(droidSansTtf.c_str(), 16.0f);
 
     ImGui_ImplWin32_Init(hWnd);
     ImGui_ImplDX11_Init(m_deviceResources->GetDevice(),

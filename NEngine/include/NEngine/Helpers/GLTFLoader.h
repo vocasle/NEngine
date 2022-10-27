@@ -1,32 +1,30 @@
 #pragma once
-#include <string>
 #include <span>
+#include <string>
 
-#include "tinygltf/tiny_gltf.h"
-
-#include "NEngine/Renderer/Model.h"
 #include "NEngine/Renderer/Mesh.h"
+#include "tinygltf/tiny_gltf.h"
 
 namespace NEngine::Helpers {
 class GLTFLoader
 {
 public:
     explicit GLTFLoader(DeviceResources &deviceResources);
-    std::unique_ptr<NEngine::Renderer::Model> Load(const std::string &path);
+    std::unique_ptr<NEngine::Renderer::Mesh> Load(const std::string &path);
 
 private:
-    void
-    ProcessNode(const tinygltf::Node &node,
-                const tinygltf::Model &model,
-                std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &outMeshes);
+    void ProcessNode(
+        const tinygltf::Node &node,
+        const tinygltf::Model &model,
+        std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
+            &outMeshPrimitives);
 
-    std::unique_ptr<NEngine::Renderer::Mesh> ProcessMesh(const tinygltf::Mesh &mesh,
-                     const tinygltf::Model &model);
+    std::unique_ptr<NEngine::Renderer::MeshPrimitive> ProcessMeshPrimitive(
+        const tinygltf::Mesh &mesh, const tinygltf::Model &model);
 
     std::vector<unsigned int> ExtractMeshIndices(
-        const tinygltf::Accessor &indexAccessor,
-        const tinygltf::Model &model);
+        const tinygltf::Accessor &indexAccessor, const tinygltf::Model &model);
 
     DeviceResources &m_deviceResources;
 };
-}
+}  // namespace NEngine::Helpers
