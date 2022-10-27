@@ -9,6 +9,7 @@
 #include "NEngine/Helpers/Renderer.h"
 #include "PixelShader.h"
 #include "VertexShader.h"
+#include "NEngine/Helpers/Camera.h"
 
 namespace NEngine::Renderer {
 class BasePass
@@ -20,6 +21,7 @@ public:
         std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes);
 
     virtual ~BasePass() = default;
+    void SetCamera(const Helpers::Camera &camera);
 
 protected:
     std::unique_ptr<VertexShader> mVertexShader;
@@ -28,8 +30,12 @@ protected:
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerFrameBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerSceneBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerObjectBuffer;
+    const Helpers::Camera *mCamera;
+
 
     void DrawMeshPrimitive(const Renderer::MeshPrimitive *meshPrimitive,
                            Helpers::DeviceResources &deviceResources);
+
+    void UpdatePerFrameBuffer();
 };
 }  // namespace NEngine::Renderer

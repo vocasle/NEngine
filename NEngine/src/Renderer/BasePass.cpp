@@ -5,6 +5,7 @@
 using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
 using namespace NEngine::Renderer;
+using namespace NEngine::Math;
 
 void
 NEngine::Renderer::BasePass::Draw(
@@ -14,6 +15,8 @@ NEngine::Renderer::BasePass::Draw(
     mVertexShader->Bind(deviceResources);
     mPixelShader->Bind(deviceResources);
     mInputLayout->Bind(deviceResources);
+
+    UpdatePerFrameBuffer();
 
     mPerSceneBuffer->Bind(deviceResources);
     mPerFrameBuffer->Bind(deviceResources);
@@ -36,6 +39,24 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
     meshPrimitive->Bind(deviceResources);
     deviceResources.GetDeviceContext()->DrawIndexed(
         meshPrimitive->GetIndexNum(), 0, 0);
+}
+
+void
+NEngine::Renderer::BasePass::SetCamera(const Helpers::Camera &camera)
+{
+    mCamera = &camera;
+}
+
+void
+NEngine::Renderer::BasePass::UpdatePerFrameBuffer()
+{
+    assert(mCamera != nullptr && "Camera is not set to BasePass!");
+    const auto viewMat = mCamera->GetViewMat();
+    const auto projMat = mCamera->GetProjMat();
+    const auto camPos = mCamera->GetPos();
+    mPerFrameBuffer->SetValue("view", viewMat);
+    mPerFrameBuffer->SetValue("proj", projMat);
+    mPerFrameBuffer->SetValue("cameraPosW", camPos);
 }
 
 NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
