@@ -79,9 +79,7 @@ set_source_files_properties(${vertex_shader_list} PROPERTIES ShaderType vs Shade
 
 add_library(${library_name} STATIC 
         ${source_file_list} 
-        ${header_file_list}
-        ${vertex_shader_list}
-        ${pixel_shader_list})
+        ${header_file_list})
 
 target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
