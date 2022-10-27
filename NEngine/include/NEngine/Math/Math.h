@@ -104,6 +104,7 @@ struct Vec4D
     std::string ToString() const;
     Vec4D &operator*(const float scalar);
     Vec4D &operator/(const float scalar);
+    bool operator==(const Vec4D &rhs) const;
 #endif
     float X;
     float Y;
@@ -228,6 +229,7 @@ struct Mat4X4
     };
 #ifdef __cplusplus
     std::string ToString() const;
+    bool operator==(const Mat4X4 &rhs) const;
 #endif
 };
 

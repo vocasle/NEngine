@@ -1212,6 +1212,19 @@ Vec4D::operator/(const float scalar)
 {
     return *this * (1 / scalar);
 }
+
+bool
+Mat4X4::operator==(const Mat4X4 &rhs) const
+{
+    return V[0] == rhs.V[0] && V[1] == rhs.V[1] && V[2] == rhs.V[2] &&
+           V[3] == rhs.V[3];
+}
+
+bool
+Vec4D::operator==(const Vec4D &rhs) const
+{
+    return X == rhs.X && Y == rhs.Y && Z == rhs.Z && W == rhs.W;
+}
 #endif
 }  // namespace Math
 
