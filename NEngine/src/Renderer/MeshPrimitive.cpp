@@ -20,7 +20,7 @@ NEngine::Renderer::MeshPrimitive::MeshPrimitive(
 
     std::unique_ptr<VertexBuffer<VertexPositionNormalTangent>> vb =
         std::make_unique<VertexBuffer<VertexPositionNormalTangent>>(
-            deviceResources, vertices);
+            deviceResources, mVertices);
     mBinds.push_back(std::move(vb));
 }
 
