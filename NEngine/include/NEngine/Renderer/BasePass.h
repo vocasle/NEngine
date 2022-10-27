@@ -5,6 +5,7 @@
 #include "InputLayout.h"
 #include "Model.h"
 #include "NEngine/Helpers/DeviceResources.h"
+#include "NEngine/Helpers/Renderer.h"
 #include "PixelShader.h"
 #include "VertexShader.h"
 #include "NEngine/Helpers/DynamicConstBuffer.h"
@@ -26,5 +27,7 @@ protected:
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerFrameBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerSceneBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerObjectBuffer;
+
+    void DrawMesh(const Renderer::Mesh *mesh, Helpers::DeviceResources &deviceResources);
 };
 }  // namespace NEngine::Renderer

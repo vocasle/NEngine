@@ -4,6 +4,7 @@
 
 using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
+using namespace NEngine::Renderer;
 
 void
 NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
@@ -13,9 +14,23 @@ NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
     mPixelShader->Bind(deviceResources);
     mInputLayout->Bind(deviceResources);
 
+    mPerSceneBuffer->Bind(deviceResources);
+    mPerFrameBuffer->Bind(deviceResources);
+
     for (auto &model : models) {
-        model->Draw(deviceResources);
+        for (auto &mesh : model->GetMeshes()) {
+            DrawMesh(mesh.get(), deviceResources);
+        }
     }
+}
+
+void
+NEngine::Renderer::BasePass::DrawMesh(const Renderer::Mesh *mesh,
+                                      Helpers::DeviceResources &deviceResources)
+{
+    // Get transform (world matrix), textures and samplers and set it to per
+    // object const buffer
+    mPerObjectBuffer->Bind(deviceResources);
 }
 
 NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
@@ -41,8 +56,10 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         Node material("material", NodeType::Struct);
         material.AddChild("roughness", NodeType::Float);
         desc.AddNode(material);
+        desc.SetBindSlot(0);
 
-        mPerObjectBuffer = std::make_unique<DynamicConstBuffer>(desc, deviceResources);
+        mPerObjectBuffer =
+            std::make_unique<DynamicConstBuffer>(desc, deviceResources);
     }
 
     {
@@ -50,8 +67,10 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         desc.AddNode(Node("view", NodeType::Float4X4));
         desc.AddNode(Node("proj", NodeType::Float4X4));
         desc.AddNode(Node("cameraPosW", NodeType::Float3));
+        desc.SetBindSlot(1);
 
-        mPerFrameBuffer = std::make_unique<DynamicConstBuffer>(desc, deviceResources);
+        mPerFrameBuffer =
+            std::make_unique<DynamicConstBuffer>(desc, deviceResources);
     }
 
     {
@@ -84,7 +103,9 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         desc.AddNode(dirLight);
         desc.AddNode(pointLightArr);
         desc.AddNode(spotLightArr);
-        
-        mPerSceneBuffer = std::make_unique<DynamicConstBuffer>(desc, deviceResources);
+        desc.SetBindSlot(2);
+
+        mPerSceneBuffer =
+            std::make_unique<DynamicConstBuffer>(desc, deviceResources);
     }
 }
