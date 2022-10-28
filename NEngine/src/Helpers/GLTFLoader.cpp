@@ -7,7 +7,6 @@
 #include "NEngine/Renderer/MeshPrimitive.h"
 #include "NEngine/Utils/Utils.h"
 
-
 using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
 using namespace NEngine::Math;
@@ -40,19 +39,19 @@ GLTFLoader::ExtractMeshIndices(const tinygltf::Accessor &indexAccessor,
     const auto &buffer = model.buffers[bufferView.buffer];
 
     const size_t byteStride = indexAccessor.ByteStride(bufferView);
+    const size_t byteOffset = indexAccessor.byteOffset + bufferView.byteOffset;
     indices.reserve(indexAccessor.count);
 
-    for (size_t i = bufferView.byteOffset; i < buffer.data.size();
-         i += byteStride) {
+    for (size_t i = 0; i < indexAccessor.count; ++i) {
         if (indexAccessor.componentType ==
             TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-            indices.push_back(
-                *reinterpret_cast<const unsigned short *>(&buffer.data.at(i)));
+            indices.push_back(*reinterpret_cast<const unsigned short *>(
+                &buffer.data.at(i * byteStride + byteOffset)));
         }
         else if (indexAccessor.componentType ==
                  TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
-            indices.push_back(
-                *reinterpret_cast<const unsigned int *>(&buffer.data.at(i)));
+            indices.push_back(*reinterpret_cast<const unsigned int *>(
+                &buffer.data.at(i * byteStride + byteOffset)));
         }
         else {
             UtilsDebugPrint("ERROR: Unexpected byte length of index type.\n");
@@ -69,8 +68,7 @@ ReadData(const std::vector<unsigned char> &data, size_t count, size_t offset)
     std::vector<T> vec;
     vec.reserve(count);
     for (size_t i = 0; i < count; ++i) {
-        vec.push_back(
-            *reinterpret_cast<const T *>(&data[0] + offset + i * sizeof(T)));
+        vec.push_back(*(reinterpret_cast<const T *>(&data[0] + offset) + i));
     }
     return vec;
 }
@@ -176,19 +174,35 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
     if (!normals.empty()) {
         assert(normals.size() > *max);
     }
+    else {
+        normals.resize(positions.size(), {0, 0, 0});
+    }
 
     if (!tangents.empty()) {
         assert(tangents.size() > *max);
     }
+    else {
+        tangents.resize(positions.size(), {0, 0, 0, 0});
+    }
 
-    vertices.reserve(indices.size());
-    for (const unsigned int idx : indices) {
-        const Vec4D normal =
-            normals.empty() ? Vec4D{0, 0, 0, 0} : Vec4D{normals[idx], 0};
-        const Vec4D tangent =
-            tangents.empty() ? Vec4D{0, 0, 0, 0} : tangents[idx];
+    if (!texCoords.empty()) {
+        assert(texCoords.size() > *max);
+    }
+    else {
+        texCoords.resize(positions.size(), {0, 0});
+    }
 
-        vertices.push_back({{positions[idx], 1}, normal, tangent});
+    assert(positions.size() == normals.size() &&
+           positions.size() == tangents.size() &&
+           positions.size() == texCoords.size());
+
+    vertices.reserve(positions.size());
+    for (size_t idx = 0; idx < positions.size(); ++idx) {
+        const Vec2D &texCoord = texCoords[idx];
+        const Vec4D normal = Vec4D(normals[idx], texCoord.Y);
+        const Vec4D &tangent = tangents[idx];
+        const Vec4D position = Vec4D(positions[idx], texCoord.X);
+        vertices.push_back({position, normal, tangent});
     }
 
     assert(!vertices.empty() && "Vertices is empty! gLTF import failed!");
