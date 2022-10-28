@@ -5,6 +5,9 @@ static const float PRECISION = 0.000001f;
 
 float4 main(VSOut In) : SV_TARGET
 {
+
+    return material.BaseColor;
+
     const float2 uv = float2(In.PosW.w, In.NormalW.w);
     const float4 diffuseSampled = diffuseTexture.Sample(defaultSampler, uv);
     const float4 specularSampled = specularTexture.Sample(defaultSampler, uv);

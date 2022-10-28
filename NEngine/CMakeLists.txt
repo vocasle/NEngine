@@ -65,16 +65,19 @@ set(header_file_list
 set(vertex_shader_list
         shader/ColorVS.hlsl
         shader/ParticleVS.hlsl
-        shader/ShadowVS.hlsl)
+        shader/ShadowVS.hlsl
+        shader/BasePassVS.hlsl)
 
 set(pixel_shader_list
         shader/ParticlePS.hlsl
-        shader/PhongPS.hlsl)
+        shader/PhongPS.hlsl
+        shader/BasePassPS.hlsl)
 
 set(shader_header_list
         shader/Common.hlsli
         shader/LightingHelper.hlsli
-        shader/Particle.hlsli)
+        shader/Particle.hlsli
+        shader/BasePass.hlsli)
 
 set_source_files_properties(${pixel_shader_list} PROPERTIES ShaderType ps ShaderModel 5_0)
 set_source_files_properties(${vertex_shader_list} PROPERTIES ShaderType vs ShaderModel 5_0)
