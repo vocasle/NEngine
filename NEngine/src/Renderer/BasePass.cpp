@@ -1,5 +1,8 @@
 #include "NEngine/Renderer/BasePass.h"
 
+#include <memory>
+
+#include "NEngine/Renderer/RasterizerState.h"
 #include "NEngine/Utils/Utils.h"
 
 using namespace NEngine::Utils;
@@ -12,6 +15,8 @@ NEngine::Renderer::BasePass::Draw(
     Helpers::DeviceResources &deviceResources,
     std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes)
 {
+    mRasterizerState->Bind(deviceResources);
+
     mVertexShader->Bind(deviceResources);
     mPixelShader->Bind(deviceResources);
     mInputLayout->Bind(deviceResources);
@@ -133,5 +138,13 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
 
         mPerSceneBuffer =
             std::make_unique<DynamicConstBuffer>(desc, deviceResources);
+    }
+
+    {
+        RasterizerDescription desc;
+        desc.FrontCounterClockwise = true;
+        desc.CullMode = CullMode::Front;
+        mRasterizerState =
+            std::make_unique<RasterizerState>(deviceResources, desc);
     }
 }

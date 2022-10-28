@@ -4,12 +4,15 @@
 
 #include "InputLayout.h"
 #include "Mesh.h"
+#include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Helpers/Renderer.h"
+#include "NEngine/Renderer/RasterizerState.h"
 #include "PixelShader.h"
 #include "VertexShader.h"
-#include "NEngine/Helpers/Camera.h"
+#include "RasterizerState.h"
+
 
 namespace NEngine::Renderer {
 class BasePass
@@ -31,7 +34,7 @@ protected:
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerSceneBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerObjectBuffer;
     const Helpers::Camera *mCamera;
-
+    std::unique_ptr<RasterizerState> mRasterizerState;
 
     void DrawMeshPrimitive(const Renderer::MeshPrimitive *meshPrimitive,
                            Helpers::DeviceResources &deviceResources);
