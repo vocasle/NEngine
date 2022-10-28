@@ -51,7 +51,6 @@ private:
     NEngine::Helpers::Camera m_camera;
     NEngine::Helpers::Renderer m_renderer;
     NEngine::Helpers::ShaderManager m_shaderManager;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perFrameCB;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perSceneCB;
     std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perObjectCB;

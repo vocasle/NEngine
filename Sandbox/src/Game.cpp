@@ -212,7 +212,6 @@ Game::Render()
     m_renderer.SetBlendState(nullptr);
     m_renderer.SetDepthStencilState(nullptr);
     m_renderer.SetPrimitiveTopology(R_DEFAULT_PRIMTIVE_TOPOLOGY);
-    m_renderer.SetRasterizerState(m_rasterizerState.Get());
     m_renderer.SetSamplerState(m_defaultSampler.Get(), 0);
 
     Mat4X4 shadowView = {};
@@ -332,6 +331,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
         loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)")));
 
     m_basePass = std::make_unique<BasePass>(*m_deviceResources);
+    m_basePass->SetCamera(m_camera);
 
     CreateDefaultSampler();
     // CreateRasterizerState();
