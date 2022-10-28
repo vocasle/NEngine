@@ -72,7 +72,7 @@ NEngine::Renderer::BasePass::UpdatePerFrameBuffer()
 NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
 {
     const auto path =
-        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "ColorVS.cso");
+        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassVS.cso");
     auto binaryBlob = UtilsReadData(path.c_str());
     mInputLayout = CreateInputLayout<VertexPositionNormalTangent>(
         deviceResources, binaryBlob);
@@ -81,7 +81,7 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
     mVertexShader = std::make_unique<VertexShader>(deviceResources, path);
 
     const auto pixelPath =
-        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "PhongPS.cso");
+        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassPS.cso");
     mPixelShader = std::make_unique<PixelShader>(deviceResources, pixelPath);
 
     {
