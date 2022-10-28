@@ -40,6 +40,11 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
 {
     // Get transform (world matrix), textures and samplers and set it to per
     // object const buffer
+    const Material &mat = meshPrimitive->GetMaterial();
+    mPerObjectBuffer->SetValue("material.BaseColor", mat.BaseColor);
+    mPerObjectBuffer->SetValue("material.Metalness", mat.Metalness);
+    mPerObjectBuffer->SetValue("material.Roughness", mat.Roughness);
+
     mPerObjectBuffer->Bind(deviceResources);
     meshPrimitive->Bind(deviceResources);
     deviceResources.GetDeviceContext()->DrawIndexed(
@@ -85,7 +90,9 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         desc.AddNode(Node("world", NodeType::Float4X4));
         desc.AddNode(Node("shadowTransform", NodeType::Float4X4));
         Node material("material", NodeType::Struct);
-        material.AddChild("roughness", NodeType::Float);
+        material.AddChild("BaseColor", NodeType::Float4);
+        material.AddChild("Metalness", NodeType::Float);
+        material.AddChild("Roughness", NodeType::Float);
         desc.AddNode(material);
         desc.SetBindSlot(0);
 
