@@ -72,6 +72,6 @@ float4 main(VSOut In) : SV_TARGET
     }
 
     float4 fragmentColor = float4(AMBIENT * lightDiffuseResult + shadow * (diffuseResult + specularResult), 1);
-    fragmentColor += reflColor * (1.0 - material.roughness);
+    fragmentColor += reflColor * (1.0 - material.Roughness);
     return fragmentColor;
 }
