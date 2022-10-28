@@ -43,3 +43,9 @@ NEngine::Renderer::MeshPrimitive::GetIndexNum() const
 {
     return mIndices.size();
 }
+
+const NEngine::Renderer::Material &
+NEngine::Renderer::MeshPrimitive::GetMaterial() const
+{
+    return mMaterial;
+}

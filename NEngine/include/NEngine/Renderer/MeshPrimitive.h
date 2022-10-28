@@ -43,6 +43,7 @@ public:
     void SetMaterial(Material material);
     void Bind(Helpers::DeviceResources &deviceResources) const;
     size_t GetIndexNum() const;
+    const Material &GetMaterial() const;
 
 private:
     std::vector<std::unique_ptr<Bindable>> mBinds;
