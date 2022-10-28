@@ -8,13 +8,13 @@ class Transform
 public:
     Transform() = default;
 
-    const Math::Mat4X4 &GetTranslate() const;
-    const Math::Mat4X4 &GetRotate() const;
+    const Math::Mat4X4 &GetTranslation() const;
+    const Math::Mat4X4 &GetRotation() const;
     const Math::Mat4X4 &GetScale() const;
     const Math::Mat4X4 GetTransform() const;
 
-    void SetTranslate(const Math::Mat4X4 &translate);
-    void SetRotate(const Math::Mat4X4 &rotate);
+    void SetTranslation(const Math::Mat4X4 &translation);
+    void SetRotation(const Math::Mat4X4 &rotation);
     void SetScale(const Math::Mat4X4 &scale);
 
     void Translate(float x, float y, float z);
@@ -26,8 +26,8 @@ public:
     void Scale(float factor);
 
 private:
-    Math::Mat4X4 mTranslate;
-    Math::Mat4X4 mRotate;
+    Math::Mat4X4 mTranslation;
+    Math::Mat4X4 mRotation;
     Math::Mat4X4 mScale;
 };
 }  // namespace NEngine::Helpers

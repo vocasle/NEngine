@@ -6,14 +6,14 @@ using namespace NEngine::Math;
 
 namespace NEngine::Helpers {
 const Math::Mat4X4 &
-Transform::GetTranslate() const
+Transform::GetTranslation() const
 {
-    return mTranslate;
+    return mTranslation;
 }
 const Math::Mat4X4 &
-Transform::GetRotate() const
+Transform::GetRotation() const
 {
-    return mRotate;
+    return mRotation;
 }
 const Math::Mat4X4 &
 Transform::GetScale() const
@@ -23,18 +23,18 @@ Transform::GetScale() const
 const Math::Mat4X4
 Transform::GetTransform() const
 {
-    return mTranslate * mRotate * mScale;
+    return mTranslation * mRotation * mScale;
 }
 
 void
-Transform::SetTranslate(const Math::Mat4X4 &translate)
+Transform::SetTranslation(const Math::Mat4X4 &translation)
 {
-    mTranslate = translate;
+    mTranslation = translation;
 }
 void
-Transform::SetRotate(const Math::Mat4X4 &rotate)
+Transform::SetRotation(const Math::Mat4X4 &rotation)
 {
-    mRotate = rotate;
+    mRotation = rotation;
 }
 void
 Transform::SetScale(const Math::Mat4X4 &scale)
@@ -50,7 +50,7 @@ Transform::Translate(float x, float y, float z)
 void
 Transform::Translate(const Math::Vec3D &offset)
 {
-    mTranslate = MathMat4X4TranslateFromVec3D(&offset);
+    mTranslation = MathMat4X4TranslateFromVec3D(&offset);
 }
 
 void
@@ -62,7 +62,7 @@ Transform::Rotate(float pitch, float roll, float yaw)
 void
 Transform::Rotate(const Math::Vec3D &angles)
 {
-    mRotate = MathMat4X4RotateFromVec3D(&angles);
+    mRotation = MathMat4X4RotateFromVec3D(&angles);
 }
 
 void
