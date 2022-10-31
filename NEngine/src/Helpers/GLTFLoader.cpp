@@ -268,8 +268,13 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
 
     auto meshPrim = std::make_unique<Renderer::MeshPrimitive>(
         m_deviceResources, vertices, indices);
+    tmpMaterial.BaseColorTexture = std::move(baseColorTex);
+    tmpMaterial.MetallicRoughnessTexture = std::move(metallicRoughnessTex);
+    tmpMaterial.NormalTexture = std::move(normalTex);
+    tmpMaterial.OcclusionTexture = std::move(occlusionTex);
+    tmpMaterial.EmissiveTexture = std::move(emissiveTex);
     meshPrim->SetMaterial(std::move(tmpMaterial));
-    
+
     return std::move(meshPrim);
 }
 
