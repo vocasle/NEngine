@@ -37,6 +37,17 @@ NEngine::Renderer::MeshPrimitive::Bind(
     for (auto &bind : mBinds) {
         bind->Bind(deviceResources);
     }
+
+    if (mMaterial.BaseColorTexture)
+        mMaterial.BaseColorTexture->Bind(deviceResources);
+    if (mMaterial.MetallicRoughnessTexture)
+        mMaterial.MetallicRoughnessTexture->Bind(deviceResources);
+    if (mMaterial.EmissiveTexture)
+        mMaterial.EmissiveTexture->Bind(deviceResources);
+    if (mMaterial.NormalTexture)
+        mMaterial.NormalTexture->Bind(deviceResources);
+    if (mMaterial.OcclusionTexture)
+        mMaterial.OcclusionTexture->Bind(deviceResources);
 }
 size_t
 NEngine::Renderer::MeshPrimitive::GetIndexNum() const
