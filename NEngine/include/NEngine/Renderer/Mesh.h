@@ -3,6 +3,7 @@
 
 #include "Drawable.h"
 #include "Mesh.h"
+#include "NEngine/Helpers/Transform.h"
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
 
@@ -17,9 +18,13 @@ public:
     const std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
         &GetMeshPrimitives() const;
 
+    const Helpers::Transform &GetTransform() const;
+    Helpers::Transform &GetTransform();
+
 private:
     std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
         mMeshPrimitives;
+    Helpers::Transform mTransform;
 };
 }  // namespace Renderer
 }  // namespace NEngine

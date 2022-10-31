@@ -16,7 +16,16 @@ NEngine::Renderer::Mesh::Mesh(
     std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshes)
     : mMeshPrimitives(std::move(meshes))
 {
-    // for (auto &mesh : meshes) {
-    //     mMeshes.push_back(std::move(mesh));
-    // }
+}
+
+const Transform &
+NEngine::Renderer::Mesh::GetTransform() const
+{
+    return mTransform;
+}
+
+Transform &
+NEngine::Renderer::Mesh::GetTransform()
+{
+    return mTransform;
 }
