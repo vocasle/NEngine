@@ -24,7 +24,8 @@ public:
     Texture(Helpers::DeviceResources &deviceResources,
             unsigned int bindSlot,
             TextureBindTarget bindTarget,
-            const Utils::Image &image);
+            const Utils::Image &image,
+            const std::string &name);
 
     virtual void Bind(Helpers::DeviceResources &deviceResources) override;
     virtual void Unbind(Helpers::DeviceResources &deviceResources) override;
@@ -36,5 +37,6 @@ private:
 
     TextureBindTarget mBindTarget;
     unsigned int mBindSlot;
+    std::string mName;
 };
 }  // namespace NEngine::Renderer

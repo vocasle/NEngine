@@ -22,9 +22,11 @@ TextureBindTargetToBindFlag(TextureBindTarget bindTarget)
 Texture::Texture(Helpers::DeviceResources &deviceResources,
                  unsigned int bindSlot,
                  TextureBindTarget bindTarget,
-                 const Utils::Image &image)
+                 const Utils::Image &image,
+                 const std::string &name)
     : mBindTarget(bindTarget),
-      mBindSlot(bindSlot)
+      mBindSlot(bindSlot),
+      mName(name)
 {
     const int arraySize = 1;
     const int mipLevels = 1;
