@@ -91,9 +91,10 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
         const auto tmpImage =
             Image(img.image, img.width, img.height, img.component, img.bits);
         return std::make_unique<Texture>(m_deviceResources,
-                                         0,
+                                         bindSlot,
                                          TextureBindTarget::ShaderResourceView,
-                                         tmpImage);
+                                         tmpImage,
+                                         img.name);
     }
     return nullptr;
 }
