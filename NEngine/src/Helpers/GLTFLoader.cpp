@@ -2,10 +2,13 @@
 
 #include <algorithm>
 
+#include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/InputLayout.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
+#include "NEngine/Renderer/Texture.h"
 #include "NEngine/Utils/Utils.h"
+#include "tinygltf/tiny_gltf.h"
 
 using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
@@ -73,6 +76,28 @@ ReadData(const std::vector<unsigned char> &data, size_t count, size_t offset)
     return vec;
 }
 
+std::unique_ptr<Texture>
+GLTFLoader::CreateTexture(const tinygltf::Model &model,
+                          size_t idx,
+                          TextureBindTarget bindTarget,
+                          unsigned int bindSlot)
+{
+    const auto &texInfo = model.textures[idx];
+    if (texInfo.sampler >= 0) {
+        const auto &sampler = model.samplers[texInfo.sampler];
+    }
+    const auto &img = model.images[texInfo.source];
+    if (!img.image.empty()) {
+        const auto tmpImage =
+            Image(img.image, img.width, img.height, img.component, img.bits);
+        return std::make_unique<Texture>(m_deviceResources,
+                                         0,
+                                         TextureBindTarget::ShaderResourceView,
+                                         tmpImage);
+    }
+    return nullptr;
+}
+
 std::unique_ptr<NEngine::Renderer::MeshPrimitive>
 GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
                                  const tinygltf::Model &model)
@@ -83,6 +108,11 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
     std::vector<Math::Vec4D> tangents;
     std::vector<Math::Vec2D> texCoords;
     Material tmpMaterial;
+    std::unique_ptr<Texture> baseColorTex;
+    std::unique_ptr<Texture> metallicRoughnessTex;
+    std::unique_ptr<Texture> normalTex;
+    std::unique_ptr<Texture> occlusionTex;
+    std::unique_ptr<Texture> emissiveTex;
 
     assert(mesh.primitives.size() == 1 &&
            "Mesh contains more than one primitive!");
@@ -149,14 +179,42 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
 
         tmpMaterial.Roughness = material.pbrMetallicRoughness.roughnessFactor;
         tmpMaterial.Metalness = material.pbrMetallicRoughness.metallicFactor;
+
         if (material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
-            UtilsDebugPrint(
-                "WARN: Extract baseColorTexture is not yet implemented");
+            baseColorTex = CreateTexture(
+                model,
+                material.pbrMetallicRoughness.baseColorTexture.index,
+                TextureBindTarget::ShaderResourceView,
+                0);
         }
+
         if (material.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
-            UtilsDebugPrint(
-                "WARN: Extract metallicRoughnessTexture is not yet "
-                "implemented");
+            metallicRoughnessTex = CreateTexture(
+                model,
+                material.pbrMetallicRoughness.metallicRoughnessTexture.index,
+                TextureBindTarget::ShaderResourceView,
+                1);
+        }
+
+        if (material.normalTexture.index >= 0) {
+            normalTex = CreateTexture(model,
+                                      material.normalTexture.index,
+                                      TextureBindTarget::ShaderResourceView,
+                                      2);
+        }
+
+        if (material.occlusionTexture.index >= 0) {
+            occlusionTex = CreateTexture(model,
+                                         material.occlusionTexture.index,
+                                         TextureBindTarget::ShaderResourceView,
+                                         3);
+        }
+
+        if (material.emissiveTexture.index >= 0) {
+            emissiveTex = CreateTexture(model,
+                                        material.emissiveTexture.index,
+                                        TextureBindTarget::ShaderResourceView,
+                                        4);
         }
 
         // const auto baseColorTextureIdx =
@@ -211,6 +269,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
     auto meshPrim = std::make_unique<Renderer::MeshPrimitive>(
         m_deviceResources, vertices, indices);
     meshPrim->SetMaterial(std::move(tmpMaterial));
+    
     return std::move(meshPrim);
 }
 

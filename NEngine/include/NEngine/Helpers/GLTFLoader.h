@@ -25,6 +25,12 @@ private:
     std::vector<unsigned int> ExtractMeshIndices(
         const tinygltf::Accessor &indexAccessor, const tinygltf::Model &model);
 
+    std::unique_ptr<NEngine::Renderer::Texture> CreateTexture(
+        const tinygltf::Model &model,
+        size_t idx,
+        NEngine::Renderer::TextureBindTarget bindTarget,
+        unsigned int bindSlot);
+
     DeviceResources &m_deviceResources;
 };
 }  // namespace NEngine::Helpers
