@@ -216,13 +216,6 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
                                         TextureBindTarget::ShaderResourceView,
                                         4);
         }
-
-        // const auto baseColorTextureIdx =
-        // material.pbrMetallicRoughness.baseColorTexture.index; const auto
-        // metallicRoughnessTextureIdx =
-        // material.pbrMetallicRoughness.metallicRoughnessTexture.index; const
-        // auto &tex = model.textures[metallicRoughnessTextureIdx]; const auto
-        // &image = model.images[tex.source];
     }
 
     std::vector<Renderer::VertexPositionNormalTangent> vertices;
