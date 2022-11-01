@@ -9,6 +9,7 @@
 #include "Bindable.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Utils/Image.h"
+#include "Sampler.h"
 
 namespace NEngine::Renderer {
 
@@ -25,7 +26,8 @@ public:
             unsigned int bindSlot,
             TextureBindTarget bindTarget,
             const Utils::Image &image,
-            const std::string &name);
+            const std::string &name,
+            const SamplerDescription &samplerDesc = SamplerDescription());
 
     virtual void Bind(Helpers::DeviceResources &deviceResources) override;
     virtual void Unbind(Helpers::DeviceResources &deviceResources) override;
@@ -38,5 +40,6 @@ private:
     TextureBindTarget mBindTarget;
     unsigned int mBindSlot;
     std::string mName;
+    Sampler mSampler;
 };
 }  // namespace NEngine::Renderer

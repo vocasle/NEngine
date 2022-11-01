@@ -23,10 +23,12 @@ Texture::Texture(Helpers::DeviceResources &deviceResources,
                  unsigned int bindSlot,
                  TextureBindTarget bindTarget,
                  const Utils::Image &image,
-                 const std::string &name)
+                 const std::string &name,
+                 const SamplerDescription &samplerDesc)
     : mBindTarget(bindTarget),
       mBindSlot(bindSlot),
-      mName(name)
+      mName(name),
+      mSampler(deviceResources, samplerDesc, bindSlot)
 {
     const int arraySize = 1;
     const int mipLevels = 1;
@@ -71,8 +73,12 @@ void
 Texture::Bind(Helpers::DeviceResources &deviceResources)
 {
     if (mBindTarget == TextureBindTarget::ShaderResourceView) {
+        deviceResources.GetDeviceContext()->VSSetShaderResources(
+            mBindSlot, 1, mSRV.GetAddressOf());
         deviceResources.GetDeviceContext()->PSSetShaderResources(
             mBindSlot, 1, mSRV.GetAddressOf());
+
+        mSampler.Bind(deviceResources);
     }
 }
 
