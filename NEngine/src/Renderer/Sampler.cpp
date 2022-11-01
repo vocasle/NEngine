@@ -57,4 +57,13 @@ SamplerDescription::SamplerDescription()
       MaxLOD(-std::numeric_limits<float>::max())
 {
 }
+
+SamplerDescription SamplerDescription::CreateGLTFDefaultSamplerDesc()
+{
+    SamplerDescription desc;
+    desc.AddressU = TextureAddressMode::Wrap;
+    desc.AddressV = TextureAddressMode::Wrap;
+    desc.AddressW = TextureAddressMode::Wrap;
+    return desc;
+}
 }  // namespace NEngine::Renderer

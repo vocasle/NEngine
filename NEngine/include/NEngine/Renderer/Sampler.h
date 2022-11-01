@@ -80,6 +80,8 @@ struct SamplerDescription
     NEngine::Math::Vec4D BorderColor;
     float MinLOD;
     float MaxLOD;
+
+    static SamplerDescription CreateGLTFDefaultSamplerDesc();
 };
 
 class Sampler : public Bindable
