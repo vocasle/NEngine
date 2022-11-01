@@ -27,7 +27,8 @@ set(source_file_list
         src/Renderer/BasePass.cpp
         src/Renderer/Texture.cpp
         src/Renderer/RasterizerState.cpp
-        src/Helpers/Transform.cpp)
+        src/Helpers/Transform.cpp
+        src/Renderer/Sampler.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -62,7 +63,8 @@ set(header_file_list
         include/NEngine/Renderer/BasePass.h
         include/NEngine/Renderer/Texture.h
         include/NEngine/Renderer/RasterizerState.h
-        include/NEngine/Helpers/Transform.h)
+        include/NEngine/Helpers/Transform.h
+        include/NEngine/Renderer/Sampler.h)
 
 set(vertex_shader_list
         shader/ColorVS.hlsl
