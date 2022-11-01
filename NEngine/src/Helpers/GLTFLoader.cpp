@@ -6,6 +6,7 @@
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/InputLayout.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
+#include "NEngine/Renderer/Sampler.h"
 #include "NEngine/Renderer/Texture.h"
 #include "NEngine/Utils/Utils.h"
 #include "tinygltf/tiny_gltf.h"
@@ -83,8 +84,12 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
                           unsigned int bindSlot)
 {
     const auto &texInfo = model.textures[idx];
+    SamplerDescription samDesc =
+        SamplerDescription::CreateGLTFDefaultSamplerDesc();
+    samDesc.Filter = SamplingFilter::MIN_LINEAR_MAG_MIP_POINT;
     if (texInfo.sampler >= 0) {
         const auto &sampler = model.samplers[texInfo.sampler];
+        // TODO: Setup sapDesc according to sampler from gLTF model
     }
     const auto &img = model.images[texInfo.source];
     if (!img.image.empty()) {
@@ -94,7 +99,8 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
                                          bindSlot,
                                          TextureBindTarget::ShaderResourceView,
                                          tmpImage,
-                                         img.name);
+                                         img.name,
+                                         samDesc);
     }
     return nullptr;
 }
