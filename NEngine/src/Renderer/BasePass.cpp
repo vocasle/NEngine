@@ -148,9 +148,7 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
     }
 
     {
-        RasterizerDescription desc;
-        desc.FrontCounterClockwise = true;
-        desc.CullMode = CullMode::Front;
+        const RasterizerDescription desc;
         mRasterizerState =
             std::make_unique<RasterizerState>(deviceResources, desc);
     }
