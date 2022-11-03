@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "NEngine/Helpers/DeviceResources.h"
+#include "NEngine/Helpers/Transform.h"
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/InputLayout.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
@@ -16,21 +17,52 @@ using namespace NEngine::Helpers;
 using namespace NEngine::Math;
 using namespace NEngine::Renderer;
 
+Transform
+GetNodeTransform(const tinygltf::Node &node)
+{
+    auto t = Transform();
+
+    if (!node.matrix.empty()) {
+    }
+    else {
+        if (!node.rotation.empty()) {
+            t.SetRotation(MathQuaternionToRotationMat(Vec4D(node.rotation[0],
+                                                            node.rotation[1],
+                                                            node.rotation[2],
+                                                            node.rotation[3])));
+        }
+        if (!node.translation.empty()) {
+            const Vec3D offset(
+                node.translation[0], node.translation[1], node.translation[2]);
+            t.SetTranslation(MathMat4X4TranslateFromVec3D(&offset));
+        }
+        if (!node.scale.empty()) {
+            const Vec3D scale(node.scale[0], node.scale[1], node.scale[2]);
+            t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
+        }
+    }
+
+    return t;
+}
+
 void
 GLTFLoader::ProcessNode(
     const tinygltf::Node &node,
     const tinygltf::Model &model,
     std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
-        &outMeshPrimitives)
+        &outMeshPrimitives,
+    Helpers::Transform &outTransform)
 {
     if (node.mesh >= 0) {
+        outTransform = GetNodeTransform(node);
         auto meshPrimitive =
             ProcessMeshPrimitive(model.meshes[node.mesh], model);
         outMeshPrimitives.push_back(std::move(meshPrimitive));
     }
 
     for (const auto childIdx : node.children) {
-        ProcessNode(model.nodes[childIdx], model, outMeshPrimitives);
+        ProcessNode(
+            model.nodes[childIdx], model, outMeshPrimitives, outTransform);
     }
 }
 
@@ -257,7 +289,8 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
         const Vec2D &texCoord = texCoords[idx];
         const Vec4D normal = Vec4D(normals[idx], texCoord.Y);
         const Vec4D &tangent = tangents[idx];
-        const Vec4D position = Vec4D(positions[idx], texCoord.X);
+        const Vec4D position = Vec4D(
+            positions[idx].X, positions[idx].Y, positions[idx].Z, texCoord.X);
         vertices.push_back({position, normal, tangent});
     }
 
@@ -310,12 +343,14 @@ GLTFLoader::Load(const std::string &path)
 
     std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshPrimitives;
 
+    Transform transform;
     for (const auto nodeIdx : scene.nodes) {
-        ProcessNode(model.nodes[nodeIdx], model, meshPrimitives);
+        ProcessNode(model.nodes[nodeIdx], model, meshPrimitives, transform);
     }
 
     std::unique_ptr<Renderer::Mesh> modelTmp = std::make_unique<Renderer::Mesh>(
         m_deviceResources, std::move(meshPrimitives));
+    modelTmp->SetTransform(transform);
 
     return std::move(modelTmp);
 }

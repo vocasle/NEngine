@@ -17,7 +17,8 @@ private:
         const tinygltf::Node &node,
         const tinygltf::Model &model,
         std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
-            &outMeshPrimitives);
+            &outMeshPrimitives,
+        Helpers::Transform &outTransform);
 
     std::unique_ptr<NEngine::Renderer::MeshPrimitive> ProcessMeshPrimitive(
         const tinygltf::Mesh &mesh, const tinygltf::Model &model);
