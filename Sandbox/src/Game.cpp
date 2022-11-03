@@ -126,7 +126,7 @@ Game::CreateDefaultSampler()
 }
 
 Game::Game()
-    : m_camera({0, 10, -5}),
+    : m_camera({0, 0, -5}),
       m_firePS("fire", {0, 0, 0}, {0, 10, 0}, {0, 0, 0}, m_camera)
 {
     m_deviceResources = std::make_unique<DeviceResources>();
@@ -327,8 +327,13 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
     //        UtilsFormatStr("%s/shader", SHADER_SRC_ROOT));
 
     GLTFLoader loader(*m_deviceResources);
-    m_meshes.push_back(std::move(
-        loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)")));
+    // m_meshes.push_back(std::move(
+    //     loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)")));
+    // m_meshes.push_back(std::move(loader.Load(
+    //     R"(D:\Source\glTF-Sample-Models\2.0\Box With Spaces\glTF\Box With
+    //     Spaces.gltf)")));
+    m_meshes.push_back(std::move(loader.Load(
+        R"(D:\Source\glTF-Sample-Models\2.0\DamagedHelmet\glTF\DamagedHelmet.gltf)")));
 
     m_basePass = std::make_unique<BasePass>(*m_deviceResources);
     m_basePass->SetCamera(m_camera);
@@ -337,7 +342,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
     // CreateRasterizerState();
 
     m_camera.SetZFar(10000);
-    m_camera.SetZNear(10);
+    m_camera.SetZNear(0.1f);
 
     m_renderer.SetDeviceResources(m_deviceResources.get());
 
