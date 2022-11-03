@@ -134,10 +134,8 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
             const auto &bufferView = model.bufferViews[accessor.bufferView];
             const auto &buffer = model.buffers[bufferView.buffer];
             const size_t byteStride = accessor.ByteStride(bufferView);
-            const size_t byteOffset = accessor.byteOffset;
-
-            assert(bufferView.byteLength - byteOffset >=
-                   byteStride * accessor.count);
+            const size_t byteOffset =
+                accessor.byteOffset + bufferView.byteOffset;
 
             if (name == "POSITION") {
                 assert(sizeof(Vec3D) == byteStride);
