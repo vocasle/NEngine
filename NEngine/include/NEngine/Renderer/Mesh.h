@@ -18,6 +18,8 @@ public:
     const std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
         &GetMeshPrimitives() const;
 
+    void SetTransform(const Helpers::Transform &t);
+
     const Helpers::Transform &GetTransform() const;
     Helpers::Transform &GetTransform();
 

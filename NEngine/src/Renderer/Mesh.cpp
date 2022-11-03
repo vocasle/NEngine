@@ -29,3 +29,9 @@ NEngine::Renderer::Mesh::GetTransform()
 {
     return mTransform;
 }
+
+void
+NEngine::Renderer::Mesh::SetTransform(const Helpers::Transform &t)
+{
+    mTransform = t;
+}
