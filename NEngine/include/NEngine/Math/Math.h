@@ -391,6 +391,8 @@ float MathRandom(float min, float max);
 void MathTest(void);
 #endif
 
+Mat4X4 MathQuaternionToRotationMat(const Vec4D &quat);
+
 #ifdef __cplusplus
 Mat4X4 operator*(const Mat4X4 &lhs, const Mat4X4 &rhs);
 

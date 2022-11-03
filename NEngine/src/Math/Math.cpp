@@ -1226,6 +1226,30 @@ Vec4D::operator==(const Vec4D &rhs) const
     return X == rhs.X && Y == rhs.Y && Z == rhs.Z && W == rhs.W;
 }
 #endif
+
+
+// TODO: This must be tested. Calculations were performed for column major that
+// is why I do transpose. All my code uses row major
+Mat4X4
+MathQuaternionToRotationMat(const Vec4D &quat)
+{
+    Mat4X4 mat = MathMat4X4Identity();
+    mat.A00 = 1 - 2 * quat.Y * quat.Y - 2 * quat.Z * quat.Z;
+    mat.A01 = 2 * quat.X * quat.Y - 2 * quat.W * quat.Z;
+    mat.A02 = 2 * quat.X * quat.Z + 2 * quat.W * quat.Y;
+
+    mat.A10 = 2 * quat.X * quat.Y + 2 * quat.W * quat.Z;
+    mat.A11 = 1 - 2 * quat.X * quat.X - 2 * quat.Z * quat.Z;
+    mat.A12 = 2 * quat.Y * quat.Z - 2 * quat.W * quat.X;
+
+    mat.A20 = 2 * quat.X * quat.Z - 2 * quat.W * quat.Y;
+    mat.A21 = 2 * quat.Y * quat.Z + 2 * quat.W * quat.X;
+    mat.A22 = 1 - 2 * quat.X * quat.X - 2 * quat.Y * quat.Y;
+
+    MathMat4X4Transpose(&mat);
+
+    return mat;
+}
 }  // namespace Math
 
 }  // namespace NEngine
