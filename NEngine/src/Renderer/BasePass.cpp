@@ -27,6 +27,9 @@ NEngine::Renderer::BasePass::Draw(
     mPerFrameBuffer->Bind(deviceResources);
 
     for (auto &mesh : meshes) {
+        const auto world = mesh->GetTransform().GetTransform();
+        mPerObjectBuffer->SetValue("world", world);
+
         for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {
             DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
         }
