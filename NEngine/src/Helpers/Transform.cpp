@@ -26,6 +26,13 @@ Transform::GetTransform() const
     return mTranslation * mRotation * mScale;
 }
 
+Transform::Transform()
+    : mTranslation(MathMat4X4Identity()),
+      mRotation(MathMat4X4Identity()),
+      mScale(MathMat4X4Identity())
+{
+}
+
 void
 Transform::SetTranslation(const Math::Mat4X4 &translation)
 {
