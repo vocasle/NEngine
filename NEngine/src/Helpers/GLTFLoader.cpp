@@ -23,13 +23,17 @@ GetNodeTransform(const tinygltf::Node &node)
     auto t = Transform();
 
     if (!node.matrix.empty()) {
+        assert("Setting matrix transform from gLTF is not yet implemented");
     }
     else {
         if (!node.rotation.empty()) {
-            t.SetRotation(MathQuaternionToRotationMat(Vec4D(node.rotation[0],
-                                                            node.rotation[1],
-                                                            node.rotation[2],
-                                                            node.rotation[3])));
+            const auto rot =
+                MathQuaternionToRotationMat(Vec4D(node.rotation[0],
+                                                  node.rotation[1],
+                                                  node.rotation[2],
+                                                  node.rotation[3]));
+
+            t.SetRotation(rot);
         }
         if (!node.translation.empty()) {
             const Vec3D offset(
