@@ -151,7 +151,8 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
     }
 
     {
-        const RasterizerDescription desc;
+        RasterizerDescription desc;
+        desc.FrontCounterClockwise = true;
         mRasterizerState =
             std::make_unique<RasterizerState>(deviceResources, desc);
     }
