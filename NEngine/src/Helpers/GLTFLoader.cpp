@@ -1,9 +1,13 @@
 #include "NEngine/Helpers/GLTFLoader.h"
 
+#include <stdlib.h>
+#include <winscard.h>
+
 #include <algorithm>
 #include <memory>
 
 #include "NEngine/Helpers/DeviceResources.h"
+#include "NEngine/Helpers/Renderer.h"
 #include "NEngine/Helpers/Transform.h"
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/InputLayout.h"
@@ -11,6 +15,7 @@
 #include "NEngine/Renderer/Sampler.h"
 #include "NEngine/Renderer/Texture.h"
 #include "NEngine/Utils/Utils.h"
+#include "mikktspace/mikktspace.h"
 #include "tinygltf/tiny_gltf.h"
 
 using namespace NEngine::Utils;
@@ -143,15 +148,119 @@ std::unique_ptr<NEngine::Renderer::Mesh>
 GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                         const tinygltf::Model &model)
 {
-    std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshPrimitives;
+    std::vector<std::unique_ptr<MeshPrimitive>> meshPrimitives;
     meshPrimitives.reserve(mesh.primitives.size());
     for (const auto &primitive : mesh.primitives) {
         meshPrimitives.push_back(
             std::move(ProcessMeshPrimitive(primitive, model)));
     }
 
-    return std::make_unique<Renderer::Mesh>(m_deviceResources,
-                                            std::move(meshPrimitives));
+    return std::make_unique<Mesh>(m_deviceResources, std::move(meshPrimitives));
+}
+
+static std::vector<NEngine::Math::Vec4D>
+GenerateTangents(const std::vector<unsigned int> &indices,
+                 const std::vector<NEngine::Math::Vec3D> &normals,
+                 const std::vector<NEngine::Math::Vec2D> &texCoords,
+                 const std::vector<NEngine::Math::Vec3D> &positions)
+{
+    struct Mesh
+    {
+        Mesh(const std::vector<unsigned int> &indices,
+             const std::vector<NEngine::Math::Vec3D> &normals,
+             const std::vector<NEngine::Math::Vec2D> &texCoords,
+             const std::vector<NEngine::Math::Vec3D> &positions)
+            : indices(indices),
+              normals(normals),
+              texCoords(texCoords),
+              positions(positions),
+              tangents(positions.size(), Vec4D())
+        {
+        }
+        const std::vector<unsigned int> &indices;
+        const std::vector<NEngine::Math::Vec3D> &normals;
+        const std::vector<NEngine::Math::Vec2D> &texCoords;
+        const std::vector<NEngine::Math::Vec3D> &positions;
+        std::vector<NEngine::Math::Vec4D> tangents;
+    };
+
+    Mesh mesh(indices, normals, texCoords, positions);
+
+    SMikkTSpaceContext ctx;
+    SMikkTSpaceInterface spaceInterface;
+    ctx.m_pInterface = &spaceInterface;
+    ctx.m_pUserData = &mesh;
+
+    auto SetTSpaceBasicCB = [](const SMikkTSpaceContext *pContext,
+                               const float fvTangent[],
+                               const float fSign,
+                               const int iFace,
+                               const int iVert)
+    {
+        const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
+        const auto idx = mesh->indices[iFace * 3 + iVert];
+        mesh->tangents[idx] =
+            Vec4D(fvTangent[0], fvTangent[1], fvTangent[2], fSign);
+    };
+
+    auto GetNumFacesCB = [](const SMikkTSpaceContext *pContext)
+    {
+        const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
+        assert(mesh->indices.size() % 3 == 0);
+        return static_cast<int>(mesh->indices.size() / 3);
+    };
+
+    auto GetNumVerticesOfFaceCB = [](const SMikkTSpaceContext *pContext,
+                                     const int iFace) { return 3; };
+
+    auto GetPositionCB = [](const SMikkTSpaceContext *pContext,
+                            float fvPosOut[],
+                            const int iFace,
+                            const int iVert)
+    {
+        const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
+        const auto idx = mesh->indices[iFace * 3 + iVert];
+        const auto pos = mesh->positions[idx];
+        fvPosOut[0] = pos.X;
+        fvPosOut[1] = pos.Y;
+        fvPosOut[2] = pos.Z;
+    };
+
+    auto GetNormalCB = [](const SMikkTSpaceContext *pContext,
+                          float fvNormOut[],
+                          const int iFace,
+                          const int iVert)
+    {
+        const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
+        const auto idx = mesh->indices[iFace * 3 + iVert];
+        const auto norm = mesh->normals[idx];
+        fvNormOut[0] = norm.X;
+        fvNormOut[1] = norm.Y;
+        fvNormOut[2] = norm.Z;
+    };
+
+    auto GetTexCoordCB = [](const SMikkTSpaceContext *pContext,
+                            float fvTexcOut[],
+                            const int iFace,
+                            const int iVert)
+    {
+        const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
+        const auto idx = mesh->indices[iFace * 3 + iVert];
+        const auto texCoord = mesh->texCoords[idx];
+        fvTexcOut[0] = texCoord.X;
+        fvTexcOut[1] = texCoord.Y;
+    };
+
+    spaceInterface.m_getNumFaces = GetNumFacesCB;
+    spaceInterface.m_setTSpaceBasic = SetTSpaceBasicCB;
+    spaceInterface.m_getNumVerticesOfFace = GetNumVerticesOfFaceCB;
+    spaceInterface.m_getPosition = GetPositionCB;
+    spaceInterface.m_getNormal = GetNormalCB;
+    spaceInterface.m_getTexCoord = GetTexCoordCB;
+    spaceInterface.m_setTSpace = nullptr;
+
+    genTangSpaceDefault(&ctx);
+    return mesh.tangents;
 }
 
 std::unique_ptr<NEngine::Renderer::MeshPrimitive>
@@ -264,7 +373,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
         }
     }
 
-    std::vector<Renderer::VertexPositionNormalTangent> vertices;
+    std::vector<VertexPositionNormalTangent> vertices;
 
     const auto max = std::max_element(std::begin(indices), std::end(indices));
 
@@ -279,7 +388,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
         assert(tangents.size() > *max);
     }
     else {
-        tangents.resize(positions.size(), {0, 0, 0, 0});
+        tangents = GenerateTangents(indices, normals, texCoords, positions);
     }
 
     if (!texCoords.empty()) {
@@ -306,8 +415,8 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
     assert(!vertices.empty() && "Vertices is empty! gLTF import failed!");
     assert(!indices.empty() && "Indices is empty! gLTF import failed!");
 
-    auto meshPrim = std::make_unique<Renderer::MeshPrimitive>(
-        m_deviceResources, vertices, indices);
+    auto meshPrim =
+        std::make_unique<MeshPrimitive>(m_deviceResources, vertices, indices);
     tmpMaterial.BaseColorTexture = std::move(baseColorTex);
     tmpMaterial.MetallicRoughnessTexture = std::move(metallicRoughnessTex);
     tmpMaterial.NormalTexture = std::move(normalTex);
@@ -350,9 +459,9 @@ GLTFLoader::Load(const std::string &path)
 
     const auto &scene = model.scenes[model.defaultScene];
 
-    std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshPrimitives;
+    std::vector<std::unique_ptr<MeshPrimitive>> meshPrimitives;
 
-    std::vector<std::unique_ptr<Renderer::Mesh>> meshes;
+    std::vector<std::unique_ptr<Mesh>> meshes;
     for (const auto nodeIdx : scene.nodes) {
         ProcessNode(model.nodes[nodeIdx], model, meshes);
     }
