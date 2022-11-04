@@ -108,7 +108,8 @@ target_link_libraries(${library_name}
         PUBLIC d3d11.lib
         PUBLIC dxgi.lib
         PUBLIC dxguid.lib
-        PUBLIC stb_image)
+        PUBLIC stb_image
+        PUBLIC mikktspace)
 
 set(HLSL_SHADER_FILES)
 list(APPEND HLSL_SHADER_FILES ${pixel_shader_list})
