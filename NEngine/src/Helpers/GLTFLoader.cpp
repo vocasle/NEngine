@@ -204,8 +204,10 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
             }
         }
 
-        assert(primitive.material >= 0 &&
-               "ERROR: gLTF model does not contain material!");
+        if (primitive.material < 0) {
+            continue;
+        }
+
         const auto &material = model.materials[primitive.material];
 
         tmpMaterial.BaseColor = {
