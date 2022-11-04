@@ -1,6 +1,7 @@
 #include "NEngine/Helpers/GLTFLoader.h"
 
 #include <algorithm>
+#include <memory>
 
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/Transform.h"
@@ -53,20 +54,17 @@ void
 GLTFLoader::ProcessNode(
     const tinygltf::Node &node,
     const tinygltf::Model &model,
-    std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
-        &outMeshPrimitives,
-    Helpers::Transform &outTransform)
+    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &outMeshes)
 {
     if (node.mesh >= 0) {
-        outTransform = GetNodeTransform(node);
-        auto meshPrimitive =
-            ProcessMeshPrimitive(model.meshes[node.mesh], model);
-        outMeshPrimitives.push_back(std::move(meshPrimitive));
+        const auto transform = GetNodeTransform(node);
+        auto mesh = ProcessMesh(model.meshes[node.mesh], model);
+        mesh->SetTransform(transform);
+        outMeshes.push_back(std::move(mesh));
     }
 
     for (const auto childIdx : node.children) {
-        ProcessNode(
-            model.nodes[childIdx], model, outMeshPrimitives, outTransform);
+        ProcessNode(model.nodes[childIdx], model, outMeshes);
     }
 }
 
@@ -141,8 +139,23 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
     return nullptr;
 }
 
+std::unique_ptr<NEngine::Renderer::Mesh>
+GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
+                        const tinygltf::Model &model)
+{
+    std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshPrimitives;
+    meshPrimitives.reserve(mesh.primitives.size());
+    for (const auto &primitive : mesh.primitives) {
+        meshPrimitives.push_back(
+            std::move(ProcessMeshPrimitive(primitive, model)));
+    }
+
+    return std::make_unique<Renderer::Mesh>(m_deviceResources,
+                                            std::move(meshPrimitives));
+}
+
 std::unique_ptr<NEngine::Renderer::MeshPrimitive>
-GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
+GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                  const tinygltf::Model &model)
 {
     std::vector<unsigned int> indices;
@@ -157,57 +170,47 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Mesh &mesh,
     std::unique_ptr<Texture> occlusionTex;
     std::unique_ptr<Texture> emissiveTex;
 
-    assert(mesh.primitives.size() == 1 &&
-           "Mesh contains more than one primitive!");
+    const auto &indexAccessor = model.accessors[primitive.indices];
 
-    for (const auto &primitive : mesh.primitives) {
-        const auto &indexAccessor = model.accessors[primitive.indices];
+    indices = ExtractMeshIndices(indexAccessor, model);
 
-        indices = ExtractMeshIndices(indexAccessor, model);
+    for (const auto &[name, accessorIdx] : primitive.attributes) {
+        const auto &accessor = model.accessors[accessorIdx];
+        const auto &bufferView = model.bufferViews[accessor.bufferView];
+        const auto &buffer = model.buffers[bufferView.buffer];
+        const size_t byteStride = accessor.ByteStride(bufferView);
+        const size_t byteOffset = accessor.byteOffset + bufferView.byteOffset;
 
-        for (const auto &[name, accessorIdx] : primitive.attributes) {
-            const auto &accessor = model.accessors[accessorIdx];
-            const auto &bufferView = model.bufferViews[accessor.bufferView];
-            const auto &buffer = model.buffers[bufferView.buffer];
-            const size_t byteStride = accessor.ByteStride(bufferView);
-            const size_t byteOffset =
-                accessor.byteOffset + bufferView.byteOffset;
-
-            if (name == "POSITION") {
-                assert(sizeof(Vec3D) == byteStride);
-                positions =
-                    ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
-            }
-            else if (name == "NORMAL") {
-                assert(sizeof(Vec3D) == byteStride);
-                normals =
-                    ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
-            }
-            else if (name == "TANGENT") {
-                assert(sizeof(Vec4D) == byteStride);
-                tangents =
-                    ReadData<Vec4D>(buffer.data, accessor.count, byteOffset);
-            }
-            else if (name == "TEXCOORD_0") {
-                assert(sizeof(Vec2D) == byteStride);
-                texCoords =
-                    ReadData<Vec2D>(buffer.data, accessor.count, byteOffset);
-            }
-            else if (name == "COLOR_0") {
-                UtilsDebugPrint("WARN: COLOR_0 is not supported yet\n");
-            }
-            else if (name == "JOINTS_0") {
-                UtilsDebugPrint("WARN: JOINTS_0 is not supported yet\n");
-            }
-            else if ("WEIGHTS_0") {
-                UtilsDebugPrint("WARN: WEIGHTS_0 is not supported yet\n");
-            }
+        if (name == "POSITION") {
+            assert(sizeof(Vec3D) == byteStride);
+            positions =
+                ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
         }
-
-        if (primitive.material < 0) {
-            continue;
+        else if (name == "NORMAL") {
+            assert(sizeof(Vec3D) == byteStride);
+            normals = ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
         }
+        else if (name == "TANGENT") {
+            assert(sizeof(Vec4D) == byteStride);
+            tangents = ReadData<Vec4D>(buffer.data, accessor.count, byteOffset);
+        }
+        else if (name == "TEXCOORD_0") {
+            assert(sizeof(Vec2D) == byteStride);
+            texCoords =
+                ReadData<Vec2D>(buffer.data, accessor.count, byteOffset);
+        }
+        else if (name == "COLOR_0") {
+            UtilsDebugPrint("WARN: COLOR_0 is not supported yet\n");
+        }
+        else if (name == "JOINTS_0") {
+            UtilsDebugPrint("WARN: JOINTS_0 is not supported yet\n");
+        }
+        else if ("WEIGHTS_0") {
+            UtilsDebugPrint("WARN: WEIGHTS_0 is not supported yet\n");
+        }
+    }
 
+    if (primitive.material >= 0) {
         const auto &material = model.materials[primitive.material];
 
         tmpMaterial.BaseColor = {
@@ -349,14 +352,11 @@ GLTFLoader::Load(const std::string &path)
 
     std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshPrimitives;
 
-    Transform transform;
+    std::vector<std::unique_ptr<Renderer::Mesh>> meshes;
     for (const auto nodeIdx : scene.nodes) {
-        ProcessNode(model.nodes[nodeIdx], model, meshPrimitives, transform);
+        ProcessNode(model.nodes[nodeIdx], model, meshes);
     }
+    assert(meshes.size() == 1 && "Unexpected num of meshes");
 
-    std::unique_ptr<Renderer::Mesh> modelTmp = std::make_unique<Renderer::Mesh>(
-        m_deviceResources, std::move(meshPrimitives));
-    modelTmp->SetTransform(transform);
-
-    return std::move(modelTmp);
+    return std::move(meshes[0]);
 }

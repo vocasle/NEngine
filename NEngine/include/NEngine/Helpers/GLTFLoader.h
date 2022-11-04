@@ -16,12 +16,13 @@ private:
     void ProcessNode(
         const tinygltf::Node &node,
         const tinygltf::Model &model,
-        std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
-            &outMeshPrimitives,
-        Helpers::Transform &outTransform);
+        std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &outMeshes);
+
+    std::unique_ptr<NEngine::Renderer::Mesh> ProcessMesh(
+        const tinygltf::Mesh &mesh, const tinygltf::Model &model);
 
     std::unique_ptr<NEngine::Renderer::MeshPrimitive> ProcessMeshPrimitive(
-        const tinygltf::Mesh &mesh, const tinygltf::Model &model);
+        const tinygltf::Primitive &primitive, const tinygltf::Model &model);
 
     std::vector<unsigned int> ExtractMeshIndices(
         const tinygltf::Accessor &indexAccessor, const tinygltf::Model &model);
