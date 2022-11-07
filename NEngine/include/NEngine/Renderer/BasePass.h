@@ -7,14 +7,21 @@
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/DynamicConstBuffer.h"
+#include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Helpers/Renderer.h"
 #include "NEngine/Renderer/RasterizerState.h"
 #include "PixelShader.h"
-#include "VertexShader.h"
 #include "RasterizerState.h"
-
+#include "VertexShader.h"
 
 namespace NEngine::Renderer {
+
+enum class BufferType {
+    PerFrame,
+    PerScene,
+    PerObject
+};
+
 class BasePass
 {
 public:
@@ -25,6 +32,19 @@ public:
 
     virtual ~BasePass() = default;
     void SetCamera(const Helpers::Camera &camera);
+
+    template <typename T>
+    T *
+    GetBufferValue(const std::string &name, BufferType bufferType)
+    {
+        if (bufferType == BufferType::PerFrame)
+            return mPerFrameBuffer->GetValue<T>(name);
+        if (bufferType == BufferType::PerObject)
+            return mPerObjectBuffer->GetValue<T>(name);
+        if (bufferType == BufferType::PerScene)
+            return mPerSceneBuffer->GetValue<T>(name);
+        return nullptr;
+    }
 
 protected:
     std::unique_ptr<VertexShader> mVertexShader;
