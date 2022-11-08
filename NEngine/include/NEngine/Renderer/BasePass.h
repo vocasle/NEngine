@@ -46,6 +46,8 @@ public:
         return nullptr;
     }
 
+    void ReloadShaders();
+
 protected:
     std::unique_ptr<VertexShader> mVertexShader;
     std::unique_ptr<PixelShader> mPixelShader;
@@ -55,6 +57,7 @@ protected:
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerObjectBuffer;
     const Helpers::Camera *mCamera;
     std::unique_ptr<RasterizerState> mRasterizerState;
+    Helpers::DeviceResources *mDeviceResources;
 
     void DrawMeshPrimitive(const Renderer::MeshPrimitive *meshPrimitive,
                            Helpers::DeviceResources &deviceResources);

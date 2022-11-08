@@ -9,16 +9,9 @@
 
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Helpers/DynamicConstBuffer.h"
-#include "NEngine/Helpers/DynamicCubeMap.h"
 #include "NEngine/Input/Keyboard.h"
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Math/Math.h"
-#include "NEngine/Helpers/ParticleSystem.h"
-#include "NEngine/Helpers/Renderer.h"
-#include "NEngine/Helpers/ShaderManager.h"
-#include "NEngine/Helpers/ShadowMap.h"
-#include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Utils/Timer.h"
 #include "NEngine/Renderer/BasePass.h"
 
@@ -33,31 +26,18 @@ public:
     void OnWindowSizeChanged(int width, int height);
 
 private:
-    void CreateDefaultSampler();
     void Clear();
     void Update();
     void Render();
     void CreateWindowSizeDependentResources();
-    void BuildShadowTransform(NEngine::Math::Mat4X4 &view,
-                              NEngine::Math::Mat4X4 &proj);
 
 #if WITH_IMGUI
     void UpdateImgui();
 #endif
 
     std::unique_ptr<NEngine::Helpers::DeviceResources> m_deviceResources;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_defaultSampler;
     NEngine::Utils::Timer m_timer;
     NEngine::Helpers::Camera m_camera;
-    NEngine::Helpers::Renderer m_renderer;
-    NEngine::Helpers::ShaderManager m_shaderManager;
-    std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perFrameCB;
-    std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perSceneCB;
-    std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perObjectCB;
-    std::unique_ptr<NEngine::Helpers::DynamicConstBuffer> m_perPassCB;
-    NEngine::Helpers::ParticleSystem m_firePS;
-    NEngine::Helpers::ShadowMap m_shadowMap;
-    NEngine::Helpers::DynamicCubeMap m_dynamicCubeMap;
 
     std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> m_meshes;
     std::unique_ptr<NEngine::Renderer::BasePass> m_basePass;

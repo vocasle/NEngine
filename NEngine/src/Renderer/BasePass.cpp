@@ -1,5 +1,8 @@
 #include "NEngine/Renderer/BasePass.h"
 
+#include <d3d11.h>
+#include <d3dcommon.h>
+
 #include <memory>
 
 #include "NEngine/Renderer/RasterizerState.h"
@@ -15,6 +18,19 @@ NEngine::Renderer::BasePass::Draw(
     Helpers::DeviceResources &deviceResources,
     std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes)
 {
+    // TODO: Move this to separate class
+    auto rtv = deviceResources.GetRenderTargetView();
+    auto dsv = deviceResources.GetDepthStencilView();
+    auto ctx = deviceResources.GetDeviceContext();
+    constexpr float clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
+    ctx->ClearRenderTargetView(rtv, clearColor);
+    ctx->ClearDepthStencilView(
+        dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+    ctx->OMSetRenderTargets(1, &rtv, deviceResources.GetDepthStencilView());
+    auto viewport = deviceResources.GetViewport();
+    ctx->RSSetViewports(1, &viewport);
+    ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
     mRasterizerState->Bind(deviceResources);
 
     mVertexShader->Bind(deviceResources);
@@ -73,6 +89,7 @@ NEngine::Renderer::BasePass::UpdatePerFrameBuffer()
 }
 
 NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
+    : mDeviceResources(&deviceResources)
 {
     const auto path =
         UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassVS.cso");
@@ -80,12 +97,7 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
     mInputLayout = CreateInputLayout<VertexPositionNormalTangent>(
         deviceResources, binaryBlob);
 
-    // TODO: Get shader blob out of constructor
-    mVertexShader = std::make_unique<VertexShader>(deviceResources, path);
-
-    const auto pixelPath =
-        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassPS.cso");
-    mPixelShader = std::make_unique<PixelShader>(deviceResources, pixelPath);
+    ReloadShaders();
 
     {
         DynamicConstBufferDesc desc;
@@ -156,4 +168,18 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         mRasterizerState =
             std::make_unique<RasterizerState>(deviceResources, desc);
     }
+}
+
+void
+NEngine::Renderer::BasePass::ReloadShaders()
+{
+    const auto path =
+        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassVS.cso");
+
+    // TODO: Get shader blob out of constructor
+    mVertexShader = std::make_unique<VertexShader>(*mDeviceResources, path);
+
+    const auto pixelPath =
+        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassPS.cso");
+    mPixelShader = std::make_unique<PixelShader>(*mDeviceResources, pixelPath);
 }
