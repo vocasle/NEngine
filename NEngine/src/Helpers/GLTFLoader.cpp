@@ -251,13 +251,31 @@ GenerateTangents(const std::vector<unsigned int> &indices,
         fvTexcOut[1] = texCoord.Y;
     };
 
+    auto SetTSpaceCB = [](const SMikkTSpaceContext *pContext,
+                        const float fvTangent[],
+                        const float fvBiTangent[],
+                        const float fMagS,
+                        const float fMagT,
+                        const tbool bIsOrientationPreserving,
+                        const int iFace,
+                        const int iVert)
+    {
+        const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
+        const auto idx = mesh->indices[iFace * 3 + iVert];
+        mesh->tangents[idx] = Vec4D(fvTangent[0],
+                                    fvTangent[1],
+                                    fvTangent[2],
+                                    bIsOrientationPreserving ? 1 : -1);
+    };
+
     spaceInterface.m_getNumFaces = GetNumFacesCB;
-    spaceInterface.m_setTSpaceBasic = SetTSpaceBasicCB;
     spaceInterface.m_getNumVerticesOfFace = GetNumVerticesOfFaceCB;
     spaceInterface.m_getPosition = GetPositionCB;
     spaceInterface.m_getNormal = GetNormalCB;
     spaceInterface.m_getTexCoord = GetTexCoordCB;
-    spaceInterface.m_setTSpace = nullptr;
+    spaceInterface.m_setTSpace = SetTSpaceCB;
+    spaceInterface.m_setTSpaceBasic = nullptr;
+
 
     genTangSpaceDefault(&ctx);
     return mesh.tangents;
