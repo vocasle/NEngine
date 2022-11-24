@@ -1,15 +1,21 @@
 #include "BasePass.hlsli"
 
-PSIn main(VSIn vin)
-{
-    PSIn vout = (PSIn)0;
+PSIn main(VSIn vin) {
+  PSIn vout = (PSIn)0;
 
-    float4x4 pvw = mul(proj, view);
-	pvw = mul(pvw, world);
-	vout.PosH = mul(pvw, float4(vin.Pos.xyz, 1.0f));
-	vout.NormalW = float4(mul(world, float4(vin.Normal.xyz, 0.0f)).xyz, vin.Normal.w);
-	vout.PosW = float4(mul(world, float4(vin.Pos.xyz, 1.0f)).xyz, vin.Pos.w);
-	vout.TangentW = float4(mul(world, float4(vin.Tangent.xyz, 0.0f)).xyz, vin.Tangent.w);
-    
-    return vout;
+  vout.TexCoords = vin.TexCoords;
+
+  float4x4 pvw = mul(proj, view);
+  pvw = mul(pvw, world);
+  vout.PosH = mul(pvw, float4(vin.Pos, 1.0));
+  vout.PosW = mul(world, float4(vin.Pos, 1.0)).xyz;
+
+  float3 N = mul((float3x3)worldInvTranspose, vin.Normal.xyz);
+  float3 T = mul((float3x3)worldInvTranspose, vin.Tangent.xyz);
+  vout.BitangentW = vin.Tangent.w * cross(N, T);
+
+  vout.NormalW = N;
+  vout.TangentW = T;
+
+  return vout;
 }

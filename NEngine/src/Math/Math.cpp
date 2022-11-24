@@ -371,15 +371,13 @@ MathMat4X4Orthographic(float viewWidth,
 }
 
 Mat4X4
-MathMat4X4ViewAt(const Vec3D *eyePos,
-                 const Vec3D *focusPos,
-                 const Vec3D *upDirect)
+MathMat4X4ViewAt(const Vec3D *eyePos, const Vec3D *eyeDir, const Vec3D *upDir)
 {
     Mat4X4 res = {};
-    Vec3D dir = MathVec3DSubtraction(focusPos, eyePos);
+    Vec3D dir = *eyeDir;
     MathVec3DNormalize(&dir);
 
-    Vec3D right = MathVec3DCross(upDirect, &dir);
+    Vec3D right = MathVec3DCross(upDir, &dir);
     MathVec3DNormalize(&right);
 
     Vec3D up = MathVec3DCross(&dir, &right);
@@ -451,8 +449,8 @@ MathMat4X4PerspectiveFov(float fovAngleY,
     const float projPlaneZ = 1.0f / tanf(fovAngleY / 2.0f);
     res.A00 = 1.0f / aspectRatio * projPlaneZ;
     res.A11 = projPlaneZ;
-    res.A22 = farZ / (farZ - nearZ);
-    res.A23 = 1.0f;
+    res.A22 = -farZ / (farZ - nearZ);
+    res.A23 = -1.0f;
     res.A32 = -(nearZ * farZ) / (farZ - nearZ);
     return res;
 }
@@ -1227,7 +1225,6 @@ Vec4D::operator==(const Vec4D &rhs) const
 }
 #endif
 
-
 // TODO: This must be tested. Calculations were performed for column major that
 // is why I do transpose. All my code uses row major
 Mat4X4
@@ -1250,6 +1247,34 @@ MathQuaternionToRotationMat(const Vec4D &quat)
 
     return mat;
 }
+
+float
+MathMat3X3Determinant(const Mat3X3 &mat)
+{
+    return mat.A00 * (mat.A11 * mat.A22 - mat.A12 * mat.A21) -
+           mat.A01 * (mat.A10 * mat.A22 - mat.A20 - mat.A12) +
+           mat.A02 * (mat.A10 * mat.A21 - mat.A20 - mat.A11);
+}
+
+#if NENGINE_USE_DIRECTXMATH
+Mat4X4
+MathXMMatrixToMat4X4(DirectX::XMMATRIX xmMat)
+{
+    using namespace DirectX;
+
+    Mat4X4 out;
+
+    XMFLOAT4X4 tmp;
+    XMStoreFloat4x4(&tmp, xmMat);
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            out.A[i][j] = tmp.m[i][j];
+        }
+    }
+
+    return out;
+}
+#endif
 }  // namespace Math
 
 }  // namespace NEngine

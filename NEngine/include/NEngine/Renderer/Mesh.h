@@ -14,6 +14,7 @@ class Mesh
 public:
     Mesh(Helpers::DeviceResources &deviceResources,
          std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshes);
+    Mesh(const Mesh &rhs);
 
     const std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
         &GetMeshPrimitives() const;

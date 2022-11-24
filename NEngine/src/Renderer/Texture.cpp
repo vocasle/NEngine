@@ -1,5 +1,6 @@
 #include "NEngine/Renderer/Texture.h"
 
+#include <d3d11.h>
 #include <dxgiformat.h>
 
 namespace NEngine::Renderer {
@@ -31,38 +32,45 @@ Texture::Texture(Helpers::DeviceResources &deviceResources,
       mSampler(deviceResources, samplerDesc, bindSlot)
 {
     const int arraySize = 1;
-    const int mipLevels = 1;
+    const int mipLevels = 0;
     const int cpuAccessFlags = 0;
     const int sampleCount = 1;
     const int sampleQuality = 0;
-    const int miscFlags = 0;
+    const int miscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-    const CD3D11_TEXTURE2D_DESC desc(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-                                     image.GetWidth(),
-                                     image.GetHeight(),
-                                     arraySize,
-                                     mipLevels,
-                                     TextureBindTargetToBindFlag(mBindTarget),
-                                     D3D11_USAGE_IMMUTABLE,
-                                     cpuAccessFlags,
-                                     sampleCount,
-                                     sampleQuality,
-                                     miscFlags);
-
-    D3D11_SUBRESOURCE_DATA initData;
-    initData.pSysMem = image.GetBytes();
-    initData.SysMemPitch = image.GetChannels() * image.GetWidth();
+    const CD3D11_TEXTURE2D_DESC desc(
+        DXGI_FORMAT_R8G8B8A8_UNORM,
+        image.GetWidth(),
+        image.GetHeight(),
+        arraySize,
+        mipLevels,
+        TextureBindTargetToBindFlag(mBindTarget) | D3D11_BIND_RENDER_TARGET,
+        D3D11_USAGE_DEFAULT,
+        cpuAccessFlags,
+        sampleCount,
+        sampleQuality,
+        miscFlags);
 
     ComPtr<ID3D11Texture2D> texture;
     HR(deviceResources.GetDevice()->CreateTexture2D(
-        &desc, &initData, texture.GetAddressOf()))
+        &desc, nullptr, texture.GetAddressOf()))
     assert(texture.Get() && "Failed to create Texture2D");
 
     if (mBindTarget == TextureBindTarget::ShaderResourceView) {
         CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(
-            texture.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, desc.Format);
+            texture.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, desc.Format, 0, -1);
         HR(deviceResources.GetDevice()->CreateShaderResourceView(
             texture.Get(), &srvDesc, mSRV.ReleaseAndGetAddressOf()))
+
+        deviceResources.GetDeviceContext()->UpdateSubresource(
+            texture.Get(),
+            0,
+            nullptr,
+            image.GetBytes(),
+            image.GetChannels() * image.GetWidth(),
+            image.GetChannels() * image.GetWidth() * image.GetHeight());
+
+        deviceResources.GetDeviceContext()->GenerateMips(mSRV.Get());
     }
     else {
         UTILS_FATAL_ERROR("Not implemented");

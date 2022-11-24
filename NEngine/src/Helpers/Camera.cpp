@@ -24,7 +24,7 @@ Camera::Camera(const Vec3D &cameraPos)
 {
     m_Pos = cameraPos;
     m_Pitch = 0.0f;
-    m_Yaw = (float)M_PI_2;
+    m_Yaw = 0.0;
     m_Speed = 1.0f;
     m_zNear = 0.1f;
     m_zFar = 100.0f;
@@ -35,10 +35,8 @@ Mat4X4
 Camera::GetViewMat() const
 {
     const Vec3D direction = MathVec3DAddition(&m_Pos, &m_At);
-    auto reflectZ = MathMat4X4Identity();
-    reflectZ.A22 = -1;
-
-    return reflectZ * MathMat4X4ViewAt(&m_Pos, &direction, &m_Up);
+    const auto negDir = MathVec3DSubtraction(m_Pos, direction);
+    return MathMat4X4ViewAt(&m_Pos, &negDir, &m_Up);
 }
 
 Mat4X4
@@ -74,14 +72,14 @@ Camera::ProcessKeyboard(double deltaMillis)
         Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
         MathVec3DNormalize(&right);
         right = MathVec3DModulateByScalar(&right, delta);
-        m_Pos = MathVec3DAddition(&m_Pos, &right);
+        m_Pos = MathVec3DSubtraction(&m_Pos, &right);
     }
     else if (Keyboard::Get().IsKeyDown(VK_RIGHT) ||
              Keyboard::Get().IsKeyDown('D')) {
         Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
         MathVec3DNormalize(&right);
         right = MathVec3DModulateByScalar(&right, delta);
-        m_Pos = MathVec3DSubtraction(&m_Pos, &right);
+        m_Pos = MathVec3DAddition(&m_Pos, &right);
     }
     else if (Keyboard::Get().IsKeyDown(VK_UP)) {
         const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
@@ -104,8 +102,17 @@ Camera::ProcessKeyboard(double deltaMillis)
 void
 Camera::UpdateVectors()
 {
+    // World axis positions:
+    // Right:       +X
+    // Up:          +Y
+    // Forward:     +Z
+    //
+    // Camera axis positions relative to World:
+    // Right:       -X
+    // Up:          +Y
+    // Forward:     -Z
     const float d = cosf(m_Pitch);
-    const float x = d * cosf(m_Yaw);
+    const float x = -d * cosf(m_Yaw);
     const float z = d * sinf(m_Yaw);
     const float y = sinf(m_Pitch);
 

@@ -18,11 +18,13 @@ NEngine::Renderer::BasePass::Draw(
     Helpers::DeviceResources &deviceResources,
     std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes)
 {
+    deviceResources.PIXBeginEvent(L"BasePass");
+
     // TODO: Move this to separate class
     auto rtv = deviceResources.GetRenderTargetView();
     auto dsv = deviceResources.GetDepthStencilView();
     auto ctx = deviceResources.GetDeviceContext();
-    constexpr float clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float clearColor[] = {0.3f, 0.3f, 0.3f, 1.0f};
     ctx->ClearRenderTargetView(rtv, clearColor);
     ctx->ClearDepthStencilView(
         dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
@@ -45,11 +47,15 @@ NEngine::Renderer::BasePass::Draw(
     for (auto &mesh : meshes) {
         const auto world = mesh->GetTransform().GetTransform();
         mPerObjectBuffer->SetValue("world", world);
+        auto invWorld = MathMat4X4Inverse(world);
+        MathMat4X4Transpose(&invWorld);
+        mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
         for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {
             DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
         }
     }
+    deviceResources.PIXEndEvent();
 }
 
 void
@@ -63,6 +69,7 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
     mPerObjectBuffer->SetValue("material.BaseColor", mat.BaseColor);
     mPerObjectBuffer->SetValue("material.Metalness", mat.Metalness);
     mPerObjectBuffer->SetValue("material.Roughness", mat.Roughness);
+    mPerObjectBuffer->SetValue("material.NormalScale", mat.NormalScale);
 
     mPerObjectBuffer->Bind(deviceResources);
     meshPrimitive->Bind(deviceResources);
@@ -94,7 +101,7 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
     const auto path =
         UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassVS.cso");
     auto binaryBlob = UtilsReadData(path.c_str());
-    mInputLayout = CreateInputLayout<VertexPositionNormalTangent>(
+    mInputLayout = CreateInputLayout<PosNormTangTex>(
         deviceResources, binaryBlob);
 
     ReloadShaders();
@@ -108,6 +115,7 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         material.AddChild("BaseColor", NodeType::Float4);
         material.AddChild("Metalness", NodeType::Float);
         material.AddChild("Roughness", NodeType::Float);
+        material.AddChild("NormalScale", NodeType::Float);
         desc.AddNode(material);
         desc.SetBindSlot(0);
 

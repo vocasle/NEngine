@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "InputLayout.h"
+#include "NEngine/Helpers/DeviceResources.h"
 
 namespace NEngine {
 namespace Helpers {
@@ -23,6 +24,8 @@ public:
     void UpdatePixelShader(const std::string &name,
                            ID3D11PixelShader *shader);
     void Recompile(ID3D11Device *device);
+
+    static void RecompileShaders(Helpers::DeviceResources &deviceResources);
 
 private:
     void CreateVertexShader(const std::string &filepath,

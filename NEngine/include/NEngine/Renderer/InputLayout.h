@@ -12,37 +12,23 @@
 namespace NEngine {
 namespace Renderer {
 
-struct VertexPositionOnly
+struct PosNormTangTex
 {
-    Math::Vec4D Position;
-};
-
-struct VertexPositionNormal
-{
-    Math::Vec4D Position;  // Z coordinate for U coordinate of UV coordinates
-    Math::Vec4D Normal;    // Z coordinate for V coordinate of UV coordinates
-};
-
-struct VertexPositionNormalTangent
-{
-    VertexPositionNormalTangent()
-        : Position(),
-          Normal(),
-          Tangent()
-    {
-    }
-    VertexPositionNormalTangent(const Math::Vec4D &position,
-                                const Math::Vec4D &normal,
-                                const Math::Vec4D &tangent)
+    PosNormTangTex() = default;
+    PosNormTangTex(const Math::Vec3D &position,
+                                const Math::Vec3D &normal,
+                                const Math::Vec4D &tangent,
+                                const Math::Vec2D &texCoords)
         : Position(position),
           Normal(normal),
-          Tangent(tangent)
+          Tangent(tangent),
+          TexCoords(texCoords)
     {
     }
-    Math::Vec4D Position;  // Z coordinate for U coordinate of UV coordinates
-    Math::Vec4D Normal;    // Z coordinate for V coordinate of UV coordinates
-    // Z coordinate is a sign of cross product between normal and tangent
-    Math::Vec4D Tangent;
+    Math::Vec3D Position;
+    Math::Vec3D Normal;
+    Math::Vec4D Tangent;  // Z is a sign of cross(normal, tangent)
+    Math::Vec2D TexCoords;
 };
 
 class InputLayout : public Bindable
@@ -74,93 +60,39 @@ CreateInputLayout(Helpers::DeviceResources &deviceResources,
 
 template <>
 inline std::unique_ptr<InputLayout>
-CreateInputLayout<VertexPositionOnly>(
+CreateInputLayout<PosNormTangTex>(
     Helpers::DeviceResources &deviceResources,
     const std::vector<uint8_t> &vertexShaderBlob)
 {
     auto il = std::make_unique<InputLayout>();
 
-    constexpr D3D11_INPUT_ELEMENT_DESC desc[1] = {
+    const D3D11_INPUT_ELEMENT_DESC desc[4] = {
         {"POSITION",
          0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         0,
-         0,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0}};
-
-    deviceResources.GetDevice()->CreateInputLayout(
-        desc,
-        _countof(desc),
-        &vertexShaderBlob[0],
-        vertexShaderBlob.size(),
-        il->mInputLayout.ReleaseAndGetAddressOf());
-
-    return std::move(il);
-}
-
-template <>
-inline std::unique_ptr<InputLayout>
-CreateInputLayout<VertexPositionNormal>(
-    Helpers::DeviceResources &deviceResources,
-    const std::vector<uint8_t> &vertexShaderBlob)
-{
-    auto il = std::make_unique<InputLayout>();
-
-    const D3D11_INPUT_ELEMENT_DESC desc[2] = {
-        {"POSITION",
-         0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         DXGI_FORMAT_R32G32B32_FLOAT,
          0,
          0,
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
         {"NORMAL",
          0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         DXGI_FORMAT_R32G32B32_FLOAT,
          0,
-         offsetof(VertexPositionNormal, Normal),
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0}};
-
-    deviceResources.GetDevice()->CreateInputLayout(
-        desc,
-        _countof(desc),
-        &vertexShaderBlob[0],
-        vertexShaderBlob.size(),
-        il->mInputLayout.ReleaseAndGetAddressOf());
-
-    return std::move(il);
-}
-
-template <>
-inline std::unique_ptr<InputLayout>
-CreateInputLayout<VertexPositionNormalTangent>(
-    Helpers::DeviceResources &deviceResources,
-    const std::vector<uint8_t> &vertexShaderBlob)
-{
-    auto il = std::make_unique<InputLayout>();
-
-    const D3D11_INPUT_ELEMENT_DESC desc[3] = {
-        {"POSITION",
-         0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         0,
-         0,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-        {"NORMAL",
-         0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         0,
-         offsetof(VertexPositionNormalTangent, Normal),
+         offsetof(PosNormTangTex, Normal),
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
         {"TANGENT",
          0,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
          0,
-         offsetof(VertexPositionNormalTangent, Tangent),
+         offsetof(PosNormTangTex, Tangent),
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        {"TEXCOORDS",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         offsetof(PosNormTangTex, TexCoords),
          D3D11_INPUT_PER_VERTEX_DATA,
          0}};
 

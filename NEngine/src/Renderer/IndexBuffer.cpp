@@ -1,4 +1,5 @@
 #include "NEngine/Renderer/IndexBuffer.h"
+
 #include "NEngine/Utils/Utils.h"
 
 using namespace NEngine::Utils;
@@ -14,17 +15,15 @@ NEngine::Renderer::IndexBuffer::IndexBuffer(
     D3D11_SUBRESOURCE_DATA data;
     data.pSysMem = &mIndexData[0];
 
-    HR(deviceResources.GetDevice()->CreateBuffer(&desc, &data, mIndexBuffer.
-        ReleaseAndGetAddressOf()))
+    HR(deviceResources.GetDevice()->CreateBuffer(
+        &desc, &data, mIndexBuffer.ReleaseAndGetAddressOf()))
 }
 
 void
 NEngine::Renderer::IndexBuffer::Bind(Helpers::DeviceResources &deviceResources)
 {
     deviceResources.GetDeviceContext()->IASetIndexBuffer(
-        mIndexBuffer.Get(),
-        DXGI_FORMAT_R32_UINT,
-        0);
+        mIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 }
 
 void

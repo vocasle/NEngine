@@ -28,7 +28,8 @@ set(source_file_list
         src/Renderer/Texture.cpp
         src/Renderer/RasterizerState.cpp
         src/Helpers/Transform.cpp
-        src/Renderer/Sampler.cpp)
+        src/Renderer/Sampler.cpp 
+        "src/Helpers/ModelImporter.cpp")
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -64,7 +65,8 @@ set(header_file_list
         include/NEngine/Renderer/Texture.h
         include/NEngine/Renderer/RasterizerState.h
         include/NEngine/Helpers/Transform.h
-        include/NEngine/Renderer/Sampler.h)
+        include/NEngine/Renderer/Sampler.h 
+        "include/NEngine/Helpers/ModelImporter.h")
 
 set(vertex_shader_list
         shader/ColorVS.hlsl
@@ -100,7 +102,9 @@ target_compile_definitions(${library_name} PRIVATE
         _UNICODE=1
         NENGINE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}"
         NENGINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
-        NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders")
+        NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders"
+        NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader"
+        NENGINE_USE_DIRECTXMATH=0)
 
 # TODO make tinygltf a private dependency
 target_link_libraries(${library_name}
@@ -109,7 +113,9 @@ target_link_libraries(${library_name}
         PUBLIC dxgi.lib
         PUBLIC dxguid.lib
         PUBLIC stb_image
-        PUBLIC mikktspace)
+        PUBLIC mikktspace
+        PUBLIC DirectXMath
+        PUBLIC wictexloader)
 
 set(HLSL_SHADER_FILES)
 list(APPEND HLSL_SHADER_FILES ${pixel_shader_list})

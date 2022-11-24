@@ -10,7 +10,8 @@ class GLTFLoader
 {
 public:
     explicit GLTFLoader(DeviceResources &deviceResources);
-    std::unique_ptr<NEngine::Renderer::Mesh> Load(const std::string &path);
+    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> Load(
+        const std::string &path);
 
 private:
     void ProcessNode(

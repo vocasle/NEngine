@@ -17,7 +17,8 @@
 
 #include <stdexcept>
 
-#include "NEngine/Helpers/GLTFLoader.h"
+#include "NEngine/Helpers/ModelImporter.h"
+#include "NEngine/Helpers/ShaderManager.h"
 
 using namespace Microsoft::WRL;
 using namespace NEngine::Helpers;
@@ -31,6 +32,7 @@ void
 Game::UpdateImgui()
 {
     if (ImGui::Button("Recompile all shaders")) {
+        NEngine::Helpers::ShaderManager::RecompileShaders(*m_deviceResources);
         m_basePass->ReloadShaders();
     }
 
@@ -108,8 +110,9 @@ Game::Update()
         "dirLight", BufferType::PerScene);
 
     if (dirLight) {
-        dirLight->Position =
-            Vec4D(cos(dirLightTime) * 5, 0, sin(dirLightTime) * 5, 10);
+        constexpr float radius = 100;
+        dirLight->Position = Vec4D(
+            cos(dirLightTime) * radius, 0, sin(dirLightTime) * radius, radius);
     }
 }
 
@@ -126,10 +129,7 @@ Game::Render()
     UpdateImgui();
 #endif
 
-    m_deviceResources->PIXBeginEvent(L"Color pass");
-    {
-        m_basePass->Draw(*m_deviceResources, m_meshes);
-    }
+    m_basePass->Draw(*m_deviceResources, m_meshes);
 
 #if WITH_IMGUI
     ImGui::Render();
@@ -170,24 +170,23 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
     Mouse::Get().SetWindowDimensions(m_deviceResources->GetBackBufferWidth(),
                                      m_deviceResources->GetBackBufferHeight());
     ID3D11Device *device = m_deviceResources->GetDevice();
-    GLTFLoader loader(*m_deviceResources);
-    // m_meshes.push_back(std::move(
-    //     loader.Load(R"(D:\Source\glTF-Sample-Models\2.0\Box\glTF\Box.gltf)")));
-    // m_meshes.push_back(std::move(loader.Load(
-    //     R"(D:\Source\glTF-Sample-Models\2.0\Box With Spaces\glTF\Box With
-    //     Spaces.gltf)")));
-    m_meshes.push_back(std::move(loader.Load(
-        R"(D:\Source\glTF-Sample-Models\2.0\DamagedHelmet\glTF\DamagedHelmet.gltf)")));
 
-    // m_meshes.push_back(std::move(loader.Load(
-    //     R"(D:\Source\glTF-Sample-Models\2.0\Sponza\glTF\Sponza.gltf)")));
+    {
+        ModelImporter importer(*m_deviceResources);
+
+        const auto helmetPath =
+            R"(C:\Users\vocasle\source\repos\NEngine\NEngine\res\gLTF\cube_with_tangents.glb)";
+
+        auto helmet = importer.Load(helmetPath);
+        std::move(
+            std::begin(helmet), std::end(helmet), std::back_inserter(m_meshes));
+    }
 
     m_basePass = std::make_unique<BasePass>(*m_deviceResources);
     m_basePass->SetCamera(m_camera);
 
     m_camera.SetZFar(10000);
     m_camera.SetZNear(0.1f);
-
 
 #if WITH_IMGUI
     ImGui::CreateContext();

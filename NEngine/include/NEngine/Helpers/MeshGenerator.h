@@ -18,5 +18,8 @@ std::unique_ptr<Mesh> MGGeneratePlane(const Math::Vec3D*origin,
 std::unique_ptr<Mesh> MGCreateSphere(float radius,
                                      unsigned int rings,
                                      unsigned int sectors);
+
+std::unique_ptr<Mesh> MGCreateCube(const Math::Vec3D &origin,
+                                   const float width);
 }
 }

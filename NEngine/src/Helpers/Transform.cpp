@@ -23,7 +23,7 @@ Transform::GetScale() const
 const Math::Mat4X4
 Transform::GetTransform() const
 {
-    return mTranslation * mRotation * mScale;
+    return mScale * mRotation * mTranslation;
 }
 
 Transform::Transform()

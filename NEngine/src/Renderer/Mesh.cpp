@@ -35,3 +35,14 @@ NEngine::Renderer::Mesh::SetTransform(const Helpers::Transform &t)
 {
     mTransform = t;
 }
+
+
+NEngine::Renderer::Mesh::Mesh(const Mesh &rhs)
+    : mTransform(rhs.mTransform)
+{
+    mMeshPrimitives.reserve(rhs.mMeshPrimitives.size());
+    for (auto &mp : rhs.mMeshPrimitives) {
+        auto meshPrim = std::make_unique<MeshPrimitive>(*mp);
+        mMeshPrimitives.push_back(std::move(meshPrim));
+    }
+}

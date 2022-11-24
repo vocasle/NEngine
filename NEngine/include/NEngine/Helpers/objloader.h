@@ -32,6 +32,7 @@ struct Mesh {
     std::vector<Math::Vec2D> TexCoords;
     std::vector<Math::Vec3D> Normals;
     std::vector<Face> Faces;
+    std::vector<unsigned int> Indices;
 };
 
 struct Model {

@@ -5,8 +5,58 @@
 #include <sstream>
 #endif
 
+#if NENGINE_USE_DIRECTXMATH
+#include "DirectXMath.h"
+#endif
+
 namespace NEngine {
 namespace Math {
+
+#if NENGINE_USE_DIRECTXMATH
+
+struct Vec2D
+{
+    Vec2D();
+    Vec2D(float x, float y);
+    Vec2D(Vec2D rhs) = default;
+    Vec2D &operator=(Vec2D rhs) = default;
+    float X;
+    float Y;
+};
+
+struct Vec3D
+{
+    Vec3D();
+    Vec3D(float x, float y, float z);
+    Vec3D(Vec3D rhs) = default;
+    Vec3D &operator=(Vec3D rhs) = default;
+    float X;
+    float Y;
+    float Z;
+};
+
+struct Vec4D
+{
+    Vec4D();
+    Vec4D(float x, float y, float z, float w);
+    float X;
+    float Y;
+    float Z;
+    float W;
+};
+
+struct Mat3X3
+{
+};
+
+struct Mat4X4
+{
+};
+
+Mat4X4 MathXMMatrixToMat4X4(DirectX::XMMATRIX xmMat);
+
+#else
+
 struct Vec2D
 {
     Vec2D()
@@ -233,6 +283,8 @@ struct Mat4X4
 #endif
 };
 
+#endif
+
 // *** 2D vector math ***
 Vec2D MathVec2DZero(void);
 
@@ -351,8 +403,8 @@ Mat4X4 MathMat4X4Orthographic(float viewWidth,
                               float zFar);
 
 Mat4X4 MathMat4X4ViewAt(const Vec3D *eyePos,
-                        const Vec3D *focusPos,
-                        const Vec3D *upDirect);
+                        const Vec3D *eyeDir,
+                        const Vec3D *upDir);
 
 Mat4X4 MathMat4X4RotateZ(float angle);
 
@@ -403,6 +455,9 @@ Vec4D MathVec4DAddition(const Vec4D &vec1, const Vec4D &vec2);
 float MathVec3DLength(const Vec3D &v);
 
 Mat4X4 MathMat4X4Inverse(const Mat4X4 &mat);
+
+float MathMat3X3Determinant(const Mat3X3 &mat);
+
 #endif
 }  // namespace Math
 

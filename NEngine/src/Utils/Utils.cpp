@@ -6,24 +6,30 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/stat.h>
+
+#include <filesystem>
 #include <memory>
 
 namespace NEngine {
 namespace Utils {
-class File {
+class File
+{
 public:
-    File(const std::string &path) {
+    File(const std::string &path)
+    {
         fopen_s(&m_out, path.c_str(), "w");
     }
 
-    ~File() {
+    ~File()
+    {
         if (m_out) {
             fclose(m_out);
         }
     }
 
     FILE *
-    Get() const {
+    Get() const
+    {
         return m_out;
     }
 
@@ -36,7 +42,8 @@ File gLog("log.txt");
 };
 
 void
-UtilsDebugPrint(const char *fmt, ...) {
+UtilsDebugPrint(const char *fmt, ...)
+{
     char out[512];
     va_list args;
     va_start(args, fmt);
@@ -48,7 +55,8 @@ UtilsDebugPrint(const char *fmt, ...) {
 }
 
 void
-UtilsFatalError(const char *fmt, ...) {
+UtilsFatalError(const char *fmt, ...)
+{
     char out[512];
     va_list args;
     va_start(args, fmt);
@@ -61,7 +69,8 @@ UtilsFatalError(const char *fmt, ...) {
 }
 
 std::string
-UtilsFormatStr(const char *fmt, ...) {
+UtilsFormatStr(const char *fmt, ...)
+{
     std::string out;
     va_list args;
     va_start(args, fmt);
@@ -76,7 +85,8 @@ UtilsFormatStr(const char *fmt, ...) {
 }
 
 int
-UtilStrFindLastChar(const char *str, const char ch) {
+UtilStrFindLastChar(const char *str, const char ch)
+{
     int pos = -1;
     const char *begin = str;
     while (str && *str) {
@@ -88,13 +98,11 @@ UtilStrFindLastChar(const char *str, const char ch) {
 }
 
 void
-UtilsStrSub(const char *str,
-            uint32_t start,
-            uint32_t end,
-            char out[],
-            uint32_t maxSize) {
+UtilsStrSub(
+    const char *str, uint32_t start, uint32_t end, char out[], uint32_t maxSize)
+{
     const uint32_t len = (uint32_t)strlen(str);
-    assert(start < len&& end < len);
+    assert(start < len && end < len);
     uint32_t max = len < maxSize ? len : maxSize - 1;
     max = max < end ? max : end;
 
@@ -105,7 +113,8 @@ UtilsStrSub(const char *str,
 }
 
 std::vector<uint8_t>
-UtilsReadData(const char *filepath) {
+UtilsReadData(const char *filepath)
+{
     FILE *f;
     fopen_s(&f, filepath, "rb");
     if (!f) {
@@ -115,8 +124,7 @@ UtilsReadData(const char *filepath) {
 
     struct stat sb = {};
     if (stat(filepath, &sb) == -1) {
-        UtilsDebugPrint("ERROR: Failed to get file stats from %s",
-                        filepath);
+        UtilsDebugPrint("ERROR: Failed to get file stats from %s", filepath);
         return {};
     }
     std::vector<uint8_t> bytes(sb.st_size);
@@ -130,7 +138,8 @@ UtilsCreateVertexBuffer(ID3D11Device *device,
                         const void *data,
                         size_t num,
                         size_t structSize,
-                        ID3D11Buffer **ppBuffer) {
+                        ID3D11Buffer **ppBuffer)
+{
     D3D11_SUBRESOURCE_DATA subresourceData = {};
     subresourceData.pSysMem = data;
 
@@ -147,7 +156,8 @@ void
 UtilsCreateIndexBuffer(ID3D11Device *device,
                        const void *data,
                        size_t num,
-                       ID3D11Buffer **ppBuffer) {
+                       ID3D11Buffer **ppBuffer)
+{
     D3D11_SUBRESOURCE_DATA subresourceData = {};
     subresourceData.pSysMem = data;
 
@@ -164,7 +174,8 @@ void
 UtilsWriteData(const char *filepath,
                const char *bytes,
                const size_t sz,
-               const bool isBinary) {
+               const bool isBinary)
+{
     FILE *out = nullptr;
     fopen_s(&out, filepath, isBinary ? "wb" : "w");
 
@@ -181,11 +192,12 @@ void
 UtilsUpdateConstantBuffer(ID3D11DeviceContext *context,
                           size_t bufferSize,
                           void *data,
-                          ID3D11Buffer *dest) {
+                          ID3D11Buffer *dest)
+{
     D3D11_MAPPED_SUBRESOURCE mapped = {};
 
-    if (FAILED(context->Map((ID3D11Resource*)dest, 0,
-        D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+    if (FAILED(context->Map(
+            (ID3D11Resource *)dest, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
         UtilsFatalError("ERROR: Failed to map constant buffer\n");
     }
     memcpy(mapped.pData, data, bufferSize);
@@ -195,7 +207,8 @@ UtilsUpdateConstantBuffer(ID3D11DeviceContext *context,
 void
 UtilsCreateConstantBuffer(ID3D11Device *device,
                           size_t byteWidth,
-                          ID3D11Buffer **pDest) {
+                          ID3D11Buffer **pDest)
+{
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bufferDesc.ByteWidth = byteWidth;
@@ -209,32 +222,44 @@ UtilsCreateConstantBuffer(ID3D11Device *device,
 }
 
 std::wstring
-UtilsStrToWstr(const std::string &str) {
+UtilsStrToWstr(const std::string &str)
+{
     size_t numConverted = 0;
     const size_t wstrSz = str.size() + 1;
     std::wstring wstr(wstrSz, 0);
-    const errno_t res = mbstowcs_s(&numConverted,
-                                   &wstr[0],
-                                   wstrSz,
-                                   &str[0],
-                                   str.size());
+    const errno_t res =
+        mbstowcs_s(&numConverted, &wstr[0], wstrSz, &str[0], str.size());
     assert(res == 0 && "Failed to convert string to widestring");
     return wstr;
 }
 
 std::string
-UtilsWstrToStr(const std::wstring &wstr) {
+UtilsWstrToStr(const std::wstring &wstr)
+{
     size_t numConverted = 0;
     const size_t strSz = wstr.size() + 1;
     std::string str(strSz, 0);
-    const errno_t res = wcstombs_s(&numConverted,
-                                   &str[0],
-                                   strSz,
-                                   &wstr[0],
-                                   wstr.size());
+    const errno_t res =
+        wcstombs_s(&numConverted, &str[0], strSz, &wstr[0], wstr.size());
     assert(res == 0 && "Failed to convert widestring to string");
     return str;
 }
 
+std::vector<std::wstring>
+UtilsGlobFiles(const std::string &dir, const std::string &ext)
+{
+    std::error_code ec;
+    std::filesystem::recursive_directory_iterator it(dir, ec);
+    std::vector<std::wstring> files;
+
+    for (auto entry : it) {
+        const auto tmp = entry.path().extension();
+        if (!entry.is_directory() && entry.path().extension() == ext) {
+            files.push_back(entry.path().wstring());
+        }
+    }
+    return files;
 }
-}
+
+}  // namespace Utils
+}  // namespace NEngine

@@ -252,13 +252,13 @@ GenerateTangents(const std::vector<unsigned int> &indices,
     };
 
     auto SetTSpaceCB = [](const SMikkTSpaceContext *pContext,
-                        const float fvTangent[],
-                        const float fvBiTangent[],
-                        const float fMagS,
-                        const float fMagT,
-                        const tbool bIsOrientationPreserving,
-                        const int iFace,
-                        const int iVert)
+                          const float fvTangent[],
+                          const float fvBiTangent[],
+                          const float fMagS,
+                          const float fMagT,
+                          const tbool bIsOrientationPreserving,
+                          const int iFace,
+                          const int iVert)
     {
         const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
         const auto idx = mesh->indices[iFace * 3 + iVert];
@@ -276,9 +276,25 @@ GenerateTangents(const std::vector<unsigned int> &indices,
     spaceInterface.m_setTSpace = SetTSpaceCB;
     spaceInterface.m_setTSpaceBasic = nullptr;
 
-
     genTangSpaceDefault(&ctx);
     return mesh.tangents;
+}
+
+std::vector<float>
+GetPropAsVec(const tinygltf::Value &ext, const std::string &propName)
+{
+    std::vector<float> numbers;
+    if (ext.Has(propName)) {
+        auto prop = ext.Get(propName);
+        for (size_t i = 0; i < prop.ArrayLen(); ++i) {
+            auto val = prop.Get(i);
+            const float num = val.IsNumber()
+                                  ? static_cast<float>(val.Get<double>())
+                                  : static_cast<float>(val.Get<int>());
+            numbers.push_back(num);
+        }
+    }
+    return numbers;
 }
 
 std::unique_ptr<NEngine::Renderer::MeshPrimitive>
@@ -291,6 +307,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
     std::vector<Math::Vec4D> tangents;
     std::vector<Math::Vec2D> texCoords;
     Material tmpMaterial;
+    KHRMaterial khrMaterial;
     std::unique_ptr<Texture> baseColorTex;
     std::unique_ptr<Texture> metallicRoughnessTex;
     std::unique_ptr<Texture> normalTex;
@@ -352,6 +369,30 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
 
         tmpMaterial.Roughness = material.pbrMetallicRoughness.roughnessFactor;
         tmpMaterial.Metalness = material.pbrMetallicRoughness.metallicFactor;
+        tmpMaterial.NormalScale = material.normalTexture.scale;
+
+        if (material.extensions.size() > 0) {
+            for (auto &[extName, ext] : material.extensions) {
+                if (extName == "KHR_materials_pbrSpecularGlossiness") {
+                    if (ext.Has("diffuseFactor")) {
+                        auto diffuseFactor = GetPropAsVec(ext, "diffuseFactor");
+                        khrMaterial.DiffuseFactor = {diffuseFactor[0],
+                                                     diffuseFactor[1],
+                                                     diffuseFactor[2],
+                                                     diffuseFactor[3]};
+                    }
+
+                    if (ext.Has("diffuseTexture")) {
+                        auto idx = ext.Get("diffuseTexture").Get("index");
+                        khrMaterial.DiffuseTexture =
+                            CreateTexture(model,
+                                          idx.Get<int>(),
+                                          TextureBindTarget::ShaderResourceView,
+                                          0);
+                    }
+                }
+            }
+        }
 
         if (material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
             baseColorTex = CreateTexture(
@@ -391,7 +432,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
         }
     }
 
-    std::vector<VertexPositionNormalTangent> vertices;
+    std::vector<PosNormTangTex> vertices;
 
     const auto max = std::max_element(std::begin(indices), std::end(indices));
 
@@ -422,12 +463,8 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
 
     vertices.reserve(positions.size());
     for (size_t idx = 0; idx < positions.size(); ++idx) {
-        const Vec2D &texCoord = texCoords[idx];
-        const Vec4D normal = Vec4D(normals[idx], texCoord.Y);
-        const Vec4D &tangent = tangents[idx];
-        const Vec4D position = Vec4D(
-            positions[idx].X, positions[idx].Y, positions[idx].Z, texCoord.X);
-        vertices.push_back({position, normal, tangent});
+        vertices.push_back(
+            {positions[idx], normals[idx], tangents[idx], texCoords[idx]});
     }
 
     assert(!vertices.empty() && "Vertices is empty! gLTF import failed!");
@@ -440,6 +477,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
     tmpMaterial.NormalTexture = std::move(normalTex);
     tmpMaterial.OcclusionTexture = std::move(occlusionTex);
     tmpMaterial.EmissiveTexture = std::move(emissiveTex);
+    tmpMaterial.KHRMaterial = std::move(khrMaterial);
     meshPrim->SetMaterial(std::move(tmpMaterial));
 
     return std::move(meshPrim);
@@ -450,7 +488,7 @@ GLTFLoader::GLTFLoader(DeviceResources &deviceResources)
 {
 }
 
-std::unique_ptr<NEngine::Renderer::Mesh>
+std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>
 GLTFLoader::Load(const std::string &path)
 {
     tinygltf::Model model;
@@ -460,19 +498,25 @@ GLTFLoader::Load(const std::string &path)
 
     tinygltf::TinyGLTF loader;
 
-    const bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+    bool isLoadSuccessful = false;
+    if (path.find(".gltf") != std::string::npos) {
+        isLoadSuccessful = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+    }
+    else {
+        isLoadSuccessful = loader.LoadBinaryFromFile(&model, &err, &warn, path);
+    }
 
     if (!err.empty()) {
         UtilsDebugPrint("ERROR: Failed to load model: %s\n", err.c_str());
-        return nullptr;
+        return {};
     }
     if (!warn.empty()) {
         UtilsDebugPrint("WARN: %s\n", warn.c_str());
-        return nullptr;
+        return {};
     }
-    if (!ret) {
+    if (!isLoadSuccessful) {
         UtilsDebugPrint("ERROR: Failed to parse gLTF\n");
-        return nullptr;
+        return {};
     }
 
     const auto &scene = model.scenes[model.defaultScene];
@@ -483,7 +527,6 @@ GLTFLoader::Load(const std::string &path)
     for (const auto nodeIdx : scene.nodes) {
         ProcessNode(model.nodes[nodeIdx], model, meshes);
     }
-    assert(meshes.size() == 1 && "Unexpected num of meshes");
 
-    return std::move(meshes[0]);
+    return std::move(meshes);
 }
