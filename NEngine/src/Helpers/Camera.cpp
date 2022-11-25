@@ -21,13 +21,16 @@ Camera::Camera()
 }
 
 Camera::Camera(const Vec3D &cameraPos)
+    : m_Pitch(0),
+      m_Yaw(MathToRadians(-90)),
+      m_Pos(cameraPos),
+      m_Speed(1),
+      m_backBufferWidth(0),
+      m_backBufferHeight(0),
+      m_zNear(1),
+      m_zFar(100),
+      m_fov(MathToRadians(45))
 {
-    m_Pos = cameraPos;
-    m_Pitch = 0.0f;
-    m_Yaw = 0.0;
-    m_Speed = 1.0f;
-    m_zNear = 0.1f;
-    m_zFar = 100.0f;
     UpdateVectors();
 }
 
@@ -42,10 +45,8 @@ Camera::GetViewMat() const
 Mat4X4
 Camera::GetProjMat() const
 {
-    return MathMat4X4PerspectiveFov(MathToRadians(m_fov),
-                                    m_backBufferWidth / m_backBufferHeight,
-                                    m_zNear,
-                                    m_zFar);
+    return MathMat4X4PerspectiveFov(
+        m_fov, m_backBufferWidth / m_backBufferHeight, m_zNear, m_zFar);
 }
 
 void
@@ -194,7 +195,7 @@ Camera::LookAt(const Vec3D &pos, const Vec3D &target, const Vec3D &up)
 void
 Camera::SetFov(float fov)
 {
-    m_fov = fov;
+    m_fov = MathToRadians(fov);
 }
 
 }  // namespace Helpers

@@ -13,3 +13,4 @@ endif()
 
 add_subdirectory(NEngine)
 add_subdirectory(Sandbox)
+add_subdirectory(NEditor)

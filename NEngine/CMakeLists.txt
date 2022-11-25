@@ -121,16 +121,13 @@ set(HLSL_SHADER_FILES)
 list(APPEND HLSL_SHADER_FILES ${pixel_shader_list})
 list(APPEND HLSL_SHADER_FILES ${vertex_shader_list})
 
-add_custom_target(shaders)
-
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 
 foreach(FILE ${HLSL_SHADER_FILES})
         get_filename_component(FILE_WE ${FILE} NAME_WE)
         get_source_file_property(shadertype ${FILE} ShaderType)
         get_source_file_property(shadermodel ${FILE} ShaderModel)
-        add_custom_command(TARGET shaders
-                        COMMAND ${FXC_EXE} /nologo 
+        add_custom_command(COMMAND ${FXC_EXE} /nologo 
                                 /Emain 
                                 /T${shadertype}_${shadermodel} 
                                 $<IF:$<CONFIG:DEBUG>,/Od,/O1> 
@@ -138,10 +135,13 @@ foreach(FILE ${HLSL_SHADER_FILES})
                                 /Fo ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.cso 
                                 /Fd ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.pdb 
                                 ${FILE}
-                        MAIN_DEPENDENCY ${FILE}
-                        COMMENT "HLSL ${FILE}"
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        VERBATIM)
+                        OUTPUT ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.cso
+                        DEPENDS ${FILE}
+                        COMMENT "Compiling ${FILE}"
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        list(APPEND HLSL_SHADER_BLOBS ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.cso)
 endforeach()
+
+add_custom_target(shaders ALL DEPENDS ${HLSL_SHADER_BLOBS})
 
 add_dependencies(${library_name} shaders)

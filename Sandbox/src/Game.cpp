@@ -51,7 +51,7 @@ Game::UpdateImgui()
 #endif
 
 Game::Game()
-    : m_camera({0, 0, -5})
+    : m_camera({0, 0, 5})
 {
     m_deviceResources = std::make_unique<DeviceResources>();
 }
@@ -175,7 +175,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
         ModelImporter importer(*m_deviceResources);
 
         const auto helmetPath =
-            R"(C:\Users\vocasle\source\repos\NEngine\NEngine\res\gLTF\cube_with_tangents.glb)";
+            R"(C:\Users\vocasle\source\repos\NEngine\NEngine\res\gLTF\helmet.glb)";
 
         auto helmet = importer.Load(helmetPath);
         std::move(

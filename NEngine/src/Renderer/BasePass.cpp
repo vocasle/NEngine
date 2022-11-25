@@ -12,6 +12,7 @@ using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
 using namespace NEngine::Renderer;
 using namespace NEngine::Math;
+using namespace Microsoft::WRL;
 
 void
 NEngine::Renderer::BasePass::Draw(
@@ -20,16 +21,27 @@ NEngine::Renderer::BasePass::Draw(
 {
     deviceResources.PIXBeginEvent(L"BasePass");
 
-    // TODO: Move this to separate class
-    auto rtv = deviceResources.GetRenderTargetView();
-    auto dsv = deviceResources.GetDepthStencilView();
+    // cache original views
+    D3D11_VIEWPORT *originalViewport = nullptr;
+    auto numViewports = 0u;
+    ComPtr<ID3D11RenderTargetView> originalRtv;
+    ComPtr<ID3D11DepthStencilView> originalDsv;
+    deviceResources.GetDeviceContext()->OMGetRenderTargets(
+        1, originalRtv.GetAddressOf(), originalDsv.GetAddressOf());
+    deviceResources.GetDeviceContext()->RSGetViewports(&numViewports,
+                                                       originalViewport);
+
+    auto rtv = mRenderTarget ? mRenderTarget->GetRenderTargetView()
+                             : deviceResources.GetRenderTargetView();
+    auto dsv = mDepthTarget ? mDepthTarget->GetDepthStencilView()
+                            : deviceResources.GetDepthStencilView();
     auto ctx = deviceResources.GetDeviceContext();
     constexpr float clearColor[] = {0.3f, 0.3f, 0.3f, 1.0f};
     ctx->ClearRenderTargetView(rtv, clearColor);
     ctx->ClearDepthStencilView(
         dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
-    ctx->OMSetRenderTargets(1, &rtv, deviceResources.GetDepthStencilView());
-    auto viewport = deviceResources.GetViewport();
+    ctx->OMSetRenderTargets(1, &rtv, dsv);
+    auto viewport = mViewport ? *mViewport : deviceResources.GetViewport();
     ctx->RSSetViewports(1, &viewport);
     ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -55,6 +67,15 @@ NEngine::Renderer::BasePass::Draw(
             DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
         }
     }
+
+    if (originalRtv && originalDsv) {
+        ctx->OMSetRenderTargets(
+            1, originalRtv.GetAddressOf(), originalDsv.Get());
+    }
+    if (originalViewport) {
+        ctx->RSSetViewports(numViewports, originalViewport);
+    }
+
     deviceResources.PIXEndEvent();
 }
 
@@ -101,8 +122,8 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
     const auto path =
         UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassVS.cso");
     auto binaryBlob = UtilsReadData(path.c_str());
-    mInputLayout = CreateInputLayout<PosNormTangTex>(
-        deviceResources, binaryBlob);
+    mInputLayout =
+        CreateInputLayout<PosNormTangTex>(deviceResources, binaryBlob);
 
     ReloadShaders();
 
@@ -190,4 +211,22 @@ NEngine::Renderer::BasePass::ReloadShaders()
     const auto pixelPath =
         UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassPS.cso");
     mPixelShader = std::make_unique<PixelShader>(*mDeviceResources, pixelPath);
+}
+
+void
+NEngine::Renderer::BasePass::SetRenderTarget(Texture &renderTarget)
+{
+    mRenderTarget = &renderTarget;
+}
+
+void
+NEngine::Renderer::BasePass::SetDepthTarget(Texture &depthTarget)
+{
+    mDepthTarget = &depthTarget;
+}
+
+void
+NEngine::Renderer::BasePass::SetViewport(D3D11_VIEWPORT &viewport)
+{
+    mViewport = &viewport;
 }

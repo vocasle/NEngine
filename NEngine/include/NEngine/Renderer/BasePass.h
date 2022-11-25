@@ -32,6 +32,9 @@ public:
 
     virtual ~BasePass() = default;
     void SetCamera(const Helpers::Camera &camera);
+    void SetRenderTarget(Texture &renderTarget);
+    void SetDepthTarget(Texture &depthTarget);
+    void SetViewport(D3D11_VIEWPORT &viewport);
 
     template <typename T>
     T *
@@ -55,9 +58,12 @@ protected:
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerFrameBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerSceneBuffer;
     std::unique_ptr<Helpers::DynamicConstBuffer> mPerObjectBuffer;
-    const Helpers::Camera *mCamera;
+    const Helpers::Camera *mCamera = nullptr;
     std::unique_ptr<RasterizerState> mRasterizerState;
     Helpers::DeviceResources *mDeviceResources;
+    Texture *mRenderTarget = nullptr;
+    Texture *mDepthTarget = nullptr;
+    D3D11_VIEWPORT *mViewport = nullptr;
 
     void DrawMeshPrimitive(const Renderer::MeshPrimitive *meshPrimitive,
                            Helpers::DeviceResources &deviceResources);
