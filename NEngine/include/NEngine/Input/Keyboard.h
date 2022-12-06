@@ -1,46 +1,32 @@
 ﻿#pragma once
 
+#include <Windows.h>
+
 #include <cstdint>
 #include <memory>
 #include <vector>
 
-#include <Windows.h>
 
-namespace NEngine
+namespace NEngine {
+namespace Input {
+class Keyboard
 {
-	namespace Input
-	{
-		enum class Keys {
-			W = 'W',
-			A = 'A',
-			S = 'S',
-			D = 'D',
-			Up = VK_UP,
-			Left = VK_LEFT,
-			Down = VK_DOWN,
-			Right = VK_RIGHT,
-			Plus = VK_OEM_PLUS,
-			Minus = VK_OEM_MINUS,
-			Num = 10
-		};
+public:
+    static Keyboard &Get();
+    ~Keyboard();
 
-		class Keyboard {
-		public:
-			static Keyboard& Get();
-			~Keyboard();
+    void OnKeyDown(WPARAM wParam);
+    void OnKeyUp(WPARAM wParam);
+    uint32_t IsKeyDown(WPARAM key);
+	void RegisterKey(WPARAM key);
 
-			void OnKeyDown(WPARAM wParam);
-			void OnKeyUp(WPARAM wParam);
+private:
+    Keyboard();
 
-			uint32_t IsKeyDown(WPARAM key);
+    static std::unique_ptr<Keyboard> m_Instance;
 
-		private:
-			Keyboard();
-
-			static std::unique_ptr<Keyboard> m_Instance;
-
-			std::vector<WPARAM> Keys;
-			std::vector<uint32_t> States;
-		};
-	}
-}
+    std::vector<WPARAM> Keys;
+    std::vector<uint32_t> States;
+};
+}  // namespace Input
+}  // namespace NEngine

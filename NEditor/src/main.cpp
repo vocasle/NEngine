@@ -408,7 +408,7 @@ WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case WM_SYSKEYUP:
         {
-            // Keyboard::ProcessMessage(message, wParam, lParam);
+            Keyboard::Get().OnKeyUp(wParam);
         } break;
     }
 

@@ -1,15 +1,18 @@
 #pragma once
 
+#include <stdint.h>
+
+#include "DirectXMath.h"
 #include "NEngine/Math/Math.h"
 
-#include <stdint.h>
 
 namespace NEngine {
 namespace Helpers {
 #define CAMERA_SENSITIVITY 0.01f
 #define MOUSE_SENSITIVITY 0.0001f
 
-class Camera {
+class Camera
+{
 public:
     Camera();
     Camera(const Math::Vec3D &cameraPos);
@@ -17,24 +20,31 @@ public:
     Math::Mat4X4 GetProjMat() const;
     void ProcessKeyboard(double deltaMillis);
     void ProcessMouse(double deltaMillis);
+    void SetPosition(DirectX::XMFLOAT3 position);
+    void SetPitch(float pitch);
+    void SetYaw(float yaw);
 
     Math::Vec3D
-    GetPos() const {
+    GetPos() const
+    {
         return m_Pos;
     }
 
     Math::Vec3D
-    GetAt() const {
+    GetAt() const
+    {
         return m_At;
     }
 
     Math::Vec3D
-    GetUp() const {
+    GetUp() const
+    {
         return m_Up;
     }
 
     Math::Vec3D
-    GetRight() const {
+    GetRight() const
+    {
         return m_Right;
     }
 
@@ -47,18 +57,23 @@ public:
     void SetFov(float fov);
 
     float
-    GetZFar() const {
+    GetZFar() const
+    {
         return m_zFar;
     }
 
     float
-    GetZNear() const {
+    GetZNear() const
+    {
         return m_zNear;
     }
+
+    void Tick(double deltaMillis);
 
 private:
     void UpdateVectors();
     void UpdateSpeed();
+    void ResetCamera();
 
     float m_Pitch;
     float m_Yaw;
@@ -72,6 +87,7 @@ private:
     float m_zNear;
     float m_zFar;
     float m_fov = 45.0f;
+    const Math::Vec3D mOriginalPos;
 };
-}
-}
+}  // namespace Helpers
+}  // namespace NEngine

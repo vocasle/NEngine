@@ -26,6 +26,8 @@ public:
 private:
     void UpdateImgui();
     void Clear();
+    bool OnViewportSizeChanged();
+    void UpdateViewportSize(DirectX::XMFLOAT2 viewportSize);
 
     NEngine::Helpers::DeviceResources mDeviceResources;
     HWND mWindow = nullptr;
