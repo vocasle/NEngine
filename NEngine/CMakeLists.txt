@@ -110,6 +110,12 @@ target_compile_definitions(${library_name}
         PUBLIC NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader"
         PUBLIC NENGINE_USE_DIRECTXMATH=0)
 
+target_compile_options(${library_name}  PRIVATE
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+                -Wall -Werror>
+        $<$<CXX_COMPILER_ID:MSVC>:
+                /W4 /WX>)
+
 # TODO make tinygltf a private dependency
 target_link_libraries(${library_name}
         PUBLIC tinygltf
