@@ -35,7 +35,6 @@ private:
     void LoadMesh(const std::string &path);
 
     NEngine::Helpers::DeviceResources mDeviceResources;
-    HWND mWindow = nullptr;
     DirectX::XMFLOAT2 mWinSize = {1280, 720};
 
     D3D11_VIEWPORT mViewport;

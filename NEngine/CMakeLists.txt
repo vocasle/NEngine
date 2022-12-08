@@ -9,7 +9,6 @@ set(source_file_list
         src/Helpers/InputLayoutOld.cpp
         src/Helpers/MeshGenerator.cpp
         src/Helpers/objloader.cpp
-        src/Helpers/ParticleSystem.cpp
         src/Helpers/Renderer.cpp
         src/Helpers/ShaderManager.cpp
         src/Helpers/ShadowMap.cpp
@@ -29,7 +28,7 @@ set(source_file_list
         src/Renderer/RasterizerState.cpp
         src/Helpers/Transform.cpp
         src/Renderer/Sampler.cpp 
-        "src/Helpers/ModelImporter.cpp")
+        src/Helpers/ModelImporter.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -42,7 +41,6 @@ set(header_file_list
         include/NEngine/Helpers/LightHelper.h
         include/NEngine/Helpers/MeshGenerator.h
         include/NEngine/Helpers/objloader.h
-        include/NEngine/Helpers/ParticleSystem.h
         include/NEngine/Helpers/Renderer.h
         include/NEngine/Helpers/ShaderManager.h
         include/NEngine/Helpers/ShadowMap.h
@@ -66,25 +64,17 @@ set(header_file_list
         include/NEngine/Renderer/RasterizerState.h
         include/NEngine/Helpers/Transform.h
         include/NEngine/Renderer/Sampler.h 
-        "include/NEngine/Helpers/ModelImporter.h")
+        include/NEngine/Helpers/ModelImporter.h)
 
 set(vertex_shader_list
-        shader/ColorVS.hlsl
-        shader/ParticleVS.hlsl
-        shader/ShadowVS.hlsl
         shader/BasePassVS.hlsl)
 
 set(pixel_shader_list
-        shader/ParticlePS.hlsl
-        shader/PhongPS.hlsl
         shader/BasePassPS.hlsl
         shader/PBRPS.hlsl
         shader/PBRPassPS.hlsl)
 
 set(shader_header_list
-        shader/Common.hlsli
-        shader/LightingHelper.hlsli
-        shader/Particle.hlsli
         shader/BasePass.hlsli
         shader/PBR/PBR.hlsli
         shader/PBR/ToneMapping.hlsli)
@@ -107,8 +97,7 @@ target_compile_definitions(${library_name}
         PUBLIC NENGINE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}"
         PUBLIC NENGINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
         PUBLIC NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders"
-        PUBLIC NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader"
-        PUBLIC NENGINE_USE_DIRECTXMATH=0)
+        PUBLIC NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader")
 
 target_compile_options(${library_name}  PRIVATE
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
