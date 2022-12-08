@@ -124,7 +124,6 @@ target_link_libraries(${library_name}
         PUBLIC dxguid.lib
         PUBLIC stb_image
         PUBLIC mikktspace
-        PUBLIC DirectXMath
         PUBLIC wictexloader
         PUBLIC ImGuizmo)
 
