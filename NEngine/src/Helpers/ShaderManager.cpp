@@ -211,9 +211,15 @@ ShaderManager::Recompile(ID3D11Device *device)
 }
 
 void
-ShaderManager::RecompileShaders(Helpers::DeviceResources &deviceResources)
+ShaderManager::RecompileShaders(Helpers::DeviceResources &deviceResources,
+                                const std::vector<ShaderDefine> &defines)
 {
     UtilsDebugPrint("Recompiling shaders\n");
+    auto macros = std::vector<D3D_SHADER_MACRO>();
+    for (const auto& define : defines) {
+        macros.push_back({define.Name.c_str(), define.Value.c_str()});
+    }
+    macros.push_back({nullptr, nullptr});
 
     WIN32_FIND_DATA findData = {};
     const std::string shadersRoot =
@@ -234,7 +240,7 @@ ShaderManager::RecompileShaders(Helpers::DeviceResources &deviceResources)
         UtilsDebugPrint("Compiling from file: %s\n",
                         UtilsWstrToStr(shaderPathW).c_str());
         HR(D3DCompileFromFile(shaderPathW.c_str(),
-                              nullptr,
+                              macros.data(),
                               D3D_COMPILE_STANDARD_FILE_INCLUDE,
                               "main",
                               isVS ? "vs_5_0" : "ps_5_0",
@@ -265,6 +271,12 @@ ShaderManager::RecompileShaders(Helpers::DeviceResources &deviceResources)
     }
     while (FindNextFile(f, &findData));
     FindClose(f);
+}
+
+void
+ShaderManager::RecompileShaders(Helpers::DeviceResources &deviceResources)
+{
+    RecompileShaders(deviceResources, {});
 }
 
 }  // namespace Helpers

@@ -2,6 +2,7 @@
 
 #include <corecrt_math_defines.h>
 
+#include <algorithm>
 #include <cmath>
 
 #include "DirectXMath.h"
@@ -20,6 +21,21 @@ using namespace DirectX;
 Camera::Camera()
     : Camera({0.0f, 0.0f, 0.0f})
 {
+    SetupMouseListener();
+}
+
+void
+Camera::SetupMouseListener()
+{
+    mMouseListener.MouseDownCallback =
+        [this](const Vec2D &pos, Mouse::ButtonType btnType)
+    { OnMouseDown(pos, btnType); };
+    mMouseListener.MouseUpCallback =
+        [this](const Vec2D &pos, Mouse::ButtonType btnType)
+    { OnMouseUp(pos, btnType); };
+    mMouseListener.MouseMoveCallback = [this](const Vec2D &pos)
+    { OnMouseMove(pos); };
+    Mouse::Get().SetMouseEventListener(mMouseListener);
 }
 
 Camera::Camera(const Vec3D &cameraPos)
@@ -35,12 +51,14 @@ Camera::Camera(const Vec3D &cameraPos)
       mOriginalPos(cameraPos)
 {
     UpdateVectors();
+    SetupMouseListener();
 }
 
 Mat4X4
 Camera::GetViewMat() const
 {
-    const Vec3D direction = MathVec3DAddition(&m_Pos, &m_At);
+    auto at = Vec3D(0, 0, 0);
+    const Vec3D direction = MathVec3DSubtraction(&at, &m_Pos);
     const auto negDir = MathVec3DSubtraction(m_Pos, direction);
     return MathMat4X4ViewAt(&m_Pos, &negDir, &m_Up);
 }
@@ -77,7 +95,7 @@ Camera::ProcessKeyboard(double deltaMillis)
         Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
         MathVec3DNormalize(&right);
         right = MathVec3DModulateByScalar(&right, delta);
-        m_Pos = MathVec3DAddition(&m_Pos, &right);
+        m_Pos = MathVec3DSubtraction(&m_Pos, &right);
     }
     else if (Keyboard::Get().IsKeyDown('D')) {
         Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
@@ -151,6 +169,12 @@ Camera::UpdateVectors()
 void
 Camera::ProcessMouse(double deltaMillis)
 {
+    if (Mouse::Get().IsLeftButtonPressed()) {
+        Arcball(deltaMillis);
+        return;
+    }
+    return;
+
     const Vec2D mouseDelta = Mouse::Get().GetMouseDelta();
 
     static const float MAX_PITCH = (float)(M_PI_2 - 0.1);
@@ -248,6 +272,107 @@ Camera::ResetCamera()
     m_Pos = mOriginalPos;
     m_Speed = 1;
     m_fov = MathToRadians(45);
+}
+
+void
+Camera::Arcball(double deltaMillis)
+{
+    if (mPrevMousePos.X != mCurMousePos.X ||
+        mPrevMousePos.Y != mCurMousePos.Y) {
+        const auto pitchDelta = mCurMousePos.Y - mPrevMousePos.Y;
+        const auto yawDelta = mCurMousePos.X - mPrevMousePos.X;
+
+        constexpr auto maxPitch = float(M_PI_2) - 0.1f;
+        m_Pitch += XMConvertToRadians(pitchDelta * 0.4);
+        m_Pitch = std::clamp(m_Pitch, -maxPitch, maxPitch);
+        m_Yaw += XMConvertToRadians(yawDelta * 0.4);
+
+        Utils::UtilsDebugPrint("pitch: %f, yaw: %f\n", m_Pitch, m_Yaw);
+       float camRadius = m_Pos.Length();
+        // calculate camera position depending on pitch
+        const auto h = camRadius * cos(m_Pitch);
+        const auto x = -h * cos(m_Yaw);
+        const auto z = -h * sin(m_Yaw);
+        const auto y = camRadius * sin(m_Pitch);
+        // XMFLOAT3 posCalculated(camRadius * h * cosf(m_Yaw), camRadius *
+        // sinf(m_Pitch), camRadius * cosf(m_Pitch));
+        m_Pos = Vec3D(x, y, z);
+        // XMFLOAT3 posCalculated(x, y, z);
+
+        // XMFLOAT3 at(0, 0, 0);
+        // XMFLOAT3 up(0, 1, 0);
+
+        // XMVECTOR vAt = XMLoadFloat3(&at);
+        // XMVECTOR vPos = XMLoadFloat3(&posCalculated);
+ 
+        // Utils::UtilsDebugPrint("cam distance: %f\n", length);
+
+        // auto viewMat = XMMatrixLookAtRH(vPos, vAt, XMLoadFloat3(&up));
+        // XMFLOAT4X4 tmp;
+        // XMStoreFloat4x4(&tmp, viewMat);
+        // mViewMat = Mat4X4(&tmp._11);
+
+        mPrevMousePos = mCurMousePos;
+    }
+}
+
+void
+Camera::OnMouseDown(const Math::Vec2D &pos, Input::Mouse::ButtonType btnType)
+{
+    if (btnType == Mouse::ButtonType::Left) {
+        mPrevMousePos = pos;
+    }
+    // Utils::UtilsDebugPrint("%s: pos: %s\n", __FUNCTION__,
+    // pos.ToString().c_str());
+}
+void
+Camera::OnMouseUp(const Math::Vec2D &pos, Input::Mouse::ButtonType btnType)
+{
+    // Utils::UtilsDebugPrint("%s: pos: %s\n", __FUNCTION__,
+    // pos.ToString().c_str());
+}
+void
+Camera::OnMouseMove(const Math::Vec2D &pos)
+{
+    mCurMousePos = pos;
+    // Utils::UtilsDebugPrint("%s: pos: %s\n", __FUNCTION__,
+    // pos.ToString().c_str());
+}
+
+Math::Vec3D
+Camera::GetPos() const
+{
+    return m_Pos;
+}
+
+Math::Vec3D
+Camera::GetAt() const
+{
+    return m_At;
+}
+
+Math::Vec3D
+Camera::GetUp() const
+{
+    return m_Up;
+}
+
+Math::Vec3D
+Camera::GetRight() const
+{
+    return m_Right;
+}
+
+float
+Camera::GetZFar() const
+{
+    return m_zFar;
+}
+
+float
+Camera::GetZNear() const
+{
+    return m_zNear;
 }
 
 }  // namespace Helpers

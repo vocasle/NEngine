@@ -9,9 +9,11 @@
 #include "DirectXMath.h"
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
+#include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Renderer/BasePass.h"
 #include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Renderer/Texture.h"
+#include "NEngine/Utils/Timer.h"
 
 namespace NEditor {
 class Editor
@@ -28,6 +30,9 @@ private:
     void Clear();
     bool OnViewportSizeChanged();
     void UpdateViewportSize(DirectX::XMFLOAT2 viewportSize);
+    void RegisterKeys();
+    void ProcessViewportInput();
+    void LoadMesh(const std::string &path);
 
     NEngine::Helpers::DeviceResources mDeviceResources;
     HWND mWindow = nullptr;
@@ -39,5 +44,7 @@ private:
     std::unique_ptr<NEngine::Renderer::BasePass> mBasePass;
     std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> mMeshes;
     NEngine::Helpers::Camera mCamera = {{0, 0, 5}};
+    NEngine::Utils::Timer mTimer;
+    NEngine::Helpers::DirectionalLight mDirLight;
 };
 }  // namespace NEditor

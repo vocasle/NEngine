@@ -50,6 +50,8 @@ struct Material
     std::unique_ptr<Texture> EmissiveTexture;
     AlphaMode AlphaMode = AlphaMode::Blend;
     KHRMaterial KHRMaterial;
+    float OcclusionStrength = 0;
+    Math::Vec3D EmissiveFactor;
 };
 
 class MeshPrimitive

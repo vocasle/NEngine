@@ -111,7 +111,7 @@ Game::Update()
 
     if (dirLight) {
         constexpr float radius = 100;
-        dirLight->Position = Vec4D(
+        dirLight->Direction = Vec4D(
             cos(dirLightTime) * radius, 0, sin(dirLightTime) * radius, radius);
     }
 }

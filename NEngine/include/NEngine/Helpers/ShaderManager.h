@@ -10,7 +10,20 @@
 
 namespace NEngine {
 namespace Helpers {
-class ShaderManager {
+struct ShaderDefine
+{
+    ShaderDefine() = default;
+    ShaderDefine(const std::string &name, const std::string &value)
+        : Name(name),
+          Value(value)
+    {
+    }
+    std::string Name;
+    std::string Value;
+};
+
+class ShaderManager
+{
 public:
     void Initialize(ID3D11Device *device,
                     const std::string &shaderBlobRootDir,
@@ -21,27 +34,26 @@ public:
     ID3D11PixelShader *GetPixelShader(const std::string &name) const;
     void UpdateVertexShader(const std::string &name,
                             ID3D11VertexShader *shader);
-    void UpdatePixelShader(const std::string &name,
-                           ID3D11PixelShader *shader);
+    void UpdatePixelShader(const std::string &name, ID3D11PixelShader *shader);
     void Recompile(ID3D11Device *device);
 
     static void RecompileShaders(Helpers::DeviceResources &deviceResources);
+    static void RecompileShaders(Helpers::DeviceResources &deviceResources,
+                                 const std::vector<ShaderDefine> &defines);
 
 private:
-    void CreateVertexShader(const std::string &filepath,
-                            ID3D11Device *device);
-    void CreatePixelShader(const std::string &filepath,
-                           ID3D11Device *device);
+    void CreateVertexShader(const std::string &filepath, ID3D11Device *device);
+    void CreatePixelShader(const std::string &filepath, ID3D11Device *device);
 
 private:
     std::string m_activeVS;
 
     typedef std::unordered_map<std::string,
                                Microsoft::WRL::ComPtr<ID3D11VertexShader>>
-    VertexShaderMap;
+        VertexShaderMap;
     typedef std::unordered_map<std::string,
                                Microsoft::WRL::ComPtr<ID3D11PixelShader>>
-    PixelShaderMap;
+        PixelShaderMap;
     VertexShaderMap m_vertexShaders;
     PixelShaderMap m_pixelShaders;
     typedef std::unordered_map<std::string, InputLayout> InputLayoutMap;
@@ -50,5 +62,5 @@ private:
     std::string m_shaderSrcRootDir;
 };
 
-}
-}
+}  // namespace Helpers
+}  // namespace NEngine

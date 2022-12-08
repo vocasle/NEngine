@@ -13,14 +13,14 @@ struct DirectionalLight
         : Ambient{},
           Diffuse{},
           Specular{},
-          Position{}
+          Direction{}
     {
     }
 
     Vec4D Ambient;
     Vec4D Diffuse;
     Vec4D Specular;
-    Vec4D Position;  // W is radius
+    Vec4D Direction;  // W is radius
 };
 
 struct PointLight

@@ -50,6 +50,24 @@ public:
     }
 
     void ReloadShaders();
+    template <typename T>
+    void
+    SetPerFrameValue(const std::string &name, const T &value)
+    {
+        mPerFrameBuffer->SetValue(name.c_str(), value);
+    }
+    template <typename T>
+    void
+    SetPerSceneValue(const std::string &name, const T &value)
+    {
+        mPerSceneBuffer->SetValue(name.c_str(), value);
+    }
+    template <typename T>
+    void
+    SetPerObjectValue(const std::string &name, const T &value)
+    {
+        mPerObjectBuffer->SetValue(name.c_str(), value);
+    }
 
 protected:
     std::unique_ptr<VertexShader> mVertexShader;

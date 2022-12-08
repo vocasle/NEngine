@@ -25,11 +25,11 @@ class Texture : public Bindable
 {
 public:
     Texture(Helpers::DeviceResources &deviceResources,
-            unsigned int bindSlot,
-            TextureBindTarget bindTarget,
             unsigned int width,
             unsigned int height,
+            TextureBindTarget bindTarget,
             const std::string &name);
+
     Texture(Helpers::DeviceResources &deviceResources,
             unsigned int bindSlot,
             TextureBindTarget bindTarget,
@@ -46,19 +46,11 @@ public:
                 DirectX::XMFLOAT2 size);
 
 private:
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> CreateTexture2D(
-        Helpers::DeviceResources &deviceResources, float width, float height);
-
-    void CreateDepthStencilView(Helpers::DeviceResources &deviceResources,
-                                ID3D11Texture2D *texture);
-    void CreateRenderTargetView(Helpers::DeviceResources &deviceResources,
-                                ID3D11Texture2D *texture);
-    void CreateShaderResourceView(Helpers::DeviceResources &deviceResources,
-                                  ID3D11Texture2D *texture);
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mSRV;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> mRTV;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> mDSV;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> mTex;
 
     TextureBindTarget mBindTarget;
     unsigned int mBindSlot;

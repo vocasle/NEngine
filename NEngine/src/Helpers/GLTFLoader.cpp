@@ -422,6 +422,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                          material.occlusionTexture.index,
                                          TextureBindTarget::ShaderResourceView,
                                          3);
+            tmpMaterial.OcclusionStrength = material.occlusionTexture.strength;
         }
 
         if (material.emissiveTexture.index >= 0) {
@@ -429,6 +430,9 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                         material.emissiveTexture.index,
                                         TextureBindTarget::ShaderResourceView,
                                         4);
+            tmpMaterial.EmissiveFactor = Vec3D(material.emissiveFactor[0],
+                                               material.emissiveFactor[1],
+                                               material.emissiveFactor[2]);
         }
     }
 

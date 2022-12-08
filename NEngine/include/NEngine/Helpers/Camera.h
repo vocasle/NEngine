@@ -3,8 +3,8 @@
 #include <stdint.h>
 
 #include "DirectXMath.h"
+#include "NEngine/Input/Mouse.h"
 #include "NEngine/Math/Math.h"
-
 
 namespace NEngine {
 namespace Helpers {
@@ -16,37 +16,15 @@ class Camera
 public:
     Camera();
     Camera(const Math::Vec3D &cameraPos);
+
+    Math::Vec3D GetPos() const;
+    Math::Vec3D GetAt() const;
+    Math::Vec3D GetUp() const;
+    Math::Vec3D GetRight() const;
+    float GetZFar() const;
+    float GetZNear() const;
     Math::Mat4X4 GetViewMat() const;
     Math::Mat4X4 GetProjMat() const;
-    void ProcessKeyboard(double deltaMillis);
-    void ProcessMouse(double deltaMillis);
-    void SetPosition(DirectX::XMFLOAT3 position);
-    void SetPitch(float pitch);
-    void SetYaw(float yaw);
-
-    Math::Vec3D
-    GetPos() const
-    {
-        return m_Pos;
-    }
-
-    Math::Vec3D
-    GetAt() const
-    {
-        return m_At;
-    }
-
-    Math::Vec3D
-    GetUp() const
-    {
-        return m_Up;
-    }
-
-    Math::Vec3D
-    GetRight() const
-    {
-        return m_Right;
-    }
 
     void SetViewDimensions(uint32_t width, uint32_t height);
     void SetZNear(const float zNear);
@@ -55,25 +33,23 @@ public:
                 const Math::Vec3D &target,
                 const Math::Vec3D &up);
     void SetFov(float fov);
-
-    float
-    GetZFar() const
-    {
-        return m_zFar;
-    }
-
-    float
-    GetZNear() const
-    {
-        return m_zNear;
-    }
+    void SetPosition(DirectX::XMFLOAT3 position);
+    void SetPitch(float pitch);
+    void SetYaw(float yaw);
 
     void Tick(double deltaMillis);
+    void ProcessKeyboard(double deltaMillis);
+    void ProcessMouse(double deltaMillis);
 
 private:
     void UpdateVectors();
     void UpdateSpeed();
     void ResetCamera();
+    void Arcball(double deltaMillis);
+    void OnMouseDown(const Math::Vec2D &pos, Input::Mouse::ButtonType btnType);
+    void OnMouseUp(const Math::Vec2D &pos, Input::Mouse::ButtonType btnType);
+    void OnMouseMove(const Math::Vec2D &pos);
+    void SetupMouseListener();
 
     float m_Pitch;
     float m_Yaw;
@@ -88,6 +64,12 @@ private:
     float m_zFar;
     float m_fov = 45.0f;
     const Math::Vec3D mOriginalPos;
+    // Arcball
+    Input::Mouse::MouseEventListener mMouseListener;
+    Math::Vec2D mPrevMousePos;
+    Math::Vec2D mCurMousePos;
+    bool mIsArcballOn = false;
+    Math::Mat4X4 mViewMat = Math::MathMat4X4Identity();
 };
 }  // namespace Helpers
 }  // namespace NEngine

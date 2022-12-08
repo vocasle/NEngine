@@ -1,11 +1,12 @@
 // Types
 
+// TODO: Make all light sources to conform KHR_lights_punctual
 struct DirectionalLight
 {
     float4 Ambient;
     float4 Diffuse;
     float4 Specular;
-    float4 Position;  // W - is radius
+    float4 Direction;  // W - is radius
 };
 
 struct PointLight
@@ -31,6 +32,8 @@ struct Material
     float Metalness;
     float Roughness;
     float NormalScale;
+    float OcclusionStrength;
+    float3 EmissiveFactor;
 };
 
 // Shader inputs/outputs

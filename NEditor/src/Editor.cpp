@@ -1,9 +1,15 @@
 #include "NEditor/Editor.h"
 
+#include <mciapi.h>
+
 #include "DirectXMath.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/ModelImporter.h"
+#include "NEngine/Helpers/ShaderManager.h"
+#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Renderer/Texture.h"
+#include "NEngine/Utils/Timer.h"
+#include "NEngine/Utils/Utils.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
@@ -13,15 +19,21 @@ namespace NEditor {
 using namespace NEngine::Helpers;
 using namespace NEngine::Renderer;
 using namespace DirectX;
+using namespace NEngine::Input;
 
 void
 Editor::Tick()
 {
+    TimerTick(&mTimer);
+    auto deltaMillis = mTimer.DeltaMillis;
+    mCamera.Tick(deltaMillis);
+
     Clear();
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
+    mBasePass->SetPerSceneValue("dirLight", mDirLight);
     mBasePass->Draw(mDeviceResources, mMeshes);
 
     UpdateImgui();
@@ -34,30 +46,32 @@ Editor::Tick()
 void
 Editor::Initialize(HWND wnd, uint32_t width, uint32_t height)
 {
+    TimerInitialize(&mTimer);
     mDeviceResources.SetWindow(wnd, width, height);
     mDeviceResources.CreateDeviceResources();
     mDeviceResources.CreateWindowSizeDependentResources();
     mViewport.Width = width / 2.0f;
     mViewport.Height = height / 2.0f;
+    mViewport.MinDepth = 0;
+    mViewport.MaxDepth = 1;
 
     mRenderTarget =
         std::make_unique<Texture>(mDeviceResources,
-                                  0,
-                                  TextureBindTarget::RenderTargetView,
                                   mViewport.Width,
                                   mViewport.Height,
+                                  TextureBindTarget::RenderTargetView,
                                   "Viewport Render Target");
 
     mDepthTarget =
         std::make_unique<Texture>(mDeviceResources,
-                                  0,
-                                  TextureBindTarget::DepthStencilView,
                                   mViewport.Width,
                                   mViewport.Height,
+                                  TextureBindTarget::DepthStencilView,
                                   "Viewport Depth View");
 
     mBasePass = std::make_unique<BasePass>(mDeviceResources);
     mBasePass->SetCamera(mCamera);
+    mCamera.SetFov(XMConvertToRadians(45));
     mBasePass->SetRenderTarget(*mRenderTarget);
     mBasePass->SetDepthTarget(*mDepthTarget);
     mBasePass->SetViewport(mViewport);
@@ -70,16 +84,7 @@ Editor::Initialize(HWND wnd, uint32_t width, uint32_t height)
     ImGui_ImplDX11_Init(mDeviceResources.GetDevice(),
                         mDeviceResources.GetDeviceContext());
 
-    {
-        ModelImporter importer(mDeviceResources);
-
-        const auto helmetPath =
-            R"(D:\Source\glTF-Sample-Models\2.0\DamagedHelmet\glTF-Binary\DamagedHelmet.glb)";
-
-        auto helmet = importer.Load(helmetPath);
-        std::move(
-            std::begin(helmet), std::end(helmet), std::back_inserter(mMeshes));
-    }
+    RegisterKeys();
 }
 
 void
@@ -98,9 +103,49 @@ Editor::OnWindowSizeChanged(int width, int height)
 }
 
 void
+Editor::ProcessViewportInput()
+{
+    if (!ImGui::IsWindowFocused()) {
+        return;
+    }
+    ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
+    ImVec2 screenPositionAbsolute = ImGui::GetItemRectMin();
+    ImVec2 mousePositionRelative =
+        ImVec2(mousePositionAbsolute.x - screenPositionAbsolute.x,
+               mousePositionAbsolute.y - screenPositionAbsolute.y);
+
+    static bool prevIsLeftDown = false;
+    static bool prevIsRightDown = false;
+    const bool isLeftDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+    const bool isRightDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+
+    const auto mousePosAbs =
+        Vec2D(mousePositionAbsolute.x, mousePositionAbsolute.y);
+
+    if (isLeftDown && !prevIsLeftDown) {
+        Mouse::Get().OnMouseDown(mousePosAbs, Mouse::ButtonType::Left);
+    }
+    if (isRightDown && !prevIsRightDown) {
+        Mouse::Get().OnMouseDown(mousePosAbs, Mouse::ButtonType::Right);
+    }
+    if (prevIsLeftDown && !isLeftDown) {
+        Mouse::Get().OnMouseUp(mousePosAbs, Mouse::ButtonType::Left);
+    }
+    if (prevIsRightDown && !isRightDown) {
+        Mouse::Get().OnMouseUp(mousePosAbs, Mouse::ButtonType::Right);
+    }
+    Mouse::Get().OnMouseMove(mousePosAbs);
+    // UtilsDebugPrint("Mouse pos: %s\n", mousePosAbs.ToString().c_str());
+
+    prevIsLeftDown = isLeftDown;
+    prevIsRightDown = isRightDown;
+}
+
+void
 Editor::UpdateImgui()
 {
     static bool *p_open;
+    static bool outputRenderTarget = true;
     // If you strip some features of, this demo is pretty much equivalent to
     // calling DockSpaceOverViewport()!
     // In most cases you should be able to just call DockSpaceOverViewport() and
@@ -161,14 +206,10 @@ Editor::UpdateImgui()
     if (opt_fullscreen)
         ImGui::PopStyleVar(2);
     // Submit the DockSpace
-    ImGuiIO &io = ImGui::GetIO();
-    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-    }
-    else {
-        // ShowDockingDisabledMessage();
-    }
+    ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+    static bool isViewportSettingsVisible = false;
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Options")) {
             // Disabling fullscreen would allow the window to be moved to the
@@ -209,63 +250,120 @@ Editor::UpdateImgui()
                                 opt_fullscreen)) {
                 dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
             }
+            if (ImGui::MenuItem("Show preview window")) {
+                isViewportSettingsVisible = !isViewportSettingsVisible;
+            }
             ImGui::Separator();
             if (ImGui::MenuItem("Close", NULL, false, p_open != NULL))
                 *p_open = false;
             ImGui::EndMenu();
         }
-        // HelpMarker(
-        //     "When docking is enabled, you can ALWAYS dock MOST window into "
-        //     "another! Try it now!"
-        //     "\n"
-        //     "- Drag from window title bar or their tab to dock/undock."
-        //     "\n"
-        //     "- Drag from window menu button (upper-left button) to undock an
-        //     " "entire node (all windows)."
-        //     "\n"
-        //     "- Hold SHIFT to disable docking (if io.ConfigDockingWithShift ==
-        //     " "false, default)"
-        //     "\n"
-        //     "- Hold SHIFT to enable docking (if io.ConfigDockingWithShift ==
-        //     " "true)"
-        //     "\n"
-        //     "This demo app has nothing to do with enabling docking!"
-        //     "\n\n"
-        //     "This demo app only demonstrate the use of ImGui::DockSpace() "
-        //     "which allows you to manually create a docking node _within_ "
-        //     "another window."
-        //     "\n\n"
-        //     "Read comments in ShowExampleAppDockSpace() for more details.");
         ImGui::EndMenuBar();
 
         ImGui::Begin("Viewport");
+        ProcessViewportInput();
         if (!OnViewportSizeChanged()) {
-            ImGui::Image((void *)mRenderTarget->GetShaderResourceView(),
+            auto srv = outputRenderTarget
+                           ? mRenderTarget->GetShaderResourceView()
+                           : mDepthTarget->GetShaderResourceView();
+            ImGui::Image((void *)srv,
                          ImVec2(mViewport.Width, mViewport.Height));
         }
+        ImGui::End();
 
-        // {
-        //     ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-        //     ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+        if (isViewportSettingsVisible) {
+            ImGui::Begin("Viewport settings");
+            if (ImGui::RadioButton("Render Target", outputRenderTarget)) {
+                outputRenderTarget = true;
+            }
+            if (ImGui::RadioButton("Depth Target", !outputRenderTarget)) {
+                outputRenderTarget = false;
+            }
 
-        //     // vMin.x += ImGui::GetWindowPos().x;
-        //     // vMin.y += ImGui::GetWindowPos().y;
-        //     // vMax.x += ImGui::GetWindowPos().x;
-        //     // vMax.y += ImGui::GetWindowPos().y;
+            if (ImGui::Button("Open model")) {
+                OPENFILENAME ofn = {sizeof(ofn)};
+                WCHAR szPath[MAX_PATH] = {};
+                ofn.lpstrFilter =
+                    L"GLB - gLTF 2.0 binary\0*.glb\0GLTF - gLTF 2.0\0*.gltf\0";
+                ofn.lpstrFile = szPath;
+                ofn.nMaxFile = ARRAYSIZE(szPath);
+                ofn.hwndOwner = mDeviceResources.GetWindow();
+                if (GetOpenFileName(&ofn)) {
+                    LoadMesh(UtilsWstrToStr(szPath));
+                }
+            }
 
-        //     // mViewport.Width = vMax.x - vMin.x;
-        //     // mViewport.Height = vMax.y - vMin.y;
+            if (ImGui::Button("Recompile all shaders")) {
+                NEngine::Helpers::ShaderManager::RecompileShaders(
+                    mDeviceResources);
+                mBasePass->ReloadShaders();
+            }
+            static const char *options[] = {"DEBUG_NONE",
+                                            "DEBUG_NDF",
+                                            "DEBUG_GEOMETRY",
+                                            "DEBUG_FRESNEL",
+                                            "DEBUG_NORMAL",
+                                            "DEBUG_ROUGHNESS",
+                                            "DEBUG_METALLIC",
+                                            "DEBUG_BASE_COLOR",
+                                            "DEBUG_DIFFUSE_BRDF",
+                                            "DEBUG_SPECULAR_BRDF"};
+            static const char *current_item = options[0];
+            if (ImGui::BeginCombo("Debug layer", current_item)) {
+                for (int n = 0; n < IM_ARRAYSIZE(options); n++) {
+                    bool is_selected =
+                        (current_item ==
+                         options[n]);  // You can store your selection however
+                                       // you want, outside or inside your
+                                       // objects
 
-        //     // ImGui::GetForegroundDrawList()->AddRect(
-        //     //     vMin, vMax, IM_COL32(255, 255, 0, 255));
-        // }
+                    if (ImGui::Selectable(options[n], is_selected)) {
+                        current_item = options[n];
+                        ShaderDefine define(current_item, "1");
+                        ShaderManager::RecompileShaders(mDeviceResources,
+                                                        {define});
+                        mBasePass->ReloadShaders();
+                    }
+                    if (is_selected) {
+                        ImGui::SetItemDefaultFocus();  // You may set the
+                                                       // initial focus when
+                                                       // opening the combo
+                                                       // (scrolling + for
+                                                       // keyboard navigation
+                                                       // support)
+                    }
+                }
+
+                ImGui::EndCombo();
+            }
+            ImGui::End();
+        }
+
+        ImGui::Begin("Properties");
+        if (ImGui::CollapsingHeader("Camera")) {
+            static float zNear = 1;
+            static float zFar = 10;
+
+            ImGui::InputFloat("Z near", &zNear);
+            ImGui::InputFloat("Z far", &zFar);
+
+            if (ImGui::Button("Apply##amera")) {
+                mCamera.SetZFar(zFar);
+                mCamera.SetZNear(zNear);
+            }
+        }
+
+        if (ImGui::CollapsingHeader("Directional Light")) {
+            ImGui::ColorPicker4("Diffuse",
+                                reinterpret_cast<float *>(&mDirLight.Diffuse));
+            ImGui::SliderFloat4("Direction",
+                                reinterpret_cast<float *>(&mDirLight.Direction),
+                                -1,
+                                1);
+        }
         ImGui::End();
     }
     ImGui::End();
-
-    // ImGui::SetNextWindowSize(ImVec2(mViewport.Width, mViewport.Height));
-    // ImGui::SetNextWindowPos(
-    //     ImVec2(mViewport.Width - mViewport.Width / 2.0f, 0));
 }
 
 Editor::~Editor()
@@ -328,10 +426,29 @@ Editor::UpdateViewportSize(DirectX::XMFLOAT2 viewportSize)
             fovAngleY *= 2.0f;
         }
 
-        mCamera.SetFov(fovAngleY);
+        mCamera.SetFov(XMConvertToRadians(fovAngleY));
     }
 
     mRenderTarget->Resize(mDeviceResources, viewportSize);
     mDepthTarget->Resize(mDeviceResources, viewportSize);
+}
+
+void
+Editor::RegisterKeys()
+{
+    // Reset camera
+    Keyboard::Get().RegisterKey('X');
+}
+
+void
+Editor::LoadMesh(const std::string &path)
+{
+    ModelImporter importer(mDeviceResources);
+    auto model = importer.Load(path);
+    if (!model.empty()) {
+        mMeshes.clear();
+        std::move(
+            std::begin(model), std::end(model), std::back_inserter(mMeshes));
+    }
 }
 }  // namespace NEditor

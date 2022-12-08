@@ -77,13 +77,17 @@ set(vertex_shader_list
 set(pixel_shader_list
         shader/ParticlePS.hlsl
         shader/PhongPS.hlsl
-        shader/BasePassPS.hlsl)
+        shader/BasePassPS.hlsl
+        shader/PBRPS.hlsl
+        shader/PBRPassPS.hlsl)
 
 set(shader_header_list
         shader/Common.hlsli
         shader/LightingHelper.hlsli
         shader/Particle.hlsli
-        shader/BasePass.hlsli)
+        shader/BasePass.hlsli
+        shader/PBR/PBR.hlsli
+        shader/PBR/ToneMapping.hlsli)
 
 set_source_files_properties(${pixel_shader_list} PROPERTIES ShaderType ps ShaderModel 5_0)
 set_source_files_properties(${vertex_shader_list} PROPERTIES ShaderType vs ShaderModel 5_0)
@@ -96,15 +100,15 @@ target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/in
 
 add_subdirectory(thirdparty)
 
-target_compile_definitions(${library_name} PRIVATE 
-        NOMINMAX=1 
-        UNICODE=1 
-        _UNICODE=1
-        NENGINE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}"
-        NENGINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
-        NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders"
-        NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader"
-        NENGINE_USE_DIRECTXMATH=0)
+target_compile_definitions(${library_name} 
+        PUBLIC NOMINMAX=1 
+        PUBLIC UNICODE=1 
+        PUBLIC _UNICODE=1
+        PUBLIC NENGINE_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}"
+        PUBLIC NENGINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+        PUBLIC NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders"
+        PUBLIC NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader"
+        PUBLIC NENGINE_USE_DIRECTXMATH=0)
 
 # TODO make tinygltf a private dependency
 target_link_libraries(${library_name}
@@ -115,7 +119,8 @@ target_link_libraries(${library_name}
         PUBLIC stb_image
         PUBLIC mikktspace
         PUBLIC DirectXMath
-        PUBLIC wictexloader)
+        PUBLIC wictexloader
+        PUBLIC ImGuizmo)
 
 set(HLSL_SHADER_FILES)
 list(APPEND HLSL_SHADER_FILES ${pixel_shader_list})
@@ -133,7 +138,8 @@ foreach(FILE ${HLSL_SHADER_FILES})
                                 $<IF:$<CONFIG:DEBUG>,/Od,/O1> 
                                 /Zi 
                                 /Fo ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.cso 
-                                /Fd ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.pdb 
+                                /Fd ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.pdb
+                                /WX
                                 ${FILE}
                         OUTPUT ${CMAKE_BINARY_DIR}/shaders/${FILE_WE}.cso
                         DEPENDS ${FILE}

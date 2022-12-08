@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Renderer/RasterizerState.h"
 #include "NEngine/Utils/Utils.h"
 
@@ -91,6 +92,8 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
     mPerObjectBuffer->SetValue("material.Metalness", mat.Metalness);
     mPerObjectBuffer->SetValue("material.Roughness", mat.Roughness);
     mPerObjectBuffer->SetValue("material.NormalScale", mat.NormalScale);
+    mPerObjectBuffer->SetValue("material.OcclusionStrength", mat.OcclusionStrength);
+    mPerObjectBuffer->SetValue("material.EmissiveFactor", mat.EmissiveFactor);
 
     mPerObjectBuffer->Bind(deviceResources);
     meshPrimitive->Bind(deviceResources);
@@ -137,6 +140,8 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         material.AddChild("Metalness", NodeType::Float);
         material.AddChild("Roughness", NodeType::Float);
         material.AddChild("NormalScale", NodeType::Float);
+        material.AddChild("OcclusionStrength", NodeType::Float);
+        material.AddChild("EmissiveFactor", NodeType::Float3);
         desc.AddNode(material);
         desc.SetBindSlot(0);
 
@@ -158,23 +163,23 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
     {
         DynamicConstBufferDesc desc;
         Node dirLight("dirLight", NodeType::Struct);
-        dirLight.AddChild("Ambient", NodeType::Float);
-        dirLight.AddChild("Diffuse", NodeType::Float);
-        dirLight.AddChild("Specular", NodeType::Float);
-        dirLight.AddChild("Position", NodeType::Float);
+        dirLight.AddChild("Ambient", NodeType::Float4);
+        dirLight.AddChild("Diffuse", NodeType::Float4);
+        dirLight.AddChild("Specular", NodeType::Float4);
+        dirLight.AddChild("Direction", NodeType::Float4);
 
         Node spotLight("spotLight", NodeType::Struct);
-        spotLight.AddChild("Ambient", NodeType::Float);
-        spotLight.AddChild("Diffuse", NodeType::Float);
-        spotLight.AddChild("Specular", NodeType::Float);
-        spotLight.AddChild("Position", NodeType::Float);
-        spotLight.AddChild("Direction", NodeType::Float);
+        spotLight.AddChild("Ambient", NodeType::Float4);
+        spotLight.AddChild("Diffuse", NodeType::Float4);
+        spotLight.AddChild("Specular", NodeType::Float4);
+        spotLight.AddChild("Position", NodeType::Float4);
+        spotLight.AddChild("Direction", NodeType::Float4);
 
         Node pointLight("pointLight", NodeType::Struct);
-        pointLight.AddChild("Ambient", NodeType::Float);
-        pointLight.AddChild("Diffuse", NodeType::Float);
-        pointLight.AddChild("Specular", NodeType::Float);
-        pointLight.AddChild("Position", NodeType::Float);
+        pointLight.AddChild("Ambient", NodeType::Float4);
+        pointLight.AddChild("Diffuse", NodeType::Float4);
+        pointLight.AddChild("Specular", NodeType::Float4);
+        pointLight.AddChild("Position", NodeType::Float4);
 
         Node spotLightArr("spotLights", NodeType::Array);
         spotLightArr.AddChildN(spotLight, 2);
@@ -197,6 +202,14 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         mRasterizerState =
             std::make_unique<RasterizerState>(deviceResources, desc);
     }
+
+    {
+        DirectionalLight dirLight;
+        dirLight.Direction = {0.0, 0.5, -0.5, 20};
+        dirLight.Diffuse = {1, 1, 1, 1};
+        dirLight.Specular = {1, 1, 1, 1};
+        mPerSceneBuffer->SetValue("dirLight", dirLight);
+    }
 }
 
 void
@@ -209,7 +222,7 @@ NEngine::Renderer::BasePass::ReloadShaders()
     mVertexShader = std::make_unique<VertexShader>(*mDeviceResources, path);
 
     const auto pixelPath =
-        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "BasePassPS.cso");
+        UtilsFormatStr("%s/%s", NENGINE_SHADER_BUILD_DIR, "PBRPassPS.cso");
     mPixelShader = std::make_unique<PixelShader>(*mDeviceResources, pixelPath);
 }
 
