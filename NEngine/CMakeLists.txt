@@ -28,7 +28,12 @@ set(source_file_list
         src/Renderer/RasterizerState.cpp
         src/Helpers/Transform.cpp
         src/Renderer/Sampler.cpp 
-        src/Helpers/ModelImporter.cpp)
+        src/Helpers/ModelImporter.cpp
+        src/Math/Vec2D.cpp
+        src/Math/Vec3D.cpp
+        src/Math/Vec4D.cpp
+        src/Math/Mat3X3.cpp
+        src/Math/Mat4X4.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -64,7 +69,12 @@ set(header_file_list
         include/NEngine/Renderer/RasterizerState.h
         include/NEngine/Helpers/Transform.h
         include/NEngine/Renderer/Sampler.h 
-        include/NEngine/Helpers/ModelImporter.h)
+        include/NEngine/Helpers/ModelImporter.h
+        include/NEngine/Math/Vec2D.h
+        include/NEngine/Math/Vec3D.h
+        include/NEngine/Math/Vec4D.h
+        include/NEngine/Math/Mat3X3.h
+        include/NEngine/Math/Mat4X4.h)
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
