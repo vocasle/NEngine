@@ -52,20 +52,20 @@ float V_GGX(float NdotL, float NdotV, float alphaRoughness) {
   return GGXV * GGXL;
 }
 
-float3 F_Schlick(float3 F0, float HdotV) {
-  return F0 + (1.0 - F0) * pow(1.0 - saturate(HdotV), 5.0);
+float3 F_Schlick(float3 F0, float NdotV) {
+  return F0 + (1.0 - F0) * pow(1.0 - NdotV, 5.0);
 }
 
 float3 BRDF_lambertian(float3 f0, float3 diffuseColor, float specularWeight,
-                       float VdotH) {
+                       float NdotV) {
   // see
   // https://seblagarde.wordpress.com/2012/01/08/pi-or-not-to-pi-in-game-lighting-equation/
-  return (1.0 - specularWeight * F_Schlick(f0, VdotH)) * (diffuseColor / M_PI);
+  return (1.0 - specularWeight * F_Schlick(f0, NdotV)) * (diffuseColor / M_PI);
 }
 
 float3 BRDF_specularGGX(float3 f0, float alphaRoughness, float specularWeight,
-                        float VdotH, float NdotL, float NdotV, float NdotH) {
-  float3 F = F_Schlick(f0, VdotH);
+                        float NdotL, float NdotV, float NdotH) {
+  float3 F = F_Schlick(f0, NdotV);
   float Vis = V_GGX(NdotL, NdotV, alphaRoughness);
   float D = D_GGX(NdotH, alphaRoughness);
 
@@ -108,9 +108,9 @@ float4 main(PSIn pin) : SV_TARGET {
 
   F0 = lerp(F0, baseColor.rgb, metallic);
 
-  float3 f_diffuse = BRDF_lambertian(F0, baseColor.rgb, specularWeight, HdotV);
-  float3 f_specular = BRDF_specularGGX(F0, alphaRoughness, specularWeight,
-                                       HdotV, NdotL, NdotV, NdotH);
+  float3 f_diffuse = BRDF_lambertian(F0, baseColor.rgb, specularWeight, NdotV);
+  float3 f_specular =
+      BRDF_specularGGX(F0, alphaRoughness, specularWeight, NdotL, NdotV, NdotH);
 
 #ifdef DEBUG_NDF
   float D = D_GGX(NdotH, alphaRoughness);
@@ -121,7 +121,7 @@ float4 main(PSIn pin) : SV_TARGET {
   return float4(G.xxx, 1.0);
 #endif
 #ifdef DEBUG_FRESNEL
-  float3 F = F_Schlick(F0, HdotV);
+  float3 F = F_Schlick(F0, NdotV);
   return float4(F, 1.0);
 #endif
 #ifdef DEBUG_NORMAL
