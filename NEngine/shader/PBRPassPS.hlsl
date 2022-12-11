@@ -15,15 +15,19 @@ static const float M_PI = 3.141592653589793;
 // T - tangent in world
 // B - bitangent in world
 float3 GetNormal(PSIn pin) {
-  float4 normSampled = normalTex.Sample(normalSam, pin.TexCoords);
-  float3 vT = normalize(pin.TangentW);
-  float3 vN = normalize(pin.NormalW);
-  float3 vB = normalize(pin.BitangentW);
-  float3 vNt = normSampled.rgb * 2.0 - 1.0;
-  vNt *= float3(material.NormalScale, material.NormalScale, 1.0);
-  vNt = normalize(vNt);
-  float3x3 TBN = float3x3(vT, vB, vN);
-  return mul(transpose(TBN), vNt);
+  float3 normal = normalize(pin.NormalW);
+  if (material.HasNormalTex) {
+    float4 normSampled = normalTex.Sample(normalSam, pin.TexCoords);
+    float3 vT = normalize(pin.TangentW);
+    float3 vN = normal;
+    float3 vB = normalize(pin.BitangentW);
+    float3 vNt = normSampled.rgb * 2.0 - 1.0;
+    vNt *= float3(material.NormalScale, material.NormalScale, 1.0);
+    vNt = normalize(vNt);
+    float3x3 TBN = float3x3(vT, vB, vN);
+    normal = mul(transpose(TBN), vNt);
+  }
+  return normal;
 }
 
 float ClampedDot(float3 V1, float3 V2) { return clamp(dot(V1, V2), 0.0, 1.0); }
@@ -97,11 +101,22 @@ float4 main(PSIn pin) : SV_TARGET {
   float NdotV = saturate(dot(N, V));
   float HdotV = saturate(dot(H, V));
 
-  float4 metallicRoughness =
-      metallicRoughnessTex.Sample(metallicRoughnessSam, pin.TexCoords);
-  float4 baseColor = baseColorTex.Sample(baseColorSam, pin.TexCoords);
-  float roughness = metallicRoughness.g;
-  float metallic = metallicRoughness.b;
+  float4 baseColor = material.BaseColor;
+
+  if (material.HasBaseColorTex) {
+    baseColor *= baseColorTex.Sample(baseColorSam, pin.TexCoords);
+  }
+
+  float roughness = 1.0;
+  float metallic = 0.0;
+
+  if (material.HasMetallicRoughnessTex) {
+    float4 metallicRoughness =
+        metallicRoughnessTex.Sample(metallicRoughnessSam, pin.TexCoords);
+
+    roughness = metallicRoughness.g;
+    metallic = metallicRoughness.b;
+  }
 
   float alphaRoughness = roughness * roughness;
   float specularWeight = 1.0;

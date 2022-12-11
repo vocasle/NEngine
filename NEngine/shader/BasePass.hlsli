@@ -34,6 +34,11 @@ struct Material
     float NormalScale;
     float OcclusionStrength;
     float3 EmissiveFactor;
+    int HasBaseColorTex;
+    int HasMetallicRoughnessTex;
+    int HasOcclusionTex;
+    int HasEmissiveTex;
+    int HasNormalTex;
 };
 
 // Shader inputs/outputs
