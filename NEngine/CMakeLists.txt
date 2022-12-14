@@ -33,7 +33,8 @@ set(source_file_list
         src/Math/Vec3D.cpp
         src/Math/Vec4D.cpp
         src/Math/Mat3X3.cpp
-        src/Math/Mat4X4.cpp)
+        src/Math/Mat4X4.cpp
+        src/Engine.cpp)
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -74,7 +75,8 @@ set(header_file_list
         include/NEngine/Math/Vec3D.h
         include/NEngine/Math/Vec4D.h
         include/NEngine/Math/Mat3X3.h
-        include/NEngine/Math/Mat4X4.h)
+        include/NEngine/Math/Mat4X4.h
+        include/NEngine/Engine.h)
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
