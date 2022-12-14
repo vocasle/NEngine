@@ -128,9 +128,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, Game *gGame)
 
 	RECT rc = { 0, 0, (LONG)width, (LONG)height };
 
-	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, TRUE);
+	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW | WS_MAXIMIZE, TRUE);
 
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_MAXIMIZE,
 				 CW_USEDEFAULT, CW_USEDEFAULT,
 				 rc.right - rc.left, rc.bottom - rc.top, NULL,
 				 NULL, hInstance, NULL);
