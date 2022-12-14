@@ -111,9 +111,9 @@ target_compile_definitions(${library_name}
 
 target_compile_options(${library_name}  PRIVATE
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-                -Wall -Werror>
+                -Wall>
         $<$<CXX_COMPILER_ID:MSVC>:
-                /W4 /WX>)
+                /W4>)
 
 # TODO make tinygltf a private dependency
 target_link_libraries(${library_name}
