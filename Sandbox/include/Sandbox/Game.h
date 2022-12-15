@@ -14,13 +14,14 @@
 #include "NEngine/Math/Math.h"
 #include "NEngine/Utils/Timer.h"
 #include "NEngine/Renderer/BasePass.h"
+#include "NEngine/Game.h"
 
-class Game {
+class MyGame : public NEngine::Game {
 public:
-    Game();
-    ~Game();
+    MyGame();
+    ~MyGame();
 
-    void Tick();
+    virtual void Update(float dt) override;
     void Initialize(HWND hWnd, uint32_t width, uint32_t height);
     void GetDefaultSize(uint32_t *width, uint32_t *height);
     void OnWindowSizeChanged(int width, int height);

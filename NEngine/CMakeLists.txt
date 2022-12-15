@@ -76,7 +76,8 @@ set(header_file_list
         include/NEngine/Math/Vec4D.h
         include/NEngine/Math/Mat3X3.h
         include/NEngine/Math/Mat4X4.h
-        include/NEngine/Engine.h)
+        include/NEngine/Engine.h 
+        "include/NEngine/Game.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)

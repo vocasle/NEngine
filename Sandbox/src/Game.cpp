@@ -29,7 +29,7 @@ using namespace NEngine::Renderer;
 
 #if WITH_IMGUI
 void
-Game::UpdateImgui()
+MyGame::UpdateImgui()
 {
     if (ImGui::Button("Recompile all shaders")) {
         NEngine::Helpers::ShaderManager::RecompileShaders(*m_deviceResources);
@@ -50,13 +50,13 @@ Game::UpdateImgui()
 }
 #endif
 
-Game::Game()
+MyGame::MyGame()
     : m_camera({0, 0, 5})
 {
     m_deviceResources = std::make_unique<DeviceResources>();
 }
 
-Game::~Game()
+MyGame::~MyGame()
 {
 #if WITH_IMGUI
     ImGui_ImplDX11_Shutdown();
@@ -66,7 +66,7 @@ Game::~Game()
 }
 
 void
-Game::Clear()
+MyGame::Clear()
 {
     ID3D11DeviceContext *ctx = m_deviceResources->GetDeviceContext();
     ID3D11RenderTargetView *rtv = m_deviceResources->GetRenderTargetView();
@@ -85,7 +85,7 @@ Game::Clear()
 }
 
 void
-Game::Update()
+MyGame::Update()
 {
     m_camera.ProcessKeyboard(m_timer.DeltaMillis);
     m_camera.ProcessMouse(m_timer.DeltaMillis);
@@ -117,7 +117,7 @@ Game::Update()
 }
 
 void
-Game::Render()
+MyGame::Render()
 {
 #if WITH_IMGUI
     ImGui_ImplDX11_NewFrame();
@@ -148,7 +148,7 @@ Game::Render()
 }
 
 void
-Game::Tick()
+MyGame::Update(float dt)
 {
     TimerTick(&m_timer);
     Update();
@@ -156,7 +156,7 @@ Game::Tick()
 }
 
 void
-Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
+MyGame::Initialize(HWND hWnd, uint32_t width, uint32_t height)
 {
     using namespace Microsoft::WRL;
 
@@ -185,14 +185,14 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
 }
 
 void
-Game::GetDefaultSize(uint32_t *width, uint32_t *height)
+MyGame::GetDefaultSize(uint32_t *width, uint32_t *height)
 {
     *width = DEFAULT_WIN_WIDTH;
     *height = DEFAULT_WIN_HEIGHT;
 }
 
 void
-Game::OnWindowSizeChanged(int width, int height)
+MyGame::OnWindowSizeChanged(int width, int height)
 {
     if (!m_deviceResources->WindowSizeChanged(width, height))
         return;
@@ -201,7 +201,7 @@ Game::OnWindowSizeChanged(int width, int height)
 }
 
 void
-Game::CreateWindowSizeDependentResources()
+MyGame::CreateWindowSizeDependentResources()
 {
     const auto size = m_deviceResources->GetOutputSize();
     const float aspectRatio =

@@ -311,6 +311,9 @@ auto
 Engine::Update() -> void
 {
     UtilsDebugPrint("Engine Update\n");
+    if (mGame) {
+        mGame->Update(0);
+    }
 }
 
 auto
@@ -333,6 +336,12 @@ Engine::InitDeviceResources() -> void
         mWnd, rect.right - rect.left, rect.bottom - rect.top);
     mDeviceResources.CreateDeviceResources();
     mDeviceResources.CreateWindowSizeDependentResources();
+}
+
+auto
+Engine::PlayGame(NEngine::Game &game) -> void
+{
+    mGame = &game;
 }
 
 }  // namespace NEngine

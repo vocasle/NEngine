@@ -3,6 +3,8 @@
 #include <Windows.h>
 
 #include "NEngine/Helpers/DeviceResources.h"
+#include "NEngine/Game.h"
+#include "NEngine/Utils/Timer.h"
 
 namespace NEngine {
 
@@ -14,6 +16,8 @@ public:
     auto OnWindowSizeChanged(long width, long height) -> void;
     auto Update() -> void;
 
+    auto PlayGame(NEngine::Game &game) -> void;
+
 private:
     auto CreateDefaultWindow() -> void;
     auto EngineLoop() -> void;
@@ -24,5 +28,7 @@ private:
 
     HWND mWnd = nullptr;
     NEngine::Helpers::DeviceResources mDeviceResources;
+    NEngine::Game *mGame = nullptr;
+    NEngine::Utils::Timer mTimer;
 };
 }  // namespace NEngine
