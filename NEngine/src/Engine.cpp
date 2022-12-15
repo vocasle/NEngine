@@ -26,8 +26,8 @@ WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
         return true;
     }
 
-    auto engine =
-        reinterpret_cast<NEngine::Engine *>(GetWindowLongPtr(hWnd, 0));
+    auto engine = reinterpret_cast<NEngine::Engine *>(
+        GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     switch (uMsg) {
         case WM_COMMAND:
@@ -264,9 +264,9 @@ Engine::Engine(int argc, const char *argv[])
 
     InitDeviceResources();
     InitImGui();
+    InitTimer();
 
     ShowWindow(mWnd, SW_SHOW);
-    EngineLoop();
 }
 
 auto
@@ -294,10 +294,15 @@ Engine::CreateDefaultWindow() -> void
 auto
 Engine::EngineLoop() -> void
 {
-    MSG msg = {};
-    while (GetMessage(&msg, NULL, 0, 0) > 0) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+    auto msg = MSG();
+    while (WM_QUIT != msg.message) {
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+        else {
+            Update();
+        }
     }
 }
 
@@ -305,12 +310,13 @@ auto
 Engine::OnWindowSizeChanged(long width, long height) -> void
 {
     UtilsDebugPrint("Window size changed: %ld, %ld\n", width, height);
+    mDeviceResources.WindowSizeChanged(static_cast<int>(width),
+                                       static_cast<int>(height));
 }
 
 auto
 Engine::Update() -> void
 {
-    UtilsDebugPrint("Engine Update\n");
     mTimer.Update();
     if (mGame) {
         mGame->Update(mTimer.GetDelta());
@@ -343,6 +349,9 @@ auto
 Engine::PlayGame(NEngine::Game &game) -> void
 {
     mGame = &game;
+    game.InitWithEngine(*this);
+
+    EngineLoop();
 }
 
 auto
