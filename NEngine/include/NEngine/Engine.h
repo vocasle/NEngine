@@ -2,10 +2,11 @@
 
 #include <Windows.h>
 
-#include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Game.h"
-#include "NEngine/Utils/Timer.h"
+#include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Math/Math.h"
+#include "NEngine/Renderer/Mesh.h"
+#include "NEngine/Utils/Timer.h"
 
 namespace NEngine {
 
@@ -23,6 +24,9 @@ public:
 
     // TODO: Move to private
     auto GetDeviceResources() -> NEngine::Helpers::DeviceResources &;
+
+    auto LoadMesh(const std::string &path)
+        -> std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>;
 
 private:
     auto CreateDefaultWindow() -> void;

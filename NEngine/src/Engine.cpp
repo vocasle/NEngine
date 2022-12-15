@@ -7,9 +7,12 @@
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
 
+#include "NEngine/Helpers/ModelImporter.h"
+
 using namespace NEngine;
 using namespace NEngine::Utils;
 using namespace NEngine::Input;
+using namespace NEngine::Helpers;
 
 static auto CALLBACK
 WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
@@ -378,6 +381,14 @@ Engine::~Engine()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+}
+
+auto
+Engine::LoadMesh(const std::string &path) -> std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>
+{
+    ModelImporter importer(mDeviceResources);
+    auto model = importer.Load(path);
+    return model;
 }
 
 }  // namespace NEngine

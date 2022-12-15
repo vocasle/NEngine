@@ -48,6 +48,21 @@ MyGame::UpdateImgui()
             m_camera.SetZNear(zNear);
         }
     }
+
+    if (ImGui::Button("Open model")) {
+        OPENFILENAME ofn = {sizeof(ofn)};
+        WCHAR szPath[MAX_PATH] = {};
+        ofn.lpstrFilter =
+            L"GLB - gLTF 2.0 binary\0*.glb\0GLTF - gLTF 2.0\0*.gltf\0";
+        ofn.lpstrFile = szPath;
+        ofn.nMaxFile = ARRAYSIZE(szPath);
+        ofn.hwndOwner = mEngine->GetDeviceResources().GetWindow();
+        if (GetOpenFileName(&ofn)) {
+            auto mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
+            std::move(
+                std::begin(mesh), std::end(mesh), std::back_inserter(m_meshes));
+        }
+    }
 }
 #endif
 
@@ -86,6 +101,8 @@ MyGame::Render()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 #endif
+
+    Clear();
 
 #if WITH_IMGUI
     UpdateImgui();
@@ -148,7 +165,6 @@ MyGame::Update(float dt)
 
     Render();
 }
-
 
 auto
 MyGame::InitWithEngine(NEngine::Engine &engine) -> void
