@@ -180,4 +180,5 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 
     m_camera.SetZFar(10000);
     m_camera.SetZNear(0.1f);
+    m_camera.SetViewDimensions(winSize.X, winSize.Y);
 }
