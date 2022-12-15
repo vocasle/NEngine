@@ -159,9 +159,7 @@ void
 Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
 {
     using namespace Microsoft::WRL;
-#ifdef MATH_TEST
-    MathTest();
-#endif
+
     m_deviceResources->SetWindow(hWnd, width, height);
     m_deviceResources->CreateDeviceResources();
     m_deviceResources->CreateWindowSizeDependentResources();
@@ -169,19 +167,7 @@ Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
     TimerInitialize(&m_timer);
     Mouse::Get().SetWindowDimensions(m_deviceResources->GetBackBufferWidth(),
                                      m_deviceResources->GetBackBufferHeight());
-    ID3D11Device *device = m_deviceResources->GetDevice();
-
-    {
-        ModelImporter importer(*m_deviceResources);
-
-        const auto helmetPath =
-            R"(C:\Users\vocasle\source\repos\NEngine\NEngine\res\gLTF\helmet.glb)";
-
-        auto helmet = importer.Load(helmetPath);
-        std::move(
-            std::begin(helmet), std::end(helmet), std::back_inserter(m_meshes));
-    }
-
+    
     m_basePass = std::make_unique<BasePass>(*m_deviceResources);
     m_basePass->SetCamera(m_camera);
 
