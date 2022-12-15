@@ -15,31 +15,27 @@
 #include "NEngine/Utils/Timer.h"
 #include "NEngine/Renderer/BasePass.h"
 #include "NEngine/Game.h"
+#include "NEngine/Engine.h"
 
 class MyGame : public NEngine::Game {
 public:
     MyGame();
     ~MyGame();
 
-    virtual void Update(float dt) override;
-    void Initialize(HWND hWnd, uint32_t width, uint32_t height);
-    void GetDefaultSize(uint32_t *width, uint32_t *height);
-    void OnWindowSizeChanged(int width, int height);
+    virtual auto Update(float dt) -> void override;
+    virtual auto InitWithEngine(NEngine::Engine &engine) -> void override;
 
 private:
     void Clear();
     void Update();
     void Render();
-    void CreateWindowSizeDependentResources();
 
-#if WITH_IMGUI
     void UpdateImgui();
-#endif
 
-    std::unique_ptr<NEngine::Helpers::DeviceResources> m_deviceResources;
-    NEngine::Utils::Timer m_timer;
     NEngine::Helpers::Camera m_camera;
 
     std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> m_meshes;
     std::unique_ptr<NEngine::Renderer::BasePass> m_basePass;
+
+    NEngine::Engine *mEngine;
 };

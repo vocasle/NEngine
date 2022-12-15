@@ -351,4 +351,17 @@ Engine::InitTimer() -> void
     mTimer.Initialize();
 }
 
+auto
+Engine::GetWindowSize() const -> Math::Vec2D
+{
+    return {static_cast<float>(mDeviceResources.GetBackBufferWidth()),
+            static_cast<float>(mDeviceResources.GetBackBufferHeight())};
+}
+
+auto
+Engine::GetDeviceResources() -> NEngine::Helpers::DeviceResources &
+{
+    return mDeviceResources;
+}
+
 }  // namespace NEngine

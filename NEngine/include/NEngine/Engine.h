@@ -5,6 +5,7 @@
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Game.h"
 #include "NEngine/Utils/Timer.h"
+#include "NEngine/Math/Math.h"
 
 namespace NEngine {
 
@@ -17,6 +18,10 @@ public:
     auto Update() -> void;
 
     auto PlayGame(NEngine::Game &game) -> void;
+    auto GetWindowSize() const -> Math::Vec2D;
+
+    // TODO: Move to private
+    auto GetDeviceResources() -> NEngine::Helpers::DeviceResources &;
 
 private:
     auto CreateDefaultWindow() -> void;
