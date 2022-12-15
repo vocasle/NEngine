@@ -23,6 +23,7 @@ private:
     auto EngineLoop() -> void;
     auto InitImGui() -> void;
     auto InitDeviceResources() -> void;
+    auto InitTimer() -> void;
 
     constexpr static auto ENGINE_WINDOW_CLASS = L"NEngineWindowClass";
 

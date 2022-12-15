@@ -311,8 +311,9 @@ auto
 Engine::Update() -> void
 {
     UtilsDebugPrint("Engine Update\n");
+    mTimer.Update();
     if (mGame) {
-        mGame->Update(0);
+        mGame->Update(mTimer.GetDelta());
     }
 }
 
@@ -342,6 +343,12 @@ auto
 Engine::PlayGame(NEngine::Game &game) -> void
 {
     mGame = &game;
+}
+
+auto
+Engine::InitTimer() -> void
+{
+    mTimer.Initialize();
 }
 
 }  // namespace NEngine
