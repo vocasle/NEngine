@@ -34,7 +34,7 @@ set(source_file_list
         src/Math/Vec4D.cpp
         src/Math/Mat3X3.cpp
         src/Math/Mat4X4.cpp
-        src/Engine.cpp)
+        src/Engine.cpp "src/ECS/EntityManager.cpp")
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -77,7 +77,7 @@ set(header_file_list
         include/NEngine/Math/Mat3X3.h
         include/NEngine/Math/Mat4X4.h
         include/NEngine/Engine.h 
-        "include/NEngine/Game.h")
+        "include/NEngine/Game.h" "include/NEngine/ECS/ECS.h" "include/NEngine/ECS/EntityManager.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
