@@ -13,6 +13,7 @@ class Engine
 {
 public:
     Engine(int argc, const char *argv[]);
+    ~Engine();
 
     auto OnWindowSizeChanged(long width, long height) -> void;
     auto Update() -> void;

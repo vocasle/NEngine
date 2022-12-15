@@ -20,7 +20,6 @@
 class MyGame : public NEngine::Game {
 public:
     MyGame();
-    ~MyGame();
 
     virtual auto Update(float dt) -> void override;
     virtual auto InitWithEngine(NEngine::Engine &engine) -> void override;

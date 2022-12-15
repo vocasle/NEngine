@@ -373,4 +373,11 @@ Engine::GetDeviceResources() -> NEngine::Helpers::DeviceResources &
     return mDeviceResources;
 }
 
+Engine::~Engine()
+{
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+}
+
 }  // namespace NEngine

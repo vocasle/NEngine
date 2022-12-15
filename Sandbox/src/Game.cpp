@@ -52,17 +52,9 @@ MyGame::UpdateImgui()
 #endif
 
 MyGame::MyGame()
-    : m_camera({0, 0, 5})
+    : m_camera({0, 0, 5}),
+      mEngine(nullptr)
 {
-}
-
-MyGame::~MyGame()
-{
-#if WITH_IMGUI
-    ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
-#endif
 }
 
 void
