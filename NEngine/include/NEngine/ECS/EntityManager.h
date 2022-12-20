@@ -3,6 +3,8 @@
 #include "Entity.h"
 #include "Repo.h"
 
+#include <bitset>
+
 namespace NEngine::ECS {
 
 constexpr auto MESH_MASK = std::bitset<64>(0x1);

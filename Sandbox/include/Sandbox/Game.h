@@ -17,6 +17,9 @@
 #include "NEngine/Game.h"
 #include "NEngine/Engine.h"
 
+#include "NEngine/ECS/EntityManager.h"
+#include "NEngine/ECS/Components/PositionComponent.h"
+
 class MyGame : public NEngine::Game {
 public:
     MyGame();
@@ -37,4 +40,7 @@ private:
     std::unique_ptr<NEngine::Renderer::BasePass> m_basePass;
 
     NEngine::Engine *mEngine;
+
+    NEngine::ECS::EntityManager<NEngine::ECS::Components::PositionComponent>
+        mEntityManager;
 };

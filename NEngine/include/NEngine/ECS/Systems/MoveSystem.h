@@ -2,18 +2,20 @@
 
 #include <vector>
 
-#include "ECS/Components/PositionComponent.h"
+#include "NEngine/ECS/Components/PositionComponent.h"
 
 namespace NEngine::ECS::Systems {
 class MoveSystem
 {
 public:
-    MoveSystem(const std::vector<Components::PositionComponent> &positions)
+    MoveSystem(std::vector<Components::PositionComponent> &positions)
         : mComponents(&positions)
     {
     }
 
+    void Update(float dt);
+
 private:
-    const std::vector<NEngine::ECS::Components::PositionComponent> *mComponents;
+    std::vector<NEngine::ECS::Components::PositionComponent> *mComponents;
 };
 }  // namespace NEngine::ECS::Systems

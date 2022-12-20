@@ -34,7 +34,7 @@ set(source_file_list
         src/Math/Vec4D.cpp
         src/Math/Mat3X3.cpp
         src/Math/Mat4X4.cpp
-        src/Engine.cpp)
+        src/Engine.cpp "src/ECS/Systems/MoveSystem.cpp")
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
