@@ -1,9 +1,11 @@
 #pragma once
 
+#include <bitset>
+
+#include "Components/PositionComponent.h"
 #include "Entity.h"
 #include "Repo.h"
-
-#include <bitset>
+#include "Systems/System.h"
 
 namespace NEngine::ECS {
 
@@ -78,6 +80,19 @@ public:
         return mRepo.GetComponent<Component>(entity);
     }
 
+    auto
+    Update(float dt)
+    {
+        for (auto &system : mSystems) {
+            system->Update(dt);
+        }
+    }
+
+    auto
+    AddSystem(NEngine::ECS::Systems::System &system)
+    {
+        mSystems.push_back(&system);
+    }
 #if DEBUG_ENTITY_MANAGER
     template <typename Component>
     [[nodiscard]] auto
@@ -108,5 +123,7 @@ private:
 
     std::unordered_map<Entity, std::bitset<64>> mEntities;
     Entity mEntityID = 0;
+
+    std::vector<NEngine::ECS::Systems::System *> mSystems;
 };
 }  // namespace NEngine::ECS

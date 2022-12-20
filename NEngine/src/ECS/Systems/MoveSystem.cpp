@@ -2,8 +2,8 @@
 
 namespace NEngine::ECS::Systems {
 
-void
-MoveSystem::Update(float dt)
+auto
+MoveSystem::Update(float dt) -> void
 {
     for (auto &pc : *mComponents) {
         pc.Position.x += pc.Velocity.x;

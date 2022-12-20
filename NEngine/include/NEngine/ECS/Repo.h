@@ -51,10 +51,6 @@ public:
         return nullptr;
     }
 
-#if !DEBUG_ENTITY_MANAGER
-private:
-#endif
-
     template <typename T>
     auto
     GetVec() noexcept -> comp_vec<T> &
@@ -68,6 +64,10 @@ private:
     {
         return std::get<comp_vec<T>>(mData);
     }
+
+#if !DEBUG_ENTITY_MANAGER
+private:
+#endif
 
     std::tuple<comp_vec<Ts>...> mData;
 };

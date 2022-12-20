@@ -82,7 +82,7 @@ set(header_file_list
         include/NEngine/ECS/Repo.h
         include/NEngine/ECS/Entity.h
         include/NEngine/ECS/Components/PositionComponent.h
-        include/NEngine/ECS/Systems/MoveSystem.h)
+        include/NEngine/ECS/Systems/MoveSystem.h "include/NEngine/ECS/Systems/System.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
