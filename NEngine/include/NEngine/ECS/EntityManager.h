@@ -1,31 +1,110 @@
 #pragma once
 
-#include <bitset>
-#include <unordered_map>
-
-#include "ECS.h"
+#include "Entity.h"
+#include "Repo.h"
 
 namespace NEngine::ECS {
+
+constexpr auto MESH_MASK = std::bitset<64>(0x1);
+constexpr auto AUDIO_MASK = std::bitset<64>(0x2);
+
+// Taken from https://stackoverflow.com/a/18063608/3846281
+template <class Component, class Tuple>
+struct Index;
+
+template <class Component, class... Types>
+struct Index<Component, std::tuple<Component, Types...>>
+{
+    static const std::size_t value = 0;
+};
+
+template <class Component, class U, class... Types>
+struct Index<Component, std::tuple<U, Types...>>
+{
+    static const std::size_t value =
+        1 + Index<Component, std::tuple<Types...>>::value;
+};
+
+template <typename... Components>
 class EntityManager
 {
 public:
-    auto CreateEntity() -> Entity;
-    template <typename Component>
-    auto AddComponent(Entity entity, ComponentType componentType)
-        -> Component &;
-    template <typename Component>
-    auto GetComponent(Entity entity) const -> Component *;
+    [[nodiscard]] auto
+    CreateEntity() noexcept -> Entity
+    {
+        assert(mEntityID + 1 < std::numeric_limits<long>::max() &&
+               "Max entities reached");
+        mEntities.insert(std::make_pair(mEntityID, std::bitset<64>()));
+        return mEntityID++;
+    }
 
     template <typename Component>
-    auto RemoveComponent(Entity entity) -> void;
+    [[nodiscard]] auto
+    HasComponent(Entity entity) const noexcept -> bool
+    {
+        CheckEntityExists(entity);
+        auto componentMask = Bitmask<Component>().to_ulong();
+        return (mEntities.at(entity).to_ulong() & componentMask) ==
+               componentMask;
+    }
 
-    auto DestroyEntity(Entity entity) -> void;
+    typedef std::tuple<Components...> tuple_t;
 
-    auto GetComponentMask(Entity entity) -> std::bitset<64>;
+    template <typename Component>
+    [[nodiscard]] constexpr static auto
+    Bitmask() noexcept -> std::bitset<64>
+    {
+        auto idx = Index<Component, tuple_t>::value;
+        auto bits = std::bitset<64>();
+        bits.set(idx);
+        return bits;
+    }
 
-    auto HasCompoment(Entity entity, ComponentType componentType) const -> bool;
+    template <typename Component>
+    [[nodiscard]] auto
+    CreateComponent(Entity entity) -> Component &
+    {
+        auto &component = mRepo.CreateComponent<Component>(entity);
+        UpdateComponentMask<Component>(entity);
+        return component;
+    }
+
+    template <typename Component>
+    [[nodiscard]] auto
+    GetComponent(Entity entity) -> Component *
+    {
+        return mRepo.GetComponent<Component>(entity);
+    }
+
+#if DEBUG_ENTITY_MANAGER
+    template <typename Component>
+    [[nodiscard]] auto
+    GetNumComponentsOfType() const noexcept -> size_t
+    {
+        return mRepo.GetVec<Component>().size();
+    }
+#endif
 
 private:
-    std::unordered_map<Entity, std::bitset<64>> mEntityCompMap;
+    auto
+    CheckEntityExists(Entity entity) const noexcept -> void
+    {
+        assert(mEntities.find(entity) != mEntities.end() && "Invalid entity");
+    }
+
+    template <typename Component>
+    auto
+    UpdateComponentMask(Entity entity) noexcept -> void
+    {
+        CheckEntityExists(entity);
+        auto oldMask = mEntities.at(entity);
+        auto component = Bitmask<Component>();
+        mEntities.at(entity) = oldMask |= component;
+    }
+
+    Repo<Components...> mRepo;
+
+    std::unordered_map<Entity, std::bitset<64>> mEntities;
+    Entity mEntityID = 0;
 };
 }  // namespace NEngine::ECS
