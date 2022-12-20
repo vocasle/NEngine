@@ -43,4 +43,6 @@ private:
 
     NEngine::ECS::EntityManager<NEngine::ECS::Components::PositionComponent>
         mEntityManager;
+
+    std::vector<NEngine::ECS::Entity> mEntities;
 };

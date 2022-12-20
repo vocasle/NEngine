@@ -26,6 +26,8 @@ using namespace NEngine::Utils;
 using namespace NEngine::Math;
 using namespace NEngine::Input;
 using namespace NEngine::Renderer;
+using namespace NEngine::ECS;
+using namespace NEngine::ECS::Components;
 
 #if WITH_IMGUI
 void
@@ -163,6 +165,16 @@ MyGame::Update(float dt)
         }
     }
 
+    {
+        auto helmetPos = mEntityManager.GetComponent<PositionComponent>(mEntities[0]);
+        if (helmetPos) {
+            auto &helmetPosRef = *helmetPos;
+            helmetPosRef.Velocity.x = MathRandom(-1, 1);
+            helmetPosRef.Velocity.y = MathRandom(-1, 1);
+            helmetPosRef.Velocity.z = MathRandom(-1, 1);
+        }
+    }
+
     Render();
 }
 
@@ -181,4 +193,12 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     m_camera.SetZFar(10000);
     m_camera.SetZNear(0.1f);
     m_camera.SetViewDimensions(winSize.X, winSize.Y);
+
+    auto helmet = mEntityManager.CreateEntity();
+    auto &pos = mEntityManager.CreateComponent<PositionComponent>(helmet);
+    UtilsDebugPrint("Helmet default position: %f %f %f\n",
+                    pos.Position.x,
+                    pos.Position.y,
+                    pos.Position.z);
+    mEntities.push_back(helmet);
 }
