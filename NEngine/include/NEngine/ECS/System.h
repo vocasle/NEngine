@@ -1,6 +1,6 @@
 #pragma once
 
-namespace NEngine::ECS::Systems {
+namespace NEngine::ECS {
 
 class System
 {

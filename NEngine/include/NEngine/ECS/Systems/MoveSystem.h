@@ -3,13 +3,15 @@
 #include <vector>
 
 #include "NEngine/ECS/Components/PositionComponent.h"
-#include "System.h"
+#include "NEngine/ECS/Entity.h"
+#include "NEngine/ECS/System.h"
 
 namespace NEngine::ECS::Systems {
-class MoveSystem : public System
+class MoveSystem : public NEngine::ECS::System
 {
 public:
-    MoveSystem(std::vector<Components::PositionComponent> &positions)
+    MoveSystem(
+        std::vector<ComponentData<Components::PositionComponent>> &positions)
         : mComponents(&positions)
     {
     }
@@ -17,6 +19,6 @@ public:
     virtual auto Update(float dt) -> void override;
 
 private:
-    std::vector<NEngine::ECS::Components::PositionComponent> *mComponents;
+    std::vector<ComponentData<Components::PositionComponent>> *mComponents;
 };
 }  // namespace NEngine::ECS::Systems

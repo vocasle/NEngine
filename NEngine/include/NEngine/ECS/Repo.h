@@ -3,21 +3,6 @@
 #include "Entity.h"
 
 namespace NEngine::ECS {
-template <typename T>
-struct ComponentData
-{
-    ComponentData()
-        : ComponentData(0)
-    {
-    }
-    ComponentData(Entity entity)
-        : Entity(entity),
-          Component()
-    {
-    }
-    Entity Entity;
-    T Component;
-};
 
 template <typename... Ts>
 class Repo

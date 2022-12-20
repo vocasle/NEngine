@@ -6,9 +6,9 @@ auto
 MoveSystem::Update(float dt) -> void
 {
     for (auto &pc : *mComponents) {
-        pc.Position.x += pc.Velocity.x;
-        pc.Position.y += pc.Velocity.y;
-        pc.Position.z += pc.Velocity.z;
+        pc.Component.Position.x += pc.Component.Velocity.x;
+        pc.Component.Position.y += pc.Component.Velocity.y;
+        pc.Component.Position.z += pc.Component.Velocity.z;
     }
 }
 

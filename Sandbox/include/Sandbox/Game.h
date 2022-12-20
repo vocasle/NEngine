@@ -7,20 +7,20 @@
 #include <utility>
 #include <vector>
 
+#include "NEngine/ECS/Components/PositionComponent.h"
+#include "NEngine/ECS/EntityManager.h"
+#include "NEngine/Engine.h"
+#include "NEngine/Game.h"
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Helpers/LightHelper.h"
+#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Math/Math.h"
-#include "NEngine/Utils/Timer.h"
 #include "NEngine/Renderer/BasePass.h"
-#include "NEngine/Game.h"
-#include "NEngine/Engine.h"
+#include "NEngine/Utils/Timer.h"
 
-#include "NEngine/ECS/EntityManager.h"
-#include "NEngine/ECS/Components/PositionComponent.h"
-
-class MyGame : public NEngine::Game {
+class MyGame : public NEngine::Game
+{
 public:
     MyGame();
 

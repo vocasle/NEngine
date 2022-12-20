@@ -1,11 +1,13 @@
 #pragma once
 
 #include <bitset>
+#include <cassert>
+#include <unordered_map>
 
 #include "Components/PositionComponent.h"
 #include "Entity.h"
 #include "Repo.h"
-#include "Systems/System.h"
+#include "System.h"
 
 namespace NEngine::ECS {
 
@@ -80,6 +82,13 @@ public:
         return mRepo.GetComponent<Component>(entity);
     }
 
+    template <typename Component>
+    [[nodiscard]] auto
+    GetComponentsOfType() noexcept -> std::vector<ComponentData<Component>> &
+    {
+        return mRepo.GetVec<Component>();
+    }
+
     auto
     Update(float dt)
     {
@@ -89,9 +98,9 @@ public:
     }
 
     auto
-    AddSystem(NEngine::ECS::Systems::System &system)
+    AddSystem(std::unique_ptr<NEngine::ECS::System> system)
     {
-        mSystems.push_back(&system);
+        mSystems.push_back(std::move(system));
     }
 #if DEBUG_ENTITY_MANAGER
     template <typename Component>
@@ -124,6 +133,6 @@ private:
     std::unordered_map<Entity, std::bitset<64>> mEntities;
     Entity mEntityID = 0;
 
-    std::vector<NEngine::ECS::Systems::System *> mSystems;
+    std::vector<std::unique_ptr<NEngine::ECS::System>> mSystems;
 };
 }  // namespace NEngine::ECS

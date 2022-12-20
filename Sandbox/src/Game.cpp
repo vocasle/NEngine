@@ -2,6 +2,7 @@
 
 #include <d3dcompiler.h>
 
+#include "NEngine/ECS/Systems/MoveSystem.h"
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Input/Mouse.h"
@@ -28,6 +29,7 @@ using namespace NEngine::Input;
 using namespace NEngine::Renderer;
 using namespace NEngine::ECS;
 using namespace NEngine::ECS::Components;
+using namespace NEngine::ECS::Systems;
 
 #if WITH_IMGUI
 void
@@ -166,13 +168,21 @@ MyGame::Update(float dt)
     }
 
     {
-        auto helmetPos = mEntityManager.GetComponent<PositionComponent>(mEntities[0]);
+        auto helmetPos =
+            mEntityManager.GetComponent<PositionComponent>(mEntities[0]);
         if (helmetPos) {
             auto &helmetPosRef = *helmetPos;
             helmetPosRef.Velocity.x = MathRandom(-1, 1);
             helmetPosRef.Velocity.y = MathRandom(-1, 1);
             helmetPosRef.Velocity.z = MathRandom(-1, 1);
         }
+
+        mEntityManager.Update(dt);
+
+        UtilsDebugPrint("Helmet new position: %f %f %f\n",
+                        helmetPos->Position.x,
+                        helmetPos->Position.y,
+                        helmetPos->Position.z);
     }
 
     Render();
@@ -193,6 +203,11 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     m_camera.SetZFar(10000);
     m_camera.SetZNear(0.1f);
     m_camera.SetViewDimensions(winSize.X, winSize.Y);
+
+    auto &moveComponents =
+        mEntityManager.GetComponentsOfType<PositionComponent>();
+    auto moveSystem = std::make_unique<MoveSystem>(moveComponents);
+    mEntityManager.AddSystem(std::move(moveSystem));
 
     auto helmet = mEntityManager.CreateEntity();
     auto &pos = mEntityManager.CreateComponent<PositionComponent>(helmet);
