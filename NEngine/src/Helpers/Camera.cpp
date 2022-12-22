@@ -87,54 +87,54 @@ void
 Camera::ProcessKeyboard(double deltaMillis)
 {
     UpdateSpeed();
-    Vec3D cameraFocus = m_At;
-    const float delta = (float)deltaMillis * CAMERA_SENSITIVITY * m_Speed;
-    const float rotDelta = (float)deltaMillis * MOUSE_SENSITIVITY * 4.0f;
+    //Vec3D cameraFocus = m_At;
+    //const float delta = (float)deltaMillis * CAMERA_SENSITIVITY * m_Speed;
+    //const float rotDelta = (float)deltaMillis * MOUSE_SENSITIVITY * 4.0f;
 
-    if (Keyboard::Get().IsKeyDown('A')) {
-        Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
-        MathVec3DNormalize(&right);
-        right = MathVec3DModulateByScalar(&right, delta);
-        m_Pos = MathVec3DSubtraction(&m_Pos, &right);
-    }
-    else if (Keyboard::Get().IsKeyDown('D')) {
-        Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
-        MathVec3DNormalize(&right);
-        right = MathVec3DModulateByScalar(&right, delta);
-        m_Pos = MathVec3DAddition(&m_Pos, &right);
-    }
-    else if (Keyboard::Get().IsKeyDown('W')) {
-        cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
-        m_Pos = MathVec3DAddition(&m_Pos, &cameraFocus);
-    }
-    else if (Keyboard::Get().IsKeyDown('S')) {
-        cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
-        m_Pos = MathVec3DSubtraction(&m_Pos, &cameraFocus);
-    }
-    else if (Keyboard::Get().IsKeyDown('R')) {
-        const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
-        m_Pos = MathVec3DAddition(&m_Pos, &up);
-    }
-    else if (Keyboard::Get().IsKeyDown('F')) {
-        const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
-        m_Pos = MathVec3DSubtraction(&m_Pos, &up);
-    }
+    //if (Keyboard::Get().IsKeyDown('A')) {
+    //    Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
+    //    MathVec3DNormalize(&right);
+    //    right = MathVec3DModulateByScalar(&right, delta);
+    //    m_Pos = MathVec3DSubtraction(&m_Pos, &right);
+    //}
+    //else if (Keyboard::Get().IsKeyDown('D')) {
+    //    Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
+    //    MathVec3DNormalize(&right);
+    //    right = MathVec3DModulateByScalar(&right, delta);
+    //    m_Pos = MathVec3DAddition(&m_Pos, &right);
+    //}
+    //else if (Keyboard::Get().IsKeyDown('W')) {
+    //    cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
+    //    m_Pos = MathVec3DAddition(&m_Pos, &cameraFocus);
+    //}
+    //else if (Keyboard::Get().IsKeyDown('S')) {
+    //    cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
+    //    m_Pos = MathVec3DSubtraction(&m_Pos, &cameraFocus);
+    //}
+    //else if (Keyboard::Get().IsKeyDown('R')) {
+    //    const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
+    //    m_Pos = MathVec3DAddition(&m_Pos, &up);
+    //}
+    //else if (Keyboard::Get().IsKeyDown('F')) {
+    //    const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
+    //    m_Pos = MathVec3DSubtraction(&m_Pos, &up);
+    //}
 
-    else if (Keyboard::Get().IsKeyDown(VK_LEFT)) {
-        m_Yaw += rotDelta;
-    }
-    else if (Keyboard::Get().IsKeyDown(VK_RIGHT)) {
-        m_Yaw -= rotDelta;
-    }
-    else if (Keyboard::Get().IsKeyDown(VK_UP)) {
-        m_Pitch += rotDelta;
-    }
-    else if (Keyboard::Get().IsKeyDown(VK_DOWN)) {
-        m_Pitch -= rotDelta;
-    }
-    else if (Keyboard::Get().IsKeyDown('X')) {
-        ResetCamera();
-    }
+    //else if (Keyboard::Get().IsKeyDown(VK_LEFT)) {
+    //    m_Yaw += rotDelta;
+    //}
+    //else if (Keyboard::Get().IsKeyDown(VK_RIGHT)) {
+    //    m_Yaw -= rotDelta;
+    //}
+    //else if (Keyboard::Get().IsKeyDown(VK_UP)) {
+    //    m_Pitch += rotDelta;
+    //}
+    //else if (Keyboard::Get().IsKeyDown(VK_DOWN)) {
+    //    m_Pitch -= rotDelta;
+    //}
+    //else if (Keyboard::Get().IsKeyDown('X')) {
+    //    ResetCamera();
+    //}
 }
 
 void

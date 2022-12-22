@@ -10,7 +10,6 @@
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/ECS/Components/RenderComponent.h"
 #include "NEngine/ECS/EntityManager.h"
-#include "NEngine/ECS/System.h"
 #include "NEngine/ECS/SystemManager.h"
 #include "NEngine/Engine.h"
 #include "NEngine/Game.h"

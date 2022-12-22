@@ -12,7 +12,6 @@ class InputSystem
 public:
     explicit InputSystem(DefaultEntityManager &entityManager);
     auto Update(float dt) -> void;
-
     auto RegisterEntity(Entity entity) -> void;
     auto UnregisterEntity(Entity entity) -> void;
 

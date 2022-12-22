@@ -191,6 +191,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 
     auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(helmet);
     renderComp.Mesh = mEngine->LoadMesh("D:\\Assets\\cube.glb");
+    auto &ic = mEntityManager.CreateComponent<InputComponent>(helmet);
 
     mEntities.push_back(helmet);
 }

@@ -18,8 +18,6 @@ auto
 InputSystem::Update(float dt) -> void
 {
     for (auto entity : mEntities) {
-        // mEntityManager->HasComponent<InputComponent>(entity) &&
-        //     mEntityManager->HasComponent<PositionComponent>(entity)
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
 
         if (Keyboard::Get().IsKeyDown('W')) {
@@ -34,7 +32,8 @@ InputSystem::Update(float dt) -> void
 auto
 InputSystem::RegisterEntity(Entity entity) -> void
 {
-    if (mEntityManager->HasComponent<PositionComponent>(entity)) {
+    if (mEntityManager->HasComponent<PositionComponent>(entity) &&
+        mEntityManager->HasComponent<InputComponent>(entity)) {
         mEntities.push_back(entity);
     }
 }
@@ -42,7 +41,8 @@ InputSystem::RegisterEntity(Entity entity) -> void
 auto
 InputSystem::UnregisterEntity(Entity entity) -> void
 {
-    if (mEntityManager->HasComponent<PositionComponent>(entity)) {
+    if (mEntityManager->HasComponent<PositionComponent>(entity) &&
+        mEntityManager->HasComponent<InputComponent>(entity)) {
         auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
         if (it != std::end(mEntities)) {
             mEntities.erase(it);
