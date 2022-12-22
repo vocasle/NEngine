@@ -18,6 +18,7 @@
 #include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/BasePass.h"
 #include "NEngine/Utils/Timer.h"
+#include "NEngine/ECS/System.h"
 
 class MyGame : public NEngine::Game
 {
@@ -45,4 +46,5 @@ private:
         mEntityManager;
 
     std::vector<NEngine::ECS::Entity> mEntities;
+    std::vector<std::unique_ptr<NEngine::ECS::System>> mSystems;
 };

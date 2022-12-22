@@ -177,7 +177,9 @@ MyGame::Update(float dt)
             helmetPosRef.Velocity.z = MathRandom(-1, 1);
         }
 
-        mEntityManager.Update(dt);
+        for (auto &system : mSystems) {
+            system->Update(dt);
+        }
 
         UtilsDebugPrint("Helmet new position: %f %f %f\n",
                         helmetPos->Position.x,
@@ -207,7 +209,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     auto &moveComponents =
         mEntityManager.GetComponentsOfType<PositionComponent>();
     auto moveSystem = std::make_unique<MoveSystem>(moveComponents);
-    mEntityManager.AddSystem(std::move(moveSystem));
+    mSystems.push_back(std::move(moveSystem));
 
     auto helmet = mEntityManager.CreateEntity();
     auto &pos = mEntityManager.CreateComponent<PositionComponent>(helmet);

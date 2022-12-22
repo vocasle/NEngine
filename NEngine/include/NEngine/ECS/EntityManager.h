@@ -7,7 +7,6 @@
 #include "Components/PositionComponent.h"
 #include "Entity.h"
 #include "Repo.h"
-#include "System.h"
 
 namespace NEngine::ECS {
 
@@ -89,19 +88,6 @@ public:
         return mRepo.GetVec<Component>();
     }
 
-    auto
-    Update(float dt)
-    {
-        for (auto &system : mSystems) {
-            system->Update(dt);
-        }
-    }
-
-    auto
-    AddSystem(std::unique_ptr<NEngine::ECS::System> system)
-    {
-        mSystems.push_back(std::move(system));
-    }
 #if DEBUG_ENTITY_MANAGER
     template <typename Component>
     [[nodiscard]] auto
@@ -132,7 +118,5 @@ private:
 
     std::unordered_map<Entity, std::bitset<64>> mEntities;
     Entity mEntityID = 0;
-
-    std::vector<std::unique_ptr<NEngine::ECS::System>> mSystems;
 };
 }  // namespace NEngine::ECS
