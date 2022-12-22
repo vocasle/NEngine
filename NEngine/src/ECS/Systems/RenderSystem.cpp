@@ -1,12 +1,18 @@
 #include "NEngine/ECS/Systems/RenderSystem.h"
 
+#include "NEngine/ECS/Components/PositionComponent.h"
+#include "NEngine/ECS/Components/RenderComponent.h"
+
 namespace NEngine::ECS::Systems {
 
 using namespace NEngine::Renderer;
+using namespace NEngine::ECS::Components;
 
-RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources)
+RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
+                           ECS::DefaultEntityManager &entityManager)
     : mDeviceResources(&deviceResources),
-      mBasePass(std::make_unique<BasePass>(deviceResources))
+      mBasePass(std::make_unique<BasePass>(deviceResources)),
+      mEntityManager(&entityManager)
 {
 }
 
@@ -37,11 +43,19 @@ RenderSystem::Clear() -> void
 auto
 RenderSystem::RegisterEntity(Entity entity) -> void
 {
+    if (mEntityManager->HasComponent<PositionComponent>(entity) &&
+        mEntityManager->HasComponent<RenderComponent>(entity)) {
+        mEntities.push_back(entity);
+    }
 }
 
 auto
 RenderSystem::UnregisterEntity(Entity entity) -> void
 {
+    auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
+    if (it != std::end(mEntities)) {
+        mEntities.erase(it);
+    }
 }
 
 }  // namespace NEngine::ECS::Systems

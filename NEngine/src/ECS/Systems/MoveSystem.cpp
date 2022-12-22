@@ -28,7 +28,9 @@ MoveSystem::UnregisterEntity(Entity entity) -> void
 {
     if (mEntityManager->HasComponent<PositionComponent>(entity)) {
         auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
-        mEntities.erase(it);
+        if (it != std::end(mEntities)) {
+            mEntities.erase(it);
+        }
     }
 }
 
