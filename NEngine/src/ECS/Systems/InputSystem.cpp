@@ -17,15 +17,28 @@ InputSystem::InputSystem(DefaultEntityManager &entityManager)
 auto
 InputSystem::Update(float dt) -> void
 {
+    const auto delta = dt * 0.004f;
+
     for (auto entity : mEntities) {
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
 
+        auto v = Velocity();
         if (Keyboard::Get().IsKeyDown('W')) {
-            pc.Velocity.z = 0.1f;
+            v.z = delta;
         }
-        else {
-            pc.Velocity.z = 0;
+
+        if (Keyboard::Get().IsKeyDown('S')) {
+            v.z = -delta;
         }
+
+        if (Keyboard::Get().IsKeyDown('A')) {
+            v.x = -delta;
+        }
+
+        if (Keyboard::Get().IsKeyDown('D')) {
+            v.x = delta;
+        }
+        pc.Velocity = v;
     }
 }
 
