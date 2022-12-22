@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Systems/InputSystem.h"
 #include "Systems/MoveSystem.h"
 #include "Systems/RenderSystem.h"
 
@@ -54,7 +55,8 @@ private:
     tuple_t mSystems;
 };
 
-using DefaultSystemManager =
-    SystemManager<Systems::RenderSystem, Systems::MoveSystem>;
+using DefaultSystemManager = SystemManager<Systems::RenderSystem,
+                                           Systems::MoveSystem,
+                                           Systems::InputSystem>;
 
 }  // namespace NEngine::ECS

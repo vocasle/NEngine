@@ -2,6 +2,7 @@
 
 #include <d3dcompiler.h>
 
+#include "NEngine/ECS/Systems/InputSystem.h"
 #include "NEngine/ECS/Systems/MoveSystem.h"
 #include "NEngine/ECS/Systems/RenderSystem.h"
 #include "NEngine/Helpers/DynamicConstBuffer.h"
@@ -179,6 +180,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     mSystemManager.SetSystem(std::make_unique<MoveSystem>(mEntityManager));
     mSystemManager.SetSystem(std::make_unique<RenderSystem>(
         mEngine->GetDeviceResources(), mEntityManager, m_camera));
+    mSystemManager.SetSystem(std::make_unique<InputSystem>(mEntityManager));
 
     auto helmet = mEntityManager.CreateEntity();
     auto &pos = mEntityManager.CreateComponent<PositionComponent>(helmet);
