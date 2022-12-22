@@ -2,6 +2,7 @@
 
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/ECS/Components/RenderComponent.h"
+#include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Math/Math.h"
 
 namespace NEngine::ECS::Systems {
@@ -9,6 +10,7 @@ namespace NEngine::ECS::Systems {
 using namespace NEngine::Renderer;
 using namespace NEngine::ECS::Components;
 using namespace NEngine::Math;
+using namespace NEngine::Helpers;
 
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
                            ECS::DefaultEntityManager &entityManager,
@@ -25,6 +27,22 @@ auto
 RenderSystem::Update(float dt) -> void
 {
     Clear();
+
+    {
+        static auto dirLightTime = 0.0f;
+        dirLightTime += dt;
+        auto dirLight = mBasePass->GetBufferValue<DirectionalLight>(
+            "dirLight", BufferType::PerScene);
+
+        if (dirLight) {
+            constexpr float radius = 100;
+            dirLight->Direction = Vec4D(cos(dirLightTime) * radius,
+                                        0,
+                                        sin(dirLightTime) * radius,
+                                        radius);
+        }
+    }
+
     for (auto entity : mEntities) {
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
         const auto position =
@@ -73,6 +91,12 @@ RenderSystem::UnregisterEntity(Entity entity) -> void
     if (it != std::end(mEntities)) {
         mEntities.erase(it);
     }
+}
+
+auto
+RenderSystem::ReloadShaders() -> void
+{
+    mBasePass->ReloadShaders();
 }
 
 }  // namespace NEngine::ECS::Systems

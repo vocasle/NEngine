@@ -41,8 +41,6 @@ private:
 
     NEngine::Helpers::Camera m_camera;
 
-    std::unique_ptr<NEngine::Renderer::BasePass> m_basePass;
-
     NEngine::Engine *mEngine;
 
     NEngine::ECS::DefaultEntityManager mEntityManager;

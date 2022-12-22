@@ -21,6 +21,8 @@ public:
     virtual auto RegisterEntity(Entity entity) -> void override;
     virtual auto UnregisterEntity(Entity entity) -> void override;
 
+    auto ReloadShaders() -> void;
+
 private:
     auto Clear() -> void;
 

@@ -39,7 +39,12 @@ MyGame::UpdateImgui()
     if (ImGui::Button("Recompile all shaders")) {
         NEngine::Helpers::ShaderManager::RecompileShaders(
             mEngine->GetDeviceResources());
-        m_basePass->ReloadShaders();
+        for (auto &system : mSystems) {
+            auto *rs = dynamic_cast<RenderSystem*>(system.get());
+            if (rs) {
+                rs->ReloadShaders();
+            }
+        }
     }
 
     if (ImGui::CollapsingHeader("Camera settings")) {
@@ -107,21 +112,9 @@ MyGame::Render()
     ImGui::NewFrame();
 #endif
 
-    // Clear();
-
 #if WITH_IMGUI
     UpdateImgui();
 #endif
-
-    // for (Entity entity : mEntities) {
-    //     if (mEntityManager.HasComponent<RenderComponent>(entity) &&
-    //         mEntityManager.HasComponent<PositionComponent>(entity)) {
-    //         auto &mesh =
-    //         *mEntityManager.GetComponent<RenderComponent>(entity);
-
-    //        m_basePass->Draw(mEngine->GetDeviceResources(), mesh.Mesh);
-    //    }
-    //}
 
 #if WITH_IMGUI
     ImGui::Render();
@@ -163,37 +156,10 @@ MyGame::Update(float dt)
                           UtilsStrToWstr(title).c_str());
             elapsedTime = 0.0f;
         }
-
-        auto dirLight = m_basePass->GetBufferValue<DirectionalLight>(
-            "dirLight", BufferType::PerScene);
-
-        if (dirLight) {
-            constexpr float radius = 100;
-            dirLight->Direction = Vec4D(cos(dirLightTime) * radius,
-                                        0,
-                                        sin(dirLightTime) * radius,
-                                        radius);
-        }
     }
 
-    {
-        auto helmetPos =
-            mEntityManager.GetComponent<PositionComponent>(mEntities[0]);
-        if (helmetPos) {
-            auto &helmetPosRef = *helmetPos;
-            helmetPosRef.Velocity.x = MathRandom(-1, 1);
-            helmetPosRef.Velocity.y = MathRandom(-1, 1);
-            helmetPosRef.Velocity.z = MathRandom(-1, 1);
-        }
-
-        for (auto &system : mSystems) {
-            system->Update(dt);
-        }
-
-        UtilsDebugPrint("Helmet new position: %f %f %f\n",
-                        helmetPos->Position.x,
-                        helmetPos->Position.y,
-                        helmetPos->Position.z);
+    for (auto &system : mSystems) {
+        system->Update(dt);
     }
 
     Render();
@@ -212,9 +178,6 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     auto winSize = mEngine->GetWindowSize();
 
     Mouse::Get().SetWindowDimensions(winSize.X, winSize.Y);
-
-    m_basePass = std::make_unique<BasePass>(mEngine->GetDeviceResources());
-    m_basePass->SetCamera(m_camera);
 
     m_camera.SetZFar(10000);
     m_camera.SetZNear(0.1f);
