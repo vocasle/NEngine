@@ -42,9 +42,7 @@ private:
 
     NEngine::Engine *mEngine;
 
-    NEngine::ECS::EntityManager<NEngine::ECS::Components::PositionComponent,
-                                NEngine::ECS::Components::RenderComponent>
-        mEntityManager;
+    NEngine::ECS::DefaultEntityManager mEntityManager;
 
     std::vector<NEngine::ECS::Entity> mEntities;
     std::vector<std::unique_ptr<NEngine::ECS::System>> mSystems;

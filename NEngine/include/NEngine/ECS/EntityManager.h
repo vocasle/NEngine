@@ -119,4 +119,7 @@ private:
     std::unordered_map<Entity, std::bitset<64>> mEntities;
     Entity mEntityID = 0;
 };
+
+using DefaultEntityManager =
+    EntityManager<Components::PositionComponent, Components::RenderComponent>;
 }  // namespace NEngine::ECS
