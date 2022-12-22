@@ -12,4 +12,14 @@ MoveSystem::Update(float dt) -> void
     }
 }
 
+auto
+MoveSystem::RegisterEntity(Entity entity) -> void
+{
+}
+
+auto
+MoveSystem::UnregisterEntity(Entity entity) -> void
+{
+}
+
 }  // namespace NEngine::ECS::Systems

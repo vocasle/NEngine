@@ -17,6 +17,8 @@ public:
     }
 
     virtual auto Update(float dt) -> void override;
+    virtual auto RegisterEntity(Entity entity) -> void override;
+    virtual auto UnregisterEntity(Entity entity) -> void override;
 
 private:
     std::vector<ComponentData<Components::PositionComponent>> *mComponents;
