@@ -11,6 +11,7 @@
 #include "NEngine/ECS/Components/RenderComponent.h"
 #include "NEngine/ECS/EntityManager.h"
 #include "NEngine/ECS/System.h"
+#include "NEngine/ECS/SystemManager.h"
 #include "NEngine/Engine.h"
 #include "NEngine/Game.h"
 #include "NEngine/Helpers/Camera.h"
@@ -46,5 +47,5 @@ private:
     NEngine::ECS::DefaultEntityManager mEntityManager;
 
     std::vector<NEngine::ECS::Entity> mEntities;
-    std::vector<std::unique_ptr<NEngine::ECS::System>> mSystems;
+    NEngine::ECS::DefaultSystemManager mSystemManager;
 };

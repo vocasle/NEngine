@@ -39,12 +39,7 @@ MyGame::UpdateImgui()
     if (ImGui::Button("Recompile all shaders")) {
         NEngine::Helpers::ShaderManager::RecompileShaders(
             mEngine->GetDeviceResources());
-        for (auto &system : mSystems) {
-            auto *rs = dynamic_cast<RenderSystem*>(system.get());
-            if (rs) {
-                rs->ReloadShaders();
-            }
-        }
+        mSystemManager.GetSystem<RenderSystem>().ReloadShaders();
     }
 
     if (ImGui::CollapsingHeader("Camera settings")) {
@@ -158,9 +153,7 @@ MyGame::Update(float dt)
         }
     }
 
-    for (auto &system : mSystems) {
-        system->Update(dt);
-    }
+    mSystemManager.Update(dt);
 
     Render();
 }
@@ -183,8 +176,8 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     m_camera.SetZNear(0.1f);
     m_camera.SetViewDimensions(winSize.X, winSize.Y);
 
-    mSystems.push_back(std::make_unique<MoveSystem>(mEntityManager));
-    mSystems.push_back(std::make_unique<RenderSystem>(
+    mSystemManager.SetSystem(std::make_unique<MoveSystem>(mEntityManager));
+    mSystemManager.SetSystem(std::make_unique<RenderSystem>(
         mEngine->GetDeviceResources(), mEntityManager, m_camera));
 
     auto helmet = mEntityManager.CreateEntity();
@@ -203,15 +196,11 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 auto
 MyGame::OnComponentAdd(NEngine::ECS::Entity entity) -> void
 {
-    for (auto &system : mSystems) {
-        system->RegisterEntity(entity);
-    }
+    mSystemManager.RegisterEntity(entity);
 }
 
 auto
 MyGame::OnComponentRemove(NEngine::ECS::Entity entity) -> void
 {
-    for (auto &system : mSystems) {
-        system->UnregisterEntity(entity);
-    }
+    mSystemManager.UnregisterEntity(entity);
 }
