@@ -2,9 +2,11 @@
 
 #include <bitset>
 #include <cassert>
+#include <functional>
 #include <unordered_map>
 
 #include "Components/PositionComponent.h"
+#include "Components/RenderComponent.h"
 #include "Entity.h"
 #include "Repo.h"
 
@@ -71,6 +73,7 @@ public:
     {
         auto &component = mRepo.CreateComponent<Component>(entity);
         UpdateComponentMask<Component>(entity);
+        NotifyComponentAdd<Component>(entity);
         return component;
     }
 
@@ -97,7 +100,56 @@ public:
     }
 #endif
 
+    auto
+    RegisterOnComponentAddCallback(std::function<void(Entity)> callback) -> void
+    {
+        mComponentAddCallbacks.push_back(callback);
+    }
+    auto
+    RegisterOnComponentRemoveCallback(std::function<void(Entity)> callback)
+        -> void
+    {
+        mComponentRemoveCallbacks.push_back(callback);
+    }
+
+    auto
+    UnregisterOnComponentAddCallback(std::function<void(Entity)> callback)
+        -> void
+    {
+        auto it = std::find(std::begin(mComponentAddCallbacks),
+                            std::end(mComponentAddCallbacks),
+                            callback);
+        mComponentAddCallbacks.erase(it);
+    }
+    auto
+    UnregisterOnComponentRemoveCallback(std::function<void(Entity)> callback)
+        -> void
+    {
+        auto it = std::find(std::begin(mComponentRemoveCallbacks),
+                            std::end(mComponentRemoveCallbacks),
+                            callback);
+        mComponentRemoveCallbacks.erase(it);
+    }
+
 private:
+    template <typename Component>
+    auto
+    NotifyComponentAdd(Entity entity) -> void
+    {
+        for (auto &cb : mComponentAddCallbacks) {
+            cb(entity);
+        }
+    }
+
+    template <typename Component>
+    auto
+    NotifyComponentRemove(Entity entity) -> void
+    {
+        for (auto &cb : mComponentRemoveCallbacks) {
+            cb(entity);
+        }
+    }
+
     auto
     CheckEntityExists(Entity entity) const noexcept -> void
     {
@@ -118,8 +170,15 @@ private:
 
     std::unordered_map<Entity, std::bitset<64>> mEntities;
     Entity mEntityID = 0;
+
+    using OnComponentAddCallback = std::function<void(Entity)>;
+    using OnComponentRemoveCallback = std::function<void(Entity)>;
+
+    std::vector<OnComponentAddCallback> mComponentAddCallbacks;
+    std::vector<OnComponentAddCallback> mComponentRemoveCallbacks;
 };
 
 using DefaultEntityManager =
-    EntityManager<Components::PositionComponent, Components::RenderComponent>;
+    EntityManager<NEngine::ECS::Components::PositionComponent,
+                  NEngine::ECS::Components::RenderComponent>;
 }  // namespace NEngine::ECS

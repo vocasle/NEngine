@@ -202,6 +202,11 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 {
     mEngine = &engine;
 
+    mEntityManager.RegisterOnComponentAddCallback([this](Entity entity) -> void
+                                                  { OnComponentAdd(entity); });
+    mEntityManager.RegisterOnComponentRemoveCallback(
+        [this](Entity entity) -> void { OnComponentRemove(entity); });
+
     auto winSize = mEngine->GetWindowSize();
 
     Mouse::Get().SetWindowDimensions(winSize.X, winSize.Y);
@@ -215,7 +220,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 
     auto &moveComponents =
         mEntityManager.GetComponentsOfType<PositionComponent>();
-    auto moveSystem = std::make_unique<MoveSystem>(moveComponents);
+    auto moveSystem = std::make_unique<MoveSystem>(mEntityManager);
     mSystems.push_back(std::move(moveSystem));
 
     auto helmet = mEntityManager.CreateEntity();
@@ -229,4 +234,20 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     renderComp.Mesh = mEngine->LoadMesh("D:\\Assets\\cube.glb");
 
     mEntities.push_back(helmet);
+}
+
+auto
+MyGame::OnComponentAdd(NEngine::ECS::Entity entity) -> void
+{
+    for (auto &system : mSystems) {
+        system->RegisterEntity(entity);
+    }
+}
+
+auto
+MyGame::OnComponentRemove(NEngine::ECS::Entity entity) -> void
+{
+    for (auto &system : mSystems) {
+        system->UnregisterEntity(entity);
+    }
 }

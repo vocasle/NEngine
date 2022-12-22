@@ -4,15 +4,15 @@
 
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/ECS/Entity.h"
+#include "NEngine/ECS/EntityManager.h"
 #include "NEngine/ECS/System.h"
 
 namespace NEngine::ECS::Systems {
 class MoveSystem : public NEngine::ECS::System
 {
 public:
-    MoveSystem(
-        std::vector<ComponentData<Components::PositionComponent>> &positions)
-        : mComponents(&positions)
+    explicit MoveSystem(ECS::DefaultEntityManager &entityManager)
+        : mEntityManager(&entityManager)
     {
     }
 
@@ -21,6 +21,7 @@ public:
     virtual auto UnregisterEntity(Entity entity) -> void override;
 
 private:
-    std::vector<ComponentData<Components::PositionComponent>> *mComponents;
+    ECS::DefaultEntityManager *mEntityManager;
+    std::vector<Entity> mEntities;
 };
 }  // namespace NEngine::ECS::Systems
