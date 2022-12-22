@@ -5,6 +5,7 @@
 #include <functional>
 #include <unordered_map>
 
+#include "Components/InputComponent.h"
 #include "Components/PositionComponent.h"
 #include "Components/RenderComponent.h"
 #include "Entity.h"
@@ -178,7 +179,7 @@ private:
     std::vector<OnComponentAddCallback> mComponentRemoveCallbacks;
 };
 
-using DefaultEntityManager =
-    EntityManager<NEngine::ECS::Components::PositionComponent,
-                  NEngine::ECS::Components::RenderComponent>;
+using DefaultEntityManager = EntityManager<Components::PositionComponent,
+                                           Components::RenderComponent,
+                                           Components::InputComponent>;
 }  // namespace NEngine::ECS

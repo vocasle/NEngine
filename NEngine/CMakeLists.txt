@@ -87,7 +87,7 @@ set(header_file_list
         include/NEngine/ECS/Systems/MoveSystem.h 
         include/NEngine/ECS/System.h
         include/NEngine/ECS/Components/RenderComponent.h 
-        "include/NEngine/ECS/Systems/RenderSystem.h" "include/NEngine/ECS/SystemManager.h")
+        "include/NEngine/ECS/Systems/RenderSystem.h" "include/NEngine/ECS/SystemManager.h" "include/NEngine/ECS/Components/InputComponent.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
