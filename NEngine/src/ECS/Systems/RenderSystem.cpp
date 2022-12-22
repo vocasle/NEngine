@@ -2,23 +2,40 @@
 
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/ECS/Components/RenderComponent.h"
+#include "NEngine/Math/Math.h"
 
 namespace NEngine::ECS::Systems {
 
 using namespace NEngine::Renderer;
 using namespace NEngine::ECS::Components;
+using namespace NEngine::Math;
 
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
-                           ECS::DefaultEntityManager &entityManager)
+                           ECS::DefaultEntityManager &entityManager,
+                           NEngine::Helpers::Camera &camera)
     : mDeviceResources(&deviceResources),
       mBasePass(std::make_unique<BasePass>(deviceResources)),
-      mEntityManager(&entityManager)
+      mEntityManager(&entityManager),
+      mCamera(&camera)
 {
+    mBasePass->SetCamera(*mCamera);
 }
 
 auto
 RenderSystem::Update(float dt) -> void
 {
+    Clear();
+    for (auto entity : mEntities) {
+        auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
+        const auto position =
+            Vec3D(pc.Position.x, pc.Position.y, pc.Position.z);
+        auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
+        for (auto &mesh : rc.Mesh) {
+            mesh->GetTransform().SetTranslation(
+                MathMat4X4TranslateFromVec3D(&position));
+        }
+        mBasePass->Draw(*mDeviceResources, rc.Mesh);
+    }
 }
 
 auto

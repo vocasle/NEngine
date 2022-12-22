@@ -4,6 +4,7 @@
 
 #include "NEngine/ECS/EntityManager.h"
 #include "NEngine/ECS/System.h"
+#include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Renderer/BasePass.h"
 
@@ -13,7 +14,8 @@ class RenderSystem : public NEngine::ECS::System
 {
 public:
     RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
-                 ECS::DefaultEntityManager &entityManager);
+                 ECS::DefaultEntityManager &entityManager,
+                 NEngine::Helpers::Camera &camera);
 
     virtual auto Update(float dt) -> void override;
     virtual auto RegisterEntity(Entity entity) -> void override;
@@ -26,6 +28,7 @@ private:
     std::unique_ptr<NEngine::Renderer::BasePass> mBasePass;
     ECS::DefaultEntityManager *mEntityManager;
     std::vector<ECS::Entity> mEntities;
+    NEngine::Helpers::Camera *mCamera;
 };
 
 }  // namespace NEngine::ECS::Systems
