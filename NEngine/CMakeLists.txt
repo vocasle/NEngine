@@ -34,7 +34,9 @@ set(source_file_list
         src/Math/Vec4D.cpp
         src/Math/Mat3X3.cpp
         src/Math/Mat4X4.cpp
-        src/Engine.cpp "src/ECS/Systems/MoveSystem.cpp")
+        src/Engine.cpp 
+        "src/ECS/Systems/MoveSystem.cpp" 
+        "src/ECS/Systems/RenderSystem.cpp")
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -84,7 +86,8 @@ set(header_file_list
         include/NEngine/ECS/Components/PositionComponent.h
         include/NEngine/ECS/Systems/MoveSystem.h 
         include/NEngine/ECS/System.h
-        include/NEngine/ECS/Components/RenderComponent.h)
+        include/NEngine/ECS/Components/RenderComponent.h 
+        "include/NEngine/ECS/Systems/RenderSystem.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
