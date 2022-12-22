@@ -62,9 +62,9 @@ MyGame::UpdateImgui()
         ofn.nMaxFile = ARRAYSIZE(szPath);
         ofn.hwndOwner = mEngine->GetDeviceResources().GetWindow();
         if (GetOpenFileName(&ofn)) {
-            auto mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
-            std::move(
-                std::begin(mesh), std::end(mesh), std::back_inserter(m_meshes));
+            auto &renderComp =
+                *mEntityManager.GetComponent<RenderComponent>(mEntities[0]);
+            renderComp.Mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
         }
     }
 }
@@ -112,7 +112,14 @@ MyGame::Render()
     UpdateImgui();
 #endif
 
-    m_basePass->Draw(mEngine->GetDeviceResources(), m_meshes);
+    for (Entity entity : mEntities) {
+        if (mEntityManager.HasComponent<RenderComponent>(entity) &&
+            mEntityManager.HasComponent<PositionComponent>(entity)) {
+            auto &mesh = *mEntityManager.GetComponent<RenderComponent>(entity);
+
+            m_basePass->Draw(mEngine->GetDeviceResources(), mesh.Mesh);
+        }
+    }
 
 #if WITH_IMGUI
     ImGui::Render();
@@ -217,5 +224,9 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
                     pos.Position.x,
                     pos.Position.y,
                     pos.Position.z);
+
+    auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(helmet);
+    renderComp.Mesh = mEngine->LoadMesh("D:\\Assets\\cube.glb");
+
     mEntities.push_back(helmet);
 }
