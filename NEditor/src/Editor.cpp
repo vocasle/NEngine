@@ -254,8 +254,11 @@ Editor::UpdateImgui()
                 isViewportSettingsVisible = !isViewportSettingsVisible;
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Close", NULL, false, p_open != NULL))
-                *p_open = false;
+            if (ImGui::MenuItem("Close", nullptr, false, p_open != nullptr)) {
+                if (p_open) {
+                    *p_open = false;
+                }
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -293,11 +296,6 @@ Editor::UpdateImgui()
                 }
             }
 
-            if (ImGui::Button("Recompile all shaders")) {
-                NEngine::Helpers::ShaderManager::RecompileShaders(
-                    mDeviceResources);
-                mBasePass->ReloadShaders();
-            }
             static const char *options[] = {"DEBUG_NONE",
                                             "DEBUG_NDF",
                                             "DEBUG_GEOMETRY",
@@ -309,6 +307,12 @@ Editor::UpdateImgui()
                                             "DEBUG_DIFFUSE_BRDF",
                                             "DEBUG_SPECULAR_BRDF"};
             static const char *current_item = options[0];
+            static ShaderDefine define("", "");
+            if (ImGui::Button("Recompile all shaders")) {
+                ShaderManager::RecompileShaders(mDeviceResources, {define});
+                mBasePass->ReloadShaders();
+            }
+
             if (ImGui::BeginCombo("Debug layer", current_item)) {
                 for (int n = 0; n < IM_ARRAYSIZE(options); n++) {
                     bool is_selected =
@@ -319,7 +323,8 @@ Editor::UpdateImgui()
 
                     if (ImGui::Selectable(options[n], is_selected)) {
                         current_item = options[n];
-                        ShaderDefine define(current_item, "1");
+                        define.Name = current_item;
+                        define.Value = "1";
                         ShaderManager::RecompileShaders(mDeviceResources,
                                                         {define});
                         mBasePass->ReloadShaders();

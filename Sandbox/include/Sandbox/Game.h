@@ -7,38 +7,44 @@
 #include <utility>
 #include <vector>
 
+#include "NEngine/ECS/Components/PositionComponent.h"
+#include "NEngine/ECS/Components/RenderComponent.h"
+#include "NEngine/ECS/EntityManager.h"
+#include "NEngine/ECS/SystemManager.h"
+#include "NEngine/Engine.h"
+#include "NEngine/Game.h"
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Helpers/LightHelper.h"
+#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Math/Math.h"
-#include "NEngine/Utils/Timer.h"
 #include "NEngine/Renderer/BasePass.h"
+#include "NEngine/Utils/Timer.h"
 
-class Game {
+class MyGame : public NEngine::Game
+{
 public:
-    Game();
-    ~Game();
+    MyGame();
 
-    void Tick();
-    void Initialize(HWND hWnd, uint32_t width, uint32_t height);
-    void GetDefaultSize(uint32_t *width, uint32_t *height);
-    void OnWindowSizeChanged(int width, int height);
+    virtual auto Update(float dt) -> void override;
+    virtual auto InitWithEngine(NEngine::Engine &engine) -> void override;
 
 private:
     void Clear();
     void Update();
     void Render();
-    void CreateWindowSizeDependentResources();
 
-#if WITH_IMGUI
     void UpdateImgui();
-#endif
 
-    std::unique_ptr<NEngine::Helpers::DeviceResources> m_deviceResources;
-    NEngine::Utils::Timer m_timer;
+    auto OnComponentAdd(NEngine::ECS::Entity entity) -> void;
+    auto OnComponentRemove(NEngine::ECS::Entity entity) -> void;
+
     NEngine::Helpers::Camera m_camera;
 
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> m_meshes;
-    std::unique_ptr<NEngine::Renderer::BasePass> m_basePass;
+    NEngine::Engine *mEngine;
+
+    NEngine::ECS::DefaultEntityManager mEntityManager;
+
+    std::vector<NEngine::ECS::Entity> mEntities;
+    NEngine::ECS::DefaultSystemManager mSystemManager;
 };

@@ -7,7 +7,7 @@ set(header_file_list
         src/Game.cpp
         src/Main.cpp)
 
-add_executable(${app_name} WIN32 
+add_executable(${app_name} 
         ${source_file_list} 
         ${header_file_list})
 

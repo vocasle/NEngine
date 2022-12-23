@@ -127,7 +127,7 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
         SamplerDescription::CreateGLTFDefaultSamplerDesc();
     samDesc.Filter = SamplingFilter::MIN_LINEAR_MAG_MIP_POINT;
     if (texInfo.sampler >= 0) {
-        const auto &sampler = model.samplers[texInfo.sampler];
+        // const auto &sampler = model.samplers[texInfo.sampler];
         // TODO: Setup sapDesc according to sampler from gLTF model
     }
     const auto &img = model.images[texInfo.source];
@@ -151,8 +151,7 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
     std::vector<std::unique_ptr<MeshPrimitive>> meshPrimitives;
     meshPrimitives.reserve(mesh.primitives.size());
     for (const auto &primitive : mesh.primitives) {
-        meshPrimitives.push_back(
-            std::move(ProcessMeshPrimitive(primitive, model)));
+        meshPrimitives.push_back(ProcessMeshPrimitive(primitive, model));
     }
 
     return std::make_unique<Mesh>(m_deviceResources, std::move(meshPrimitives));
@@ -191,17 +190,17 @@ GenerateTangents(const std::vector<unsigned int> &indices,
     ctx.m_pInterface = &spaceInterface;
     ctx.m_pUserData = &mesh;
 
-    auto SetTSpaceBasicCB = [](const SMikkTSpaceContext *pContext,
-                               const float fvTangent[],
-                               const float fSign,
-                               const int iFace,
-                               const int iVert)
-    {
-        const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
-        const auto idx = mesh->indices[iFace * 3 + iVert];
-        mesh->tangents[idx] =
-            Vec4D(fvTangent[0], fvTangent[1], fvTangent[2], fSign);
-    };
+    // auto SetTSpaceBasicCB = [](const SMikkTSpaceContext *pContext,
+    //                            const float fvTangent[],
+    //                            const float fSign,
+    //                            const int iFace,
+    //                            const int iVert)
+    // {
+    //     const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
+    //     const auto idx = mesh->indices[iFace * 3 + iVert];
+    //     mesh->tangents[idx] =
+    //         Vec4D(fvTangent[0], fvTangent[1], fvTangent[2], fSign);
+    // };
 
     auto GetNumFacesCB = [](const SMikkTSpaceContext *pContext)
     {
@@ -532,5 +531,5 @@ GLTFLoader::Load(const std::string &path)
         ProcessNode(model.nodes[nodeIdx], model, meshes);
     }
 
-    return std::move(meshes);
+    return meshes;
 }

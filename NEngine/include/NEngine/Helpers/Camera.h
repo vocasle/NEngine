@@ -68,7 +68,6 @@ private:
     Input::Mouse::MouseEventListener mMouseListener;
     Math::Vec2D mPrevMousePos;
     Math::Vec2D mCurMousePos;
-    bool mIsArcballOn = false;
     Math::Mat4X4 mViewMat = Math::MathMat4X4Identity();
 };
 }  // namespace Helpers

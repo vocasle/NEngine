@@ -92,8 +92,24 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
     mPerObjectBuffer->SetValue("material.Metalness", mat.Metalness);
     mPerObjectBuffer->SetValue("material.Roughness", mat.Roughness);
     mPerObjectBuffer->SetValue("material.NormalScale", mat.NormalScale);
-    mPerObjectBuffer->SetValue("material.OcclusionStrength", mat.OcclusionStrength);
+    mPerObjectBuffer->SetValue("material.OcclusionStrength",
+                               mat.OcclusionStrength);
     mPerObjectBuffer->SetValue("material.EmissiveFactor", mat.EmissiveFactor);
+    mPerObjectBuffer->SetValue(
+        "material.HasBaseColorTex",
+        static_cast<int>(mat.BaseColorTexture != nullptr));
+    mPerObjectBuffer->SetValue(
+        "material.HasMetallicRoughnessTex",
+        static_cast<int>(mat.BaseColorTexture != nullptr));
+    mPerObjectBuffer->SetValue(
+        "material.HasOcclusionTex",
+        static_cast<int>(mat.BaseColorTexture != nullptr));
+    mPerObjectBuffer->SetValue(
+        "material.HasEmissiveTex",
+        static_cast<int>(mat.BaseColorTexture != nullptr));
+    mPerObjectBuffer->SetValue(
+        "material.HasNormalTex",
+        static_cast<int>(mat.BaseColorTexture != nullptr));
 
     mPerObjectBuffer->Bind(deviceResources);
     meshPrimitive->Bind(deviceResources);
@@ -142,6 +158,11 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         material.AddChild("NormalScale", NodeType::Float);
         material.AddChild("OcclusionStrength", NodeType::Float);
         material.AddChild("EmissiveFactor", NodeType::Float3);
+        material.AddChild("HasBaseColorTex", NodeType::Bool);
+        material.AddChild("HasMetallicRoughnessTex", NodeType::Bool);
+        material.AddChild("HasOcclusionTex", NodeType::Bool);
+        material.AddChild("HasEmissiveTex", NodeType::Bool);
+        material.AddChild("HasNormalTex", NodeType::Bool);
         desc.AddNode(material);
         desc.SetBindSlot(0);
 

@@ -2,6 +2,9 @@
 
 #include <d3dcompiler.h>
 
+#include "NEngine/ECS/Systems/InputSystem.h"
+#include "NEngine/ECS/Systems/MoveSystem.h"
+#include "NEngine/ECS/Systems/RenderSystem.h"
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Input/Mouse.h"
@@ -26,14 +29,18 @@ using namespace NEngine::Utils;
 using namespace NEngine::Math;
 using namespace NEngine::Input;
 using namespace NEngine::Renderer;
+using namespace NEngine::ECS;
+using namespace NEngine::ECS::Components;
+using namespace NEngine::ECS::Systems;
 
 #if WITH_IMGUI
 void
-Game::UpdateImgui()
+MyGame::UpdateImgui()
 {
     if (ImGui::Button("Recompile all shaders")) {
-        NEngine::Helpers::ShaderManager::RecompileShaders(*m_deviceResources);
-        m_basePass->ReloadShaders();
+        NEngine::Helpers::ShaderManager::RecompileShaders(
+            mEngine->GetDeviceResources());
+        mSystemManager.GetSystem<RenderSystem>().ReloadShaders();
     }
 
     if (ImGui::CollapsingHeader("Camera settings")) {
@@ -47,30 +54,38 @@ Game::UpdateImgui()
             m_camera.SetZNear(zNear);
         }
     }
+
+    if (ImGui::Button("Open model")) {
+        OPENFILENAME ofn = {sizeof(ofn)};
+        WCHAR szPath[MAX_PATH] = {};
+        ofn.lpstrFilter =
+            L"GLB - gLTF 2.0 binary\0*.glb\0GLTF - gLTF 2.0\0*.gltf\0";
+        ofn.lpstrFile = szPath;
+        ofn.nMaxFile = ARRAYSIZE(szPath);
+        ofn.hwndOwner = mEngine->GetDeviceResources().GetWindow();
+        if (GetOpenFileName(&ofn)) {
+            auto &renderComp =
+                *mEntityManager.GetComponent<RenderComponent>(mEntities[0]);
+            renderComp.Mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
+        }
+    }
 }
 #endif
 
-Game::Game()
-    : m_camera({0, 0, 5})
+MyGame::MyGame()
+    : m_camera({0, 0, 5}),
+      mEngine(nullptr)
 {
-    m_deviceResources = std::make_unique<DeviceResources>();
-}
-
-Game::~Game()
-{
-#if WITH_IMGUI
-    ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
-#endif
 }
 
 void
-Game::Clear()
+MyGame::Clear()
 {
-    ID3D11DeviceContext *ctx = m_deviceResources->GetDeviceContext();
-    ID3D11RenderTargetView *rtv = m_deviceResources->GetRenderTargetView();
-    ID3D11DepthStencilView *dsv = m_deviceResources->GetDepthStencilView();
+    ID3D11DeviceContext *ctx = mEngine->GetDeviceResources().GetDeviceContext();
+    ID3D11RenderTargetView *rtv =
+        mEngine->GetDeviceResources().GetRenderTargetView();
+    ID3D11DepthStencilView *dsv =
+        mEngine->GetDeviceResources().GetDepthStencilView();
 
     static const float CLEAR_COLOR[4] = {
         0.392156899f, 0.584313750f, 0.929411829f, 1.000000000f};
@@ -81,43 +96,11 @@ Game::Clear()
     ctx->ClearDepthStencilView(
         dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     ctx->OMSetRenderTargets(1, &rtv, dsv);
-    ctx->RSSetViewports(1, &m_deviceResources->GetViewport());
+    ctx->RSSetViewports(1, &mEngine->GetDeviceResources().GetViewport());
 }
 
 void
-Game::Update()
-{
-    m_camera.ProcessKeyboard(m_timer.DeltaMillis);
-    m_camera.ProcessMouse(m_timer.DeltaMillis);
-
-    static float elapsedTime = 0.0f;
-    const auto deltaSeconds = static_cast<float>(m_timer.DeltaMillis / 1000.0);
-    elapsedTime += deltaSeconds;
-    static float dirLightTime = 0;
-    dirLightTime += deltaSeconds;
-
-    if (elapsedTime >= 1.0f) {
-        const std::string title =
-            UtilsFormatStr("Sandbox -- FPS: %d, frame: %f s",
-                           static_cast<int>(elapsedTime / deltaSeconds),
-                           deltaSeconds);
-        SetWindowText(m_deviceResources->GetWindow(),
-                      UtilsStrToWstr(title).c_str());
-        elapsedTime = 0.0f;
-    }
-
-    auto dirLight = m_basePass->GetBufferValue<DirectionalLight>(
-        "dirLight", BufferType::PerScene);
-
-    if (dirLight) {
-        constexpr float radius = 100;
-        dirLight->Direction = Vec4D(
-            cos(dirLightTime) * radius, 0, sin(dirLightTime) * radius, radius);
-    }
-}
-
-void
-Game::Render()
+MyGame::Render()
 {
 #if WITH_IMGUI
     ImGui_ImplDX11_NewFrame();
@@ -129,104 +112,98 @@ Game::Render()
     UpdateImgui();
 #endif
 
-    m_basePass->Draw(*m_deviceResources, m_meshes);
-
 #if WITH_IMGUI
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 #endif
 
-    const HRESULT hr = m_deviceResources->GetSwapChain()->Present(1, 0);
+    const HRESULT hr =
+        mEngine->GetDeviceResources().GetSwapChain()->Present(1, 0);
 
     ID3D11DeviceContext1 *ctx = reinterpret_cast<ID3D11DeviceContext1 *>(
-        m_deviceResources->GetDeviceContext());
-    ctx->DiscardView((ID3D11View *)m_deviceResources->GetRenderTargetView());
-    if (m_deviceResources->GetDepthStencilView()) {
+        mEngine->GetDeviceResources().GetDeviceContext());
+    ctx->DiscardView(
+        (ID3D11View *)mEngine->GetDeviceResources().GetRenderTargetView());
+    if (mEngine->GetDeviceResources().GetDepthStencilView()) {
         ctx->DiscardView(
-            (ID3D11View *)m_deviceResources->GetDepthStencilView());
+            (ID3D11View *)mEngine->GetDeviceResources().GetDepthStencilView());
     }
 }
 
 void
-Game::Tick()
+MyGame::Update(float dt)
 {
-    TimerTick(&m_timer);
-    Update();
+    {
+        m_camera.ProcessKeyboard(dt);
+        m_camera.ProcessMouse(dt);
+
+        static float elapsedTime = 0.0f;
+        const auto deltaSeconds = static_cast<float>(dt / 1000.0);
+        elapsedTime += deltaSeconds;
+        static float dirLightTime = 0;
+        dirLightTime += deltaSeconds;
+
+        if (elapsedTime >= 1.0f) {
+            const std::string title =
+                UtilsFormatStr("Sandbox -- FPS: %d, frame: %f s",
+                               static_cast<int>(elapsedTime / deltaSeconds),
+                               deltaSeconds);
+            SetWindowText(mEngine->GetDeviceResources().GetWindow(),
+                          UtilsStrToWstr(title).c_str());
+            elapsedTime = 0.0f;
+        }
+    }
+
+    mSystemManager.Update(dt);
+
     Render();
 }
 
-void
-Game::Initialize(HWND hWnd, uint32_t width, uint32_t height)
+auto
+MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 {
-    using namespace Microsoft::WRL;
-#ifdef MATH_TEST
-    MathTest();
-#endif
-    m_deviceResources->SetWindow(hWnd, width, height);
-    m_deviceResources->CreateDeviceResources();
-    m_deviceResources->CreateWindowSizeDependentResources();
-    CreateWindowSizeDependentResources();
-    TimerInitialize(&m_timer);
-    Mouse::Get().SetWindowDimensions(m_deviceResources->GetBackBufferWidth(),
-                                     m_deviceResources->GetBackBufferHeight());
-    ID3D11Device *device = m_deviceResources->GetDevice();
+    mEngine = &engine;
 
-    {
-        ModelImporter importer(*m_deviceResources);
+    mEntityManager.RegisterOnComponentAddCallback([this](Entity entity) -> void
+                                                  { OnComponentAdd(entity); });
+    mEntityManager.RegisterOnComponentRemoveCallback(
+        [this](Entity entity) -> void { OnComponentRemove(entity); });
 
-        const auto helmetPath =
-            R"(C:\Users\vocasle\source\repos\NEngine\NEngine\res\gLTF\helmet.glb)";
+    auto winSize = mEngine->GetWindowSize();
 
-        auto helmet = importer.Load(helmetPath);
-        std::move(
-            std::begin(helmet), std::end(helmet), std::back_inserter(m_meshes));
-    }
-
-    m_basePass = std::make_unique<BasePass>(*m_deviceResources);
-    m_basePass->SetCamera(m_camera);
+    Mouse::Get().SetWindowDimensions(winSize.X, winSize.Y);
 
     m_camera.SetZFar(10000);
     m_camera.SetZNear(0.1f);
+    m_camera.SetViewDimensions(winSize.X, winSize.Y);
 
-#if WITH_IMGUI
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
+    mSystemManager.SetSystem(std::make_unique<MoveSystem>(mEntityManager));
+    mSystemManager.SetSystem(std::make_unique<RenderSystem>(
+        mEngine->GetDeviceResources(), mEntityManager, m_camera));
+    mSystemManager.SetSystem(std::make_unique<InputSystem>(mEntityManager));
 
-    ImGui_ImplWin32_Init(hWnd);
-    ImGui_ImplDX11_Init(m_deviceResources->GetDevice(),
-                        m_deviceResources->GetDeviceContext());
-#endif
+    auto helmet = mEntityManager.CreateEntity();
+    auto &pos = mEntityManager.CreateComponent<PositionComponent>(helmet);
+    UtilsDebugPrint("Helmet default position: %f %f %f\n",
+                    pos.Position.x,
+                    pos.Position.y,
+                    pos.Position.z);
+
+    auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(helmet);
+    renderComp.Mesh = mEngine->LoadMesh("D:\\Assets\\cube.glb");
+    auto &ic = mEntityManager.CreateComponent<InputComponent>(helmet);
+
+    mEntities.push_back(helmet);
 }
 
-void
-Game::GetDefaultSize(uint32_t *width, uint32_t *height)
+auto
+MyGame::OnComponentAdd(NEngine::ECS::Entity entity) -> void
 {
-    *width = DEFAULT_WIN_WIDTH;
-    *height = DEFAULT_WIN_HEIGHT;
+    mSystemManager.RegisterEntity(entity);
 }
 
-void
-Game::OnWindowSizeChanged(int width, int height)
+auto
+MyGame::OnComponentRemove(NEngine::ECS::Entity entity) -> void
 {
-    if (!m_deviceResources->WindowSizeChanged(width, height))
-        return;
-
-    CreateWindowSizeDependentResources();
-}
-
-void
-Game::CreateWindowSizeDependentResources()
-{
-    const auto size = m_deviceResources->GetOutputSize();
-    const float aspectRatio =
-        static_cast<float>(size.right) / static_cast<float>(size.bottom);
-    float fovAngleY = 45.0f;
-
-    // portrait or snapped view.
-    if (aspectRatio < 1.0f) {
-        fovAngleY *= 2.0f;
-    }
-
-    m_camera.SetFov(fovAngleY);
-    m_camera.SetViewDimensions(size.right, size.bottom);
+    mSystemManager.UnregisterEntity(entity);
 }
