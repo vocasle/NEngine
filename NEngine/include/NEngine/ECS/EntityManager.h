@@ -132,6 +132,12 @@ public:
         mComponentRemoveCallbacks.erase(it);
     }
 
+    [[nodiscard]] auto
+    GetBitmask(Entity entity) -> unsigned long
+    {
+        return mEntities.at(entity).to_ulong();
+    }
+
 private:
     template <typename Component>
     auto
