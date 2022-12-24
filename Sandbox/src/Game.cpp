@@ -70,6 +70,14 @@ MyGame::UpdateImgui()
             renderComp.Mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
         }
     }
+
+    if (ImGui::Begin("Scene")) {
+        if (ImGui::CollapsingHeader("Graph")) {
+            mScene.Visit([](const GameObject &go) -> void
+                         { ImGui::Text("%s", go.Name.c_str()); });
+        }
+    }
+    ImGui::End();
 }
 #endif
 

@@ -41,4 +41,14 @@ Scene::FindEntityByName(const std::string &entityName) -> ECS::GameObject *
                      { return gameObject.Name == entityName; });
     return it == std::end(mEntities) ? nullptr : &*it;
 }
+
+auto
+Scene::Visit(std::function<void(const ECS::GameObject &)> callback) const
+    -> void
+{
+    for (auto &go : mEntities) {
+        callback(go);
+    }
+}
+
 }  // namespace NEngine

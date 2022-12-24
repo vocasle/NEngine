@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <vector>
 
 #include "ECS/Entity.h"
@@ -14,6 +15,9 @@ public:
     auto RemoveFromScene(const std::string &entityName) -> void;
     [[nodiscard]] auto FindEntityByName(const std::string &entityName)
         -> ECS::GameObject *;
+
+    auto Visit(std::function<void(const ECS::GameObject &)> callback) const
+        -> void;
 
 private:
     std::vector<ECS::GameObject> mEntities;
