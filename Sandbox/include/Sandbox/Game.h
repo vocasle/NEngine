@@ -14,12 +14,8 @@
 #include "NEngine/Engine.h"
 #include "NEngine/Game.h"
 #include "NEngine/Helpers/Camera.h"
-#include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Helpers/LightHelper.h"
-#include "NEngine/Input/Keyboard.h"
 #include "NEngine/Math/Math.h"
-#include "NEngine/Renderer/BasePass.h"
-#include "NEngine/Utils/Timer.h"
+#include "NEngine/Scene.h"
 
 class MyGame : public NEngine::Game
 {
@@ -30,7 +26,6 @@ public:
     virtual auto InitWithEngine(NEngine::Engine &engine) -> void override;
 
 private:
-    void Clear();
     void Update();
     void Render();
 
