@@ -40,6 +40,6 @@ private:
 
     NEngine::ECS::DefaultEntityManager mEntityManager;
 
-    std::vector<NEngine::ECS::Entity> mEntities;
     NEngine::ECS::DefaultSystemManager mSystemManager;
+    NEngine::Scene mScene;
 };

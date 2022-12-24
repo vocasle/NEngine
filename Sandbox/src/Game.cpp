@@ -32,6 +32,7 @@ using namespace NEngine::Renderer;
 using namespace NEngine::ECS;
 using namespace NEngine::ECS::Components;
 using namespace NEngine::ECS::Systems;
+using namespace NEngine;
 
 #if WITH_IMGUI
 void
@@ -64,8 +65,8 @@ MyGame::UpdateImgui()
         ofn.nMaxFile = ARRAYSIZE(szPath);
         ofn.hwndOwner = mEngine->GetDeviceResources().GetWindow();
         if (GetOpenFileName(&ofn)) {
-            auto &renderComp =
-                *mEntityManager.GetComponent<RenderComponent>(mEntities[0]);
+            auto &renderComp = *mEntityManager.GetComponent<RenderComponent>(
+                mScene.FindEntityByName("Player")->ID);
             renderComp.Mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
         }
     }
@@ -172,7 +173,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     renderComp.Mesh = mEngine->LoadMesh("D:\\Assets\\cube.glb");
     auto &ic = mEntityManager.CreateComponent<InputComponent>(helmet);
 
-    mEntities.push_back(helmet);
+    mScene.AddToScene({helmet, "Player", mEntityManager.GetBitmask(helmet)});
 }
 
 auto
