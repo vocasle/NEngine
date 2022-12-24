@@ -8,4 +8,5 @@ main(int argc, const char *argv[]) -> int
 
     std::unique_ptr<NEngine::Game> game = std::make_unique<MyGame>();
     engine.PlayGame(*game);
+    engine.Deinit();
 }
