@@ -35,6 +35,12 @@ using namespace NEngine::ECS::Systems;
 using namespace NEngine;
 
 #if WITH_IMGUI
+
+#define IG_COMPONENT_NAME(componentType)                    \
+    if (go.ComponentMask & ComponentType_##componentType) { \
+        ImGui::Text("\t" #componentType);                   \
+    }
+
 void
 MyGame::UpdateImgui()
 {
@@ -77,15 +83,9 @@ MyGame::UpdateImgui()
                 [](const GameObject &go) -> void
                 {
                     ImGui::Text("%s", go.Name.c_str());
-                    if (go.ComponentMask & ComponentType_POSITION) {
-                        ImGui::Text("\tPOSITION");
-                    }
-                    if (go.ComponentMask & ComponentType_INPUT) {
-                        ImGui::Text("\tINPUT");
-                    }
-                    if (go.ComponentMask & ComponentType_RENDER) {
-                        ImGui::Text("\tRENDER");
-                    }
+                    IG_COMPONENT_NAME(POSITION)
+                    IG_COMPONENT_NAME(INPUT)
+                    IG_COMPONENT_NAME(RENDER)
                 });
         }
     }
@@ -194,6 +194,13 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     auto &ic = mEntityManager.CreateComponent<InputComponent>(helmet);
 
     mScene.AddToScene({helmet, "Player", mEntityManager.GetBitmask(helmet)});
+
+    auto plane = mEntityManager.CreateEntity();
+    auto &planeMesh = mEntityManager.CreateComponent<RenderComponent>(plane);
+    planeMesh.Mesh = mEngine->LoadMesh(
+        UtilsFormatStr("%s/%s", NENGINE_RES_DIR, "\\gLTF\\plane.glb"));
+    auto &planePos = mEntityManager.CreateComponent<PositionComponent>(plane);
+    mScene.AddToScene({plane, "Ground", mEntityManager.GetBitmask(plane)});
 }
 
 auto
