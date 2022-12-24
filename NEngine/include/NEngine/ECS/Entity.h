@@ -23,8 +23,24 @@ struct ComponentData
 
 struct GameObject
 {
+    GameObject(Entity id, const std::string &name, unsigned long componentMask)
+        : Name(name),
+          ID(id),
+          ComponentMask(componentMask)
+    {
+    }
+
+    GameObject(Entity id, const std::string &name)
+        : GameObject(id, name, 0)
+    {
+    }
+    GameObject()
+        : GameObject(0, "")
+    {
+    }
+
     std::string Name;
     Entity ID;
-    long ComponentMask;
+    unsigned long ComponentMask;
 };
 }  // namespace NEngine::ECS
