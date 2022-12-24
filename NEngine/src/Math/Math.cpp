@@ -1083,14 +1083,6 @@ MathMat4X4Inverse(const Mat4X4 &mat)
 }
 
 std::string
-Vec2D::ToString() const
-{
-    std::stringstream out;
-    out << "{ " << X << ", " << Y << " }";
-    return out.str();
-}
-
-std::string
 Mat4X4::ToString() const
 {
     std::stringstream out;
