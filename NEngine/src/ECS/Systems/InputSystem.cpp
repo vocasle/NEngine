@@ -32,11 +32,11 @@ InputSystem::Update(float dt) -> void
         }
 
         if (Keyboard::Get().IsKeyDown('A')) {
-            v.x = -delta;
+            v.x = delta;
         }
 
         if (Keyboard::Get().IsKeyDown('D')) {
-            v.x = delta;
+            v.x = -delta;
         }
         pc.Velocity = v;
     }
