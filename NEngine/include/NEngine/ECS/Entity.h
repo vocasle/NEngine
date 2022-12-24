@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace NEngine::ECS {
 typedef long Entity;
 
@@ -17,5 +19,12 @@ struct ComponentData
     }
     Entity Entity;
     T Component;
+};
+
+struct GameObject
+{
+    std::string Name;
+    Entity ID;
+    long ComponentMask;
 };
 }  // namespace NEngine::ECS

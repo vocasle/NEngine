@@ -1,15 +1,31 @@
 #include "NEngine/Scene.h"
 
 namespace NEngine {
+
 auto
-Scene::AddToScene(ECS::Entity entity) -> void
+Scene::AddToScene(const ECS::GameObject &entity) -> void
 {
     mEntities.push_back(entity);
 }
 auto
-Scene::RemoveFromScene(ECS::Entity entity) -> void
+Scene::RemoveFromScene(ECS::Entity entityID) -> void
 {
-    auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
+    auto it = std::find_if(std::begin(mEntities),
+                           std::end(mEntities),
+                           [entityID](const ECS::GameObject &gameObject) -> bool
+                           { return gameObject.ID == entityID; });
+    if (it != std::end(mEntities)) {
+        mEntities.erase(it);
+    }
+}
+auto
+Scene::RemoveFromScene(const std::string &entityName) -> void
+{
+    auto it =
+        std::find_if(std::begin(mEntities),
+                     std::end(mEntities),
+                     [entityName](const ECS::GameObject &gameObject) -> bool
+                     { return gameObject.Name == entityName; });
     if (it != std::end(mEntities)) {
         mEntities.erase(it);
     }

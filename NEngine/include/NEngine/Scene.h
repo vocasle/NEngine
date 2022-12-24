@@ -8,11 +8,12 @@ namespace NEngine {
 
 class Scene
 {
-    auto AddToScene(ECS::Entity entity) -> void;
-    auto RemoveFromScene(ECS::Entity entity) -> void;
+    auto AddToScene(const ECS::GameObject &entity) -> void;
+    auto RemoveFromScene(ECS::Entity entityID) -> void;
+    auto RemoveFromScene(const std::string &entityName) -> void;
 
 private:
-    std::vector<ECS::Entity> mEntities;
+    std::vector<ECS::GameObject> mEntities;
 };
 
 }  // namespace NEngine
