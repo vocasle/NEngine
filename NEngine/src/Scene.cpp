@@ -30,4 +30,15 @@ Scene::RemoveFromScene(const std::string &entityName) -> void
         mEntities.erase(it);
     }
 }
+
+auto
+Scene::FindEntityByName(const std::string &entityName) -> ECS::GameObject *
+{
+    auto it =
+        std::find_if(std::begin(mEntities),
+                     std::end(mEntities),
+                     [entityName](const ECS::GameObject &gameObject) -> bool
+                     { return gameObject.Name == entityName; });
+    return it == std::end(mEntities) ? nullptr : &*it;
+}
 }  // namespace NEngine
