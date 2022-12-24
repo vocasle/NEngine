@@ -28,6 +28,7 @@ To build with VS 2022 you just need to open the project as CMake project.
 To build with CMake navigate to root of the repo and execute:
 
 	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -S . - B build-debug -G Ninja
+	cmake --build build-debug
 
 
 ## Roadmap
