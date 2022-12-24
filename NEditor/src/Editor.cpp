@@ -2,7 +2,6 @@
 
 #include <mciapi.h>
 
-#include "DirectXMath.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/ModelImporter.h"
 #include "NEngine/Helpers/ShaderManager.h"
@@ -18,7 +17,6 @@ namespace NEditor {
 
 using namespace NEngine::Helpers;
 using namespace NEngine::Renderer;
-using namespace DirectX;
 using namespace NEngine::Input;
 
 void
@@ -71,7 +69,7 @@ Editor::Initialize(HWND wnd, uint32_t width, uint32_t height)
 
     mBasePass = std::make_unique<BasePass>(mDeviceResources);
     mBasePass->SetCamera(mCamera);
-    mCamera.SetFov(XMConvertToRadians(45));
+    mCamera.SetFov(MathToRadians(45));
     mBasePass->SetRenderTarget(*mRenderTarget);
     mBasePass->SetDepthTarget(*mDepthTarget);
     mBasePass->SetViewport(mViewport);
@@ -90,14 +88,14 @@ Editor::Initialize(HWND wnd, uint32_t width, uint32_t height)
 void
 Editor::GetDefaultSize(uint32_t *width, uint32_t *height)
 {
-    *width = mWinSize.x;
-    *height = mWinSize.y;
+    *width = mWinSize.X;
+    *height = mWinSize.Y;
 }
 void
 Editor::OnWindowSizeChanged(int width, int height)
 {
-    mWinSize.x = width;
-    mWinSize.y = height;
+    mWinSize.X = width;
+    mWinSize.Y = height;
 
     mDeviceResources.WindowSizeChanged(width, height);
 }
@@ -402,12 +400,14 @@ Editor::OnViewportSizeChanged()
 {
     auto min = ImGui::GetWindowContentRegionMin();
     auto max = ImGui::GetWindowContentRegionMax();
-    auto viewportSize = XMFLOAT2(max.x - min.x, max.y - min.y);
-    const auto oldViewportSize = XMFLOAT2(mViewport.Width, mViewport.Height);
+    auto viewportSize = Vec2D(max.x - min.x, max.y - min.y);
+    const auto oldViewportSize = Vec2D(mViewport.Width, mViewport.Height);
     const auto epsilon = 0.01f;
-    if (!XMVector2NearEqual(XMLoadFloat2(&viewportSize),
-                            XMLoadFloat2(&oldViewportSize),
-                            XMLoadFloat(&epsilon))) {
+
+    const bool isEqual = MathNearlyEqual(viewportSize.X, oldViewportSize.X) &&
+                         MathNearlyEqual(viewportSize.Y, oldViewportSize.Y);
+
+    if (!isEqual) {
         UpdateViewportSize(viewportSize);
         return true;
     }
@@ -415,15 +415,21 @@ Editor::OnViewportSizeChanged()
 }
 
 void
-Editor::UpdateViewportSize(DirectX::XMFLOAT2 viewportSize)
+Editor::UpdateViewportSize(const NEngine::Math::Vec2D &viewportSize)
 {
-    mViewport.Width = viewportSize.x;
-    mViewport.Height = viewportSize.y;
+    if (viewportSize.X == 0 || viewportSize.Y == 0) {
+        UtilsDebugPrint("WARN: Invalid viewport size %s.\n",
+                        viewportSize.ToString().c_str());
+        return;
+    }
 
-    mCamera.SetViewDimensions(viewportSize.x, viewportSize.y);
+    mViewport.Width = viewportSize.X;
+    mViewport.Height = viewportSize.Y;
+
+    mCamera.SetViewDimensions(viewportSize.X, viewportSize.Y);
     {
-        const float aspectRatio = static_cast<float>(viewportSize.y) /
-                                  static_cast<float>(viewportSize.x);
+        const float aspectRatio = static_cast<float>(viewportSize.Y) /
+                                  static_cast<float>(viewportSize.X);
         float fovAngleY = 45.0f;
 
         // portrait or snapped view.
@@ -431,7 +437,7 @@ Editor::UpdateViewportSize(DirectX::XMFLOAT2 viewportSize)
             fovAngleY *= 2.0f;
         }
 
-        mCamera.SetFov(XMConvertToRadians(fovAngleY));
+        mCamera.SetFov(MathToRadians(fovAngleY));
     }
 
     mRenderTarget->Resize(mDeviceResources, viewportSize);

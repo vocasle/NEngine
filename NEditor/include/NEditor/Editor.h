@@ -6,10 +6,10 @@
 #include <memory>
 #include <vector>
 
-#include "DirectXMath.h"
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/LightHelper.h"
+#include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/BasePass.h"
 #include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Renderer/Texture.h"
@@ -29,13 +29,13 @@ private:
     void UpdateImgui();
     void Clear();
     bool OnViewportSizeChanged();
-    void UpdateViewportSize(DirectX::XMFLOAT2 viewportSize);
+    void UpdateViewportSize(const NEngine::Math::Vec2D &viewportSize);
     void RegisterKeys();
     void ProcessViewportInput();
     void LoadMesh(const std::string &path);
 
     NEngine::Helpers::DeviceResources mDeviceResources;
-    DirectX::XMFLOAT2 mWinSize = {1280, 720};
+    NEngine::Math::Vec2D mWinSize = {1280, 720};
 
     D3D11_VIEWPORT mViewport;
     std::unique_ptr<NEngine::Renderer::Texture> mRenderTarget;
