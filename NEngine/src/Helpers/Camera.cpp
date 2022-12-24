@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cmath>
 
-#include "DirectXMath.h"
 #include "NEngine/Input/Keyboard.h"
 #include "NEngine/Input/Mouse.h"
 #include "NEngine/Math/Math.h"
@@ -16,7 +15,6 @@ namespace Helpers {
 
 using namespace Math;
 using namespace Input;
-using namespace DirectX;
 
 Camera::Camera()
     : Camera({0.0f, 0.0f, 0.0f})
@@ -242,9 +240,9 @@ Camera::SetFov(float fov)
 }
 
 void
-Camera::SetPosition(DirectX::XMFLOAT3 position)
+Camera::SetPosition(const Math::Vec3D &position)
 {
-    m_Pos = Vec3D(position.x, position.y, position.z);
+    m_Pos = position;
 }
 void
 Camera::SetPitch(float pitch)
@@ -283,9 +281,9 @@ Camera::Arcball(double deltaMillis)
         const auto yawDelta = mCurMousePos.X - mPrevMousePos.X;
 
         constexpr auto maxPitch = float(M_PI_2) - 0.1f;
-        m_Pitch += XMConvertToRadians(pitchDelta * 0.4);
+        m_Pitch += MathToRadians(pitchDelta * 0.4);
         m_Pitch = std::clamp(m_Pitch, -maxPitch, maxPitch);
-        m_Yaw += XMConvertToRadians(yawDelta * 0.4);
+        m_Yaw += MathToRadians(yawDelta * 0.4);
 
         Utils::UtilsDebugPrint("pitch: %f, yaw: %f\n", m_Pitch, m_Yaw);
        float camRadius = m_Pos.Length();

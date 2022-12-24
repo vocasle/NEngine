@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "Bindable.h"
-#include "DirectXMath.h"
 #include "NEngine/Helpers/DeviceResources.h"
+#include "NEngine/Math/Math.h"
 #include "NEngine/Utils/Image.h"
 #include "Sampler.h"
 
@@ -43,10 +43,9 @@ public:
     ID3D11RenderTargetView *GetRenderTargetView() const;
     ID3D11DepthStencilView *GetDepthStencilView() const;
     void Resize(Helpers::DeviceResources &deviceResources,
-                DirectX::XMFLOAT2 size);
+                const Math::Vec2D &size);
 
 private:
-
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mSRV;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> mRTV;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> mDSV;

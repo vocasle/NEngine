@@ -1255,26 +1255,6 @@ MathMat3X3Determinant(const Mat3X3 &mat)
            mat.A01 * (mat.A10 * mat.A22 - mat.A20 - mat.A12) +
            mat.A02 * (mat.A10 * mat.A21 - mat.A20 - mat.A11);
 }
-
-#if NENGINE_USE_DIRECTXMATH
-Mat4X4
-MathXMMatrixToMat4X4(DirectX::XMMATRIX xmMat)
-{
-    using namespace DirectX;
-
-    Mat4X4 out;
-
-    XMFLOAT4X4 tmp;
-    XMStoreFloat4x4(&tmp, xmMat);
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            out.A[i][j] = tmp.m[i][j];
-        }
-    }
-
-    return out;
-}
-#endif
 }  // namespace Math
 
 }  // namespace NEngine
