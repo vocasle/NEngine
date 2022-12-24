@@ -73,8 +73,20 @@ MyGame::UpdateImgui()
 
     if (ImGui::Begin("Scene")) {
         if (ImGui::CollapsingHeader("Graph")) {
-            mScene.Visit([](const GameObject &go) -> void
-                         { ImGui::Text("%s", go.Name.c_str()); });
+            mScene.Visit(
+                [](const GameObject &go) -> void
+                {
+                    ImGui::Text("%s", go.Name.c_str());
+                    if (go.ComponentMask & ComponentType_POSITION) {
+                        ImGui::Text("\tPOSITION");
+                    }
+                    if (go.ComponentMask & ComponentType_INPUT) {
+                        ImGui::Text("\tINPUT");
+                    }
+                    if (go.ComponentMask & ComponentType_RENDER) {
+                        ImGui::Text("\tRENDER");
+                    }
+                });
         }
     }
     ImGui::End();
