@@ -36,7 +36,7 @@ set(source_file_list
         src/Math/Mat4X4.cpp
         src/Engine.cpp 
         "src/ECS/Systems/MoveSystem.cpp" 
-        "src/ECS/Systems/RenderSystem.cpp" "src/ECS/Systems/InputSystem.cpp")
+        "src/ECS/Systems/RenderSystem.cpp" "src/ECS/Systems/InputSystem.cpp" "src/Scene.cpp")
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -87,7 +87,7 @@ set(header_file_list
         include/NEngine/ECS/Systems/MoveSystem.h 
         
         include/NEngine/ECS/Components/RenderComponent.h 
-        "include/NEngine/ECS/Systems/RenderSystem.h" "include/NEngine/ECS/SystemManager.h" "include/NEngine/ECS/Components/InputComponent.h" "include/NEngine/ECS/Systems/InputSystem.h")
+        "include/NEngine/ECS/Systems/RenderSystem.h" "include/NEngine/ECS/SystemManager.h" "include/NEngine/ECS/Components/InputComponent.h" "include/NEngine/ECS/Systems/InputSystem.h" "include/NEngine/Scene.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
