@@ -20,6 +20,6 @@ target_link_libraries(${app_name} NEngine imgui)
 
 target_compile_options(${app_name} PRIVATE
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-                -Wall -Werror>
+                -Wall>
         $<$<CXX_COMPILER_ID:MSVC>:
-                /W4 /WX>)
+                /W4>)
