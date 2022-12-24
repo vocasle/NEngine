@@ -22,26 +22,12 @@ NEngine::Renderer::BasePass::Draw(
 {
     deviceResources.PIXBeginEvent(L"BasePass");
 
-    // cache original views
-    D3D11_VIEWPORT *originalViewport = nullptr;
-    auto numViewports = 0u;
-    ComPtr<ID3D11RenderTargetView> originalRtv;
-    ComPtr<ID3D11DepthStencilView> originalDsv;
-    deviceResources.GetDeviceContext()->OMGetRenderTargets(
-        1, originalRtv.GetAddressOf(), originalDsv.GetAddressOf());
-    deviceResources.GetDeviceContext()->RSGetViewports(&numViewports,
-                                                       originalViewport);
-
     auto rtv = mRenderTarget ? mRenderTarget->GetRenderTargetView()
                              : deviceResources.GetRenderTargetView();
     auto dsv = mDepthTarget ? mDepthTarget->GetDepthStencilView()
                             : deviceResources.GetDepthStencilView();
+
     auto ctx = deviceResources.GetDeviceContext();
-    constexpr float clearColor[] = {0.3f, 0.3f, 0.3f, 1.0f};
-    ctx->ClearRenderTargetView(rtv, clearColor);
-    ctx->ClearDepthStencilView(
-        dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
-    ctx->OMSetRenderTargets(1, &rtv, dsv);
     auto viewport = mViewport ? *mViewport : deviceResources.GetViewport();
     ctx->RSSetViewports(1, &viewport);
     ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -67,14 +53,6 @@ NEngine::Renderer::BasePass::Draw(
         for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {
             DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
         }
-    }
-
-    if (originalRtv && originalDsv) {
-        ctx->OMSetRenderTargets(
-            1, originalRtv.GetAddressOf(), originalDsv.Get());
-    }
-    if (originalViewport) {
-        ctx->RSSetViewports(numViewports, originalViewport);
     }
 
     deviceResources.PIXEndEvent();

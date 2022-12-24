@@ -80,6 +80,11 @@ RenderSystem::RegisterEntity(Entity entity) -> void
 {
     if (mEntityManager->HasComponent<PositionComponent>(entity) &&
         mEntityManager->HasComponent<RenderComponent>(entity)) {
+        auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
+        if (it != std::end(mEntities)) {
+            UtilsDebugPrint("Entity %l already registered with RenderSystem");
+            return;
+        }
         mEntities.push_back(entity);
     }
 }

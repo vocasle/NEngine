@@ -13,9 +13,6 @@
 
 namespace NEngine::ECS {
 
-constexpr auto MESH_MASK = std::bitset<64>(0x1);
-constexpr auto AUDIO_MASK = std::bitset<64>(0x2);
-
 // Taken from https://stackoverflow.com/a/18063608/3846281
 template <class Component, class Tuple>
 struct Index;
@@ -132,6 +129,12 @@ public:
         mComponentRemoveCallbacks.erase(it);
     }
 
+    [[nodiscard]] auto
+    GetBitmask(Entity entity) -> unsigned long
+    {
+        return mEntities.at(entity).to_ulong();
+    }
+
 private:
     template <typename Component>
     auto
@@ -182,4 +185,10 @@ private:
 using DefaultEntityManager = EntityManager<Components::PositionComponent,
                                            Components::RenderComponent,
                                            Components::InputComponent>;
+
+enum ComponentType {
+    ComponentType_POSITION = 0x1,
+    ComponentType_RENDER = 0x2,
+    ComponentType_INPUT = 0x4,
+};
 }  // namespace NEngine::ECS

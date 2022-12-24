@@ -32,8 +32,15 @@ using namespace NEngine::Renderer;
 using namespace NEngine::ECS;
 using namespace NEngine::ECS::Components;
 using namespace NEngine::ECS::Systems;
+using namespace NEngine;
 
 #if WITH_IMGUI
+
+#define IG_COMPONENT_NAME(componentType)                    \
+    if (go.ComponentMask & ComponentType_##componentType) { \
+        ImGui::Text("\t" #componentType);                   \
+    }
+
 void
 MyGame::UpdateImgui()
 {
@@ -64,39 +71,32 @@ MyGame::UpdateImgui()
         ofn.nMaxFile = ARRAYSIZE(szPath);
         ofn.hwndOwner = mEngine->GetDeviceResources().GetWindow();
         if (GetOpenFileName(&ofn)) {
-            auto &renderComp =
-                *mEntityManager.GetComponent<RenderComponent>(mEntities[0]);
+            auto &renderComp = *mEntityManager.GetComponent<RenderComponent>(
+                mScene.FindEntityByName("Player")->ID);
             renderComp.Mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
         }
     }
+
+    if (ImGui::Begin("Scene")) {
+        if (ImGui::CollapsingHeader("Graph")) {
+            mScene.Visit(
+                [](const GameObject &go) -> void
+                {
+                    ImGui::Text("%s", go.Name.c_str());
+                    IG_COMPONENT_NAME(POSITION)
+                    IG_COMPONENT_NAME(INPUT)
+                    IG_COMPONENT_NAME(RENDER)
+                });
+        }
+    }
+    ImGui::End();
 }
 #endif
 
 MyGame::MyGame()
-    : m_camera({0, 0, 5}),
+    : m_camera({0, 0, -5}),
       mEngine(nullptr)
 {
-}
-
-void
-MyGame::Clear()
-{
-    ID3D11DeviceContext *ctx = mEngine->GetDeviceResources().GetDeviceContext();
-    ID3D11RenderTargetView *rtv =
-        mEngine->GetDeviceResources().GetRenderTargetView();
-    ID3D11DepthStencilView *dsv =
-        mEngine->GetDeviceResources().GetDepthStencilView();
-
-    static const float CLEAR_COLOR[4] = {
-        0.392156899f, 0.584313750f, 0.929411829f, 1.000000000f};
-
-    ctx->Flush();
-
-    ctx->ClearRenderTargetView(rtv, CLEAR_COLOR);
-    ctx->ClearDepthStencilView(
-        dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    ctx->OMSetRenderTargets(1, &rtv, dsv);
-    ctx->RSSetViewports(1, &mEngine->GetDeviceResources().GetViewport());
 }
 
 void
@@ -193,7 +193,14 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     renderComp.Mesh = mEngine->LoadMesh("D:\\Assets\\cube.glb");
     auto &ic = mEntityManager.CreateComponent<InputComponent>(helmet);
 
-    mEntities.push_back(helmet);
+    mScene.AddToScene({helmet, "Player", mEntityManager.GetBitmask(helmet)});
+
+    auto plane = mEntityManager.CreateEntity();
+    auto &planeMesh = mEntityManager.CreateComponent<RenderComponent>(plane);
+    planeMesh.Mesh = mEngine->LoadMesh(
+        UtilsFormatStr("%s/%s", NENGINE_RES_DIR, "\\gLTF\\plane.glb"));
+    auto &planePos = mEntityManager.CreateComponent<PositionComponent>(plane);
+    mScene.AddToScene({plane, "Ground", mEntityManager.GetBitmask(plane)});
 }
 
 auto
