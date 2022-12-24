@@ -10,13 +10,21 @@
 
 namespace NEngine {
 
+struct WindowSettings
+{
+    Math::Vec2D Position;
+    Math::Vec2D Size;
+};
+
 class Engine
 {
 public:
     Engine(int argc, const char *argv[]);
     ~Engine();
 
-    auto OnWindowSizeChanged(long width, long height) -> void;
+    auto OnWindowSizeChanged(float width, float height) -> void;
+    auto OnWindowMoved(float x, float y) -> void;
+
     auto Update() -> void;
 
     auto PlayGame(NEngine::Game &game) -> void;
@@ -27,6 +35,7 @@ public:
 
     auto LoadMesh(const std::string &path)
         -> std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>;
+    auto Deinit() -> void;
 
 private:
     auto CreateDefaultWindow() -> void;
@@ -34,6 +43,8 @@ private:
     auto InitImGui() -> void;
     auto InitDeviceResources() -> void;
     auto InitTimer() -> void;
+    auto ReadConfig() -> void;
+    auto SaveConfig() -> void;
 
     constexpr static auto ENGINE_WINDOW_CLASS = L"NEngineWindowClass";
 
@@ -41,5 +52,6 @@ private:
     NEngine::Helpers::DeviceResources mDeviceResources;
     NEngine::Game *mGame = nullptr;
     NEngine::Utils::Timer mTimer;
+    WindowSettings mWinSettings;
 };
 }  // namespace NEngine

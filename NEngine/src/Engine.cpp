@@ -1,13 +1,14 @@
 #include "NEngine/Engine.h"
 
+#include <sstream>
+
+#include "NEngine/Helpers/ModelImporter.h"
 #include "NEngine/Input/Keyboard.h"
 #include "NEngine/Input/Mouse.h"
 #include "NEngine/Utils/Utils.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
-
-#include "NEngine/Helpers/ModelImporter.h"
 
 using namespace NEngine;
 using namespace NEngine::Utils;
@@ -55,7 +56,8 @@ WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 
         case WM_MOVE:
             if (engine) {
-                // OnWindowMoved();
+                engine->OnWindowMoved(float(LOWORD(lParam)),
+                                      float(HIWORD(lParam)));
             }
             break;
 
@@ -257,6 +259,8 @@ Engine::Engine(int argc, const char *argv[])
         UtilsDebugPrint("[%d]: %s\n", i, argv[i]);
     }
 
+    ReadConfig();
+
     CreateDefaultWindow();
     if (!mWnd) {
         UTILS_FATAL_ERROR("Failed to create default window!");
@@ -284,10 +288,10 @@ Engine::CreateDefaultWindow() -> void
                           NEngine::Engine::ENGINE_WINDOW_CLASS,
                           L"NEngine v0.0.1",
                           WS_OVERLAPPEDWINDOW,
-                          CW_USEDEFAULT,
-                          CW_USEDEFAULT,
-                          DEFAULT_WIN_WIDTH,
-                          DEFAULT_WIN_HEIGHT,
+                          mWinSettings.Position.X,
+                          mWinSettings.Position.Y,
+                          mWinSettings.Size.X,
+                          mWinSettings.Size.Y,
                           nullptr,
                           nullptr,
                           nullptr,
@@ -310,11 +314,12 @@ Engine::EngineLoop() -> void
 }
 
 auto
-Engine::OnWindowSizeChanged(long width, long height) -> void
+Engine::OnWindowSizeChanged(float width, float height) -> void
 {
-    UtilsDebugPrint("Window size changed: %ld, %ld\n", width, height);
+    UtilsDebugPrint("Window size changed: %f, %f\n", width, height);
     mDeviceResources.WindowSizeChanged(static_cast<int>(width),
                                        static_cast<int>(height));
+    mWinSettings.Size = {width, height};
 }
 
 auto
@@ -384,11 +389,85 @@ Engine::~Engine()
 }
 
 auto
-Engine::LoadMesh(const std::string &path) -> std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>
+Engine::LoadMesh(const std::string &path)
+    -> std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>
 {
     ModelImporter importer(mDeviceResources);
     auto model = importer.Load(path);
     return model;
+}
+
+auto
+Engine::OnWindowMoved(float x, float y) -> void
+{
+    UtilsDebugPrint("Window moved: %f %f\n", x, y);
+    mWinSettings.Position = {x, y};
+}
+
+auto
+Engine::SaveConfig() -> void
+{
+    std::ostringstream out;
+
+    out << "[window]" << '\n'
+        << "x=" << mWinSettings.Position.X << '\n'
+        << "y=" << mWinSettings.Position.Y << '\n'
+        << "w=" << mWinSettings.Size.X << '\n'
+        << "h=" << mWinSettings.Size.Y << '\n';
+
+    const auto windowConfig = out.str();
+
+    const auto filename =
+        UtilsFormatStr("%s/%s", NENGINE_BUILD_DIR, "config.ini");
+    UtilsWriteData(filename.c_str(), windowConfig.c_str(), windowConfig.size());
+}
+
+auto
+Engine::ReadConfig() -> void
+{
+    const auto filename =
+        UtilsFormatStr("%s/%s", NENGINE_BUILD_DIR, "config.ini");
+    const auto bytes = UtilsReadData(filename.c_str());
+
+    const auto stringData = std::string(std::begin(bytes), std::end(bytes));
+
+    std::istringstream in(stringData);
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.find("[window]") != std::string::npos) {
+            float x = 0;
+            float y = 0;
+            char ch = 0;
+            if (!(in >> ch >> ch >> x)) {
+                UtilsDebugPrint("Failed to read window x coordinate\n");
+            }
+
+            if (!(in >> ch >> ch >> y)) {
+                UtilsDebugPrint("Failed to read window y coordinate\n");
+            }
+
+            mWinSettings.Position = {x, y};
+
+            x = DEFAULT_WIN_WIDTH;
+            y = DEFAULT_WIN_HEIGHT;
+
+            if (!(in >> ch >> ch >> x)) {
+                UtilsDebugPrint("Failed to read window width\n");
+            }
+
+            if (!(in >> ch >> ch >> y)) {
+                UtilsDebugPrint("Failed to read window height\n");
+            }
+
+            mWinSettings.Size = {x, y};
+        }
+    }
+}
+
+auto
+Engine::Deinit() -> void
+{
+    SaveConfig();
 }
 
 }  // namespace NEngine
