@@ -36,7 +36,9 @@ set(source_file_list
         src/Math/Mat4X4.cpp
         src/Engine.cpp 
         "src/ECS/Systems/MoveSystem.cpp" 
-        "src/ECS/Systems/RenderSystem.cpp" "src/ECS/Systems/InputSystem.cpp" "src/Scene.cpp")
+        "src/ECS/Systems/RenderSystem.cpp" 
+        "src/ECS/Systems/InputSystem.cpp" 
+        "src/Scene.cpp")
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -85,9 +87,12 @@ set(header_file_list
         include/NEngine/ECS/Entity.h
         include/NEngine/ECS/Components/PositionComponent.h
         include/NEngine/ECS/Systems/MoveSystem.h 
-        
         include/NEngine/ECS/Components/RenderComponent.h 
-        "include/NEngine/ECS/Systems/RenderSystem.h" "include/NEngine/ECS/SystemManager.h" "include/NEngine/ECS/Components/InputComponent.h" "include/NEngine/ECS/Systems/InputSystem.h" "include/NEngine/Scene.h")
+        "include/NEngine/ECS/Systems/RenderSystem.h" 
+        "include/NEngine/ECS/SystemManager.h" 
+        "include/NEngine/ECS/Components/InputComponent.h" 
+        "include/NEngine/ECS/Systems/InputSystem.h" 
+        "include/NEngine/Scene.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
@@ -113,6 +118,12 @@ target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/in
 
 add_subdirectory(thirdparty)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(NENGINE_DEBUG 1)
+else()
+    set(NENGINE_DEBUG 0)
+endif()
+
 target_compile_definitions(${library_name} 
         PUBLIC NOMINMAX=1 
         PUBLIC UNICODE=1 
@@ -121,7 +132,10 @@ target_compile_definitions(${library_name}
         PUBLIC NENGINE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
         PUBLIC NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders"
         PUBLIC NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader"
-        PUBLIC NENGINE_RES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/res")
+        PUBLIC NENGINE_RES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/res"
+        PUBLIC NENGINE_DEBUG=${NENGINE_DEBUG})
+
+
 
 target_compile_options(${library_name}  PRIVATE
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
