@@ -53,7 +53,6 @@ Vec3D::Normalize()
     return *this;
 }
 
-
 bool
 Vec3D::operator==(const Vec3D &rhs) const
 {
@@ -88,6 +87,17 @@ Vec3D
 operator*(const float s, const Vec3D &rhs)
 {
     return rhs * s;
+}
+
+Vec3D
+operator/(const Vec3D &lhs, const float s)
+{
+    return lhs * (1 / s);
+}
+Vec3D
+operator/(const float s, const Vec3D &rhs)
+{
+    return rhs / s;
 }
 
 }  // namespace NEngine::Math
