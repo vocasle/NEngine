@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "NEngine/Math/MathUtils.h"
+
 namespace NEngine::Math {
 std::string
 Vec3D::ToString() const
@@ -40,7 +42,7 @@ Vec3D::Cross(const Vec3D &lhs, const Vec3D &rhs)
 float
 Vec3D::Dot(const Vec3D &lhs, const Vec3D &rhs)
 {
-    return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z;
+    return sqrtf(lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z);
 }
 
 Vec3D &
@@ -56,7 +58,8 @@ Vec3D::Normalize()
 bool
 Vec3D::operator==(const Vec3D &rhs) const
 {
-    return X == rhs.X && Y == rhs.Y && Z == rhs.Z;
+    return NearlyEqual(X, rhs.X) && NearlyEqual(Y, rhs.Y) &&
+           NearlyEqual(Z, rhs.Z);
 }
 
 bool
