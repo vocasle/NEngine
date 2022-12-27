@@ -97,10 +97,5 @@ operator/(const Vec3D &lhs, const float s)
 {
     return lhs * (1 / s);
 }
-Vec3D
-operator/(const float s, const Vec3D &rhs)
-{
-    return rhs / s;
-}
 
 }  // namespace NEngine::Math
