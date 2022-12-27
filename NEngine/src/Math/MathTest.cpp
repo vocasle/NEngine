@@ -126,6 +126,52 @@ TestVec3D()
         UTILS_ASSERT(NearlyEqual(e, r), "Normalize() test failed");
         UtilsDebugPrint("Normalize() test passed\n");
     }
+
+    {
+        auto v1 = Vec3D(3, 2, 5);
+        auto v2 = Vec3D(1, 4, 6);
+        auto e = Vec3D(4, 6, 11);
+        auto r = v1 + v2;
+
+        UTILS_ASSERT(NearlyEqual(e, r),
+                     "operator+(const Vec3D &, const Vec3D &) test failed");
+        UtilsDebugPrint(
+            "operator+(const Vec3D &, const Vec3D &) test passed\n");
+    }
+
+    {
+        auto v1 = Vec3D(3, 2, 5);
+        auto v2 = Vec3D(1, 4, 6);
+        auto e = Vec3D(2, -2, -1);
+        auto r = v1 - v2;
+
+        UTILS_ASSERT(NearlyEqual(e, r),
+                     "operator-(const Vec3D &, const Vec3D &) test failed");
+        UtilsDebugPrint(
+            "operator-(const Vec3D &, const Vec3D &) test passed\n");
+    }
+
+    {
+        auto v1 = Vec3D(3, 2, 5);
+        auto e = Vec3D(6, 4, 10);
+        auto r = v1 * 2;
+
+        UTILS_ASSERT(NearlyEqual(e, r),
+                     "operator*(const Vec3D &, const float &) test failed");
+        UtilsDebugPrint(
+            "operator*(const Vec3D &, const float &) test passed\n");
+    }
+
+    {
+        auto v1 = Vec3D(3, 2, 5);
+        auto e = Vec3D(1.5f, 1, 2.5f);
+        auto r = v1 / 2;
+
+        UTILS_ASSERT(NearlyEqual(e, r),
+                     "operator/(const Vec3D &, const float &) test failed");
+        UtilsDebugPrint(
+            "operator/(const Vec3D &, const float &) test passed\n");
+    }
 }
 
 void
