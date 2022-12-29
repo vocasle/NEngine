@@ -54,7 +54,27 @@ Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
 Mat3X3
 Mat3X3::Mult(const Mat3X3 &lhs, const Mat3X3 &rhs)
 {
-    return Mat3X3();
+    auto ret = Mat3X3();
+
+    auto rhs_v0 = rhs[0];
+    auto rhs_v1 = rhs[1];
+    auto rhs_v2 = rhs[2];
+
+    auto v0 = Mult(lhs, rhs_v0);
+    auto v1 = Mult(lhs, rhs_v1);
+    auto v2 = Mult(lhs, rhs_v2);
+    ret(0, 0) = v0.X;
+    ret(0, 1) = v0.Y;
+    ret(0, 2) = v0.Z;
+
+    ret(1, 0) = v1.X;
+    ret(1, 1) = v1.Y;
+    ret(1, 2) = v1.Z;
+
+    ret(2, 0) = v2.X;
+    ret(2, 1) = v2.Y;
+    ret(2, 2) = v2.Z;
+    return ret;
 }
 
 Mat3X3
@@ -79,13 +99,17 @@ Mat3X3::Mult(const Mat3X3 &lhs, const Vec3D &rhs)
     return ret;
 }
 
-// Mat3X3
-// Mat3X3::RotX(float phi)
-//{
-//     const auto cos = cosf(phi);
-//     const auto sin = sinf(phi);
-//
-// }
+Mat3X3
+Mat3X3::Subtract(const Mat3X3 &lhs, const Mat3X3 &rhs)
+{
+    auto ret = Mat3X3();
+    for (size_t i = 0; i < 3; ++i) {
+        for (size_t j = 0; j < 3; ++j) {
+            ret(i, j) = lhs(i, j) - rhs(i, j);
+        }
+    }
+    return ret;
+}
 
 Mat3X3
 Mat3X3::RotZ(float phi)
@@ -113,7 +137,7 @@ operator==(const Mat3X3 &lhs, const Mat3X3 &rhs)
     bool isEqual = true;
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
-            isEqual = isEqual && lhs(i, j) == rhs(i, j);
+            isEqual = isEqual && NearlyEqual(lhs(i, j), rhs(i, j));
         }
     }
     return isEqual;

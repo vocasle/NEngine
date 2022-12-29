@@ -19,16 +19,18 @@ public:
            float v2y,
            float v2z);
 
+    float &operator()(size_t i, size_t j);
+    float operator()(size_t i, size_t j) const;
+    Vec3D operator[](size_t i) const;
+
     static Mat3X3 Add(const Mat3X3 &lhs, const Mat3X3 &rhs);
+    static Mat3X3 Subtract(const Mat3X3 &lhs, const Mat3X3 &rhs);
     static Mat3X3 Mult(const Mat3X3 &lhs, const Mat3X3 &rhs);
     static Mat3X3 Mult(const Mat3X3 &lhs, float s);
     static Vec3D Mult(const Mat3X3 &lhs, const Vec3D &rhs);
     float Determinant() const;
     Mat3X3 Inverse() const;
     Mat3X3 Transpose() const;
-    float &operator()(size_t i, size_t j);
-    float operator()(size_t i, size_t j) const;
-    Vec3D operator[](size_t i) const;
 
     static Mat3X3 RotX(float phi);
     static Mat3X3 RotY(float phi);

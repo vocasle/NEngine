@@ -10,6 +10,16 @@ void
 TestVec3D()
 {
     using namespace NEngine::Utils;
+    UtilsDebugPrint("\n==============================\n");
+    UtilsDebugPrint("Running tests for Vec3D\n");
+    UtilsDebugPrint("==============================\n");
+
+    {
+        auto v = Vec3D();
+
+        UTILS_ASSERT(v.X == 0 && v.Y == 0 && v.Z == 0, "Vec3D() test failed");
+        UtilsDebugPrint("Vec3D() test passed\n");
+    }
 
     {
         auto v = Vec3D();
@@ -100,7 +110,7 @@ TestVec3D()
     {
         auto v1 = Vec3D(1, 2, 3);
         auto v2 = Vec3D(2, 2, 1);
-        auto e = 3.0f;
+        auto e = 9.0f;
         auto res = Vec3D::Dot(v1, v2);
 
         UTILS_ASSERT(NearlyEqual(e, res),
@@ -179,6 +189,58 @@ TestMat3X3()
 {
     using namespace NEngine::Utils;
 
+    UtilsDebugPrint("\n==============================\n");
+    UtilsDebugPrint("Running tests for Mat3X3\n");
+    UtilsDebugPrint("==============================\n");
+
+    {
+        auto mat = Mat3X3();
+
+        auto isIdentity = true;
+        for (size_t i = 0; i < 3; ++i) {
+            for (size_t j = 0; j < 3; ++j) {
+                if (i != j) {
+                    isIdentity = isIdentity && mat(i, j) == 0;
+                }
+                else {
+                    isIdentity = isIdentity && mat(i, j) == 1;
+                }
+            }
+        }
+
+        UTILS_ASSERT(isIdentity, "Mat3X3() test failed");
+        UtilsDebugPrint("Mat3X3() test passed\n");
+    }
+
+    {
+        auto mat = Mat3X3(5);
+
+        auto isPassed = true;
+        for (size_t i = 0; i < 3; ++i) {
+            for (size_t j = 0; j < 3; ++j) {
+                isPassed = isPassed && mat(i, j) == 5;
+            }
+        }
+
+        UTILS_ASSERT(isPassed, "Mat3X3(float) test failed");
+        UtilsDebugPrint("Mat3X3(float) test passed\n");
+    }
+
+    {
+        auto mat = Mat3X3(1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+        UTILS_ASSERT(mat(0, 0) == 1 && mat(0, 1) == 2 && mat(0, 2) == 3 &&
+                         mat(1, 0) == 4 && mat(1, 1) == 5 && mat(1, 2) == 6 &&
+                         mat(2, 0) == 7 && mat(2, 1) == 8 && mat(2, 2) == 9,
+                     "Mat3X3(float, float, float,\n"
+                     "\tfloat, float, float,\n"
+                     "\tfloat, float, float) test failed");
+        UtilsDebugPrint(
+            "Mat3X3(float, float, float,\n"
+            "\tfloat, float, float,\n"
+            "\tfloat, float, float) test passed\n");
+    }
+
     {
         auto mat = Mat3X3(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
@@ -190,79 +252,45 @@ TestMat3X3()
     }
 
     {
-        auto m1 = Mat3X3();
-        auto m2 = Mat3X3();
-        m2(0, 0) = m2(1, 1) = m2(2, 2) = 1;
-        UTILS_ASSERT(m2 == m1, "Mat3X3 is not identity by default");
-        UtilsDebugPrint("Mat3X3 is identity by default\n");
-    }
+        auto mat = Mat3X3(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-    {
         auto v0 = Vec3D(1, 2, 3);
-        auto v1 = Vec3D(2, 4, 6);
-        auto v2 = Vec3D(4, 8, 12);
-        auto m1 = Mat3X3(1, 2, 3, 2, 4, 6, 4, 8, 12);
-        UTILS_ASSERT(v0 == m1[0] && v1 == m1[1] && v2 == m1[2],
+        auto v1 = Vec3D(4, 5, 6);
+        auto v2 = Vec3D(7, 8, 9);
+
+        UTILS_ASSERT(v0 == mat[0] && v1 == mat[1] && v2 == mat[2],
                      "operator[](size_t) test failed");
         UtilsDebugPrint("operator[](size_t) test passed\n");
     }
 
     {
-        auto m1 = Mat3X3(10);
-        auto m2 = Mat3X3(1);
-        auto res = m2 * 10;
-        UTILS_ASSERT(res == m1, "operator*(Mat3X3, float) test failed");
-        UtilsDebugPrint("operator*(Mat3X3, float) test passed\n");
-    }
-
-    {
+        auto m0 = Mat3X3(5);
         auto m1 = Mat3X3(5);
-        auto m2 = Mat3X3(10);
-        auto m3 = m1 + m1;
-        UTILS_ASSERT(m3 == m2, "operator+(Mat3X3, Mat3X3) test failed");
-        UtilsDebugPrint("operator+(Mat3X3, Mat3X3) test passed\n");
+        auto e = Mat3X3(10);
+        auto r = m0 + m1;
+        UTILS_ASSERT(r == e, "Add(const Mat3X3 &, const Mat3X3 &) test failed");
+        UtilsDebugPrint("Add(const Mat3X3 &, const Mat3X3 &) test passed\n");
     }
 
     {
-        auto m1 = Mat3X3(10);
-        auto m2 = Mat3X3(5);
-        auto res = m1 - m2;
-        UTILS_ASSERT(res == m2, "operator-(Mat3X3, Mat3X3) test failed");
-        UtilsDebugPrint("operator-(Mat3X3, Mat3X3) test passed\n");
+        auto m0 = Mat3X3(5);
+        auto m1 = Mat3X3(5);
+        auto e = Mat3X3(0);
+        auto r = m0 - m1;
+        UTILS_ASSERT(r == e,
+                     "Subtract(const Mat3X3 &, const Mat3X3 &) test failed");
+        UtilsDebugPrint(
+            "Subtract(const Mat3X3 &, const Mat3X3 &) test passed\n");
     }
 
     {
-        auto m = Mat3X3::RotZ(ToRadians(90));
-        auto v = Vec3D(1, 0, 0);
-        auto e = Vec3D(0, 1, 0);
-        auto r = m * v;
-
-        UTILS_ASSERT(NearlyEqual(r, e), "Mat3X3::RotZ test failed");
-        UtilsDebugPrint("Mat3X3::RotZ test passed\n");
-    }
-
-    {
-        auto res0 = false;
-        auto res1 = false;
-
-        {
-            auto v0 = Vec3D(1, 1, 1);
-            auto exp_v0 = Vec3D(5, 5, 5);
-            auto m0 = Mat3X3() * 5;
-            auto res_v0 = m0 * v0;
-            res0 = exp_v0 == res_v0;
-        }
-
-        {
-            auto v = Vec3D(1, 0, 0);
-            auto exp = Vec3D(0, 1, 0);
-            auto m = Mat3X3::RotZ(ToRadians(90));
-            auto res = m * v;
-            res1 = res == exp;
-        }
-
-        UTILS_ASSERT(res0 && res1, "operator*(Vec3D, Mat3X3) test failed");
-        UtilsDebugPrint("operator*(Vec3D, Mat3X3) test passed\n");
+        auto scale = Mat3X3() * 4;
+        auto rotZ = Mat3X3::RotZ(ToRadians(90));
+        auto e = Mat3X3(0, 4, 0, -4, 0, 0, 0, 0, 4);
+        auto r = Mat3X3::Mult(scale, rotZ);
+        UTILS_ASSERT(r == e,
+                     "Mult(const Mat3X3 &, const Mat3X3 &) test failed");
+        UtilsDebugPrint("Mult(const Mat3X3 &, const Mat3X3 &) test passed\n");
     }
 }
 
@@ -270,5 +298,6 @@ void
 MathTest()
 {
     TestVec3D();
+    TestMat3X3();
 }
 }  // namespace NEngine::Math
