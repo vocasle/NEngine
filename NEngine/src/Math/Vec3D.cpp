@@ -42,7 +42,7 @@ Vec3D::Cross(const Vec3D &lhs, const Vec3D &rhs)
 float
 Vec3D::Dot(const Vec3D &lhs, const Vec3D &rhs)
 {
-    return sqrtf(lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z);
+    return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z;
 }
 
 Vec3D &
