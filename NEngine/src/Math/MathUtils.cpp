@@ -23,13 +23,8 @@ NearlyEqual(float lhs, float rhs)
 bool
 NearlyEqual(const Vec3D &lhs, const Vec3D &rhs)
 {
-    const auto lhsLen = lhs.Length();
-    const auto rhsLen = rhs.Length();
-    const auto isLenEqual = NearlyEqual(lhsLen, rhsLen);
-    const auto dot = Vec3D::Dot(lhs, rhs);
-    return isLenEqual && NearlyEqual(lhsLen, dot) && NearlyEqual(rhsLen, dot);
-    // const auto cosPhi = dot / (lhsLen * rhsLen);
-    // return isLenEqual && NearlyEqual(1, cosPhi);
+    return NearlyEqual(lhs.X, rhs.X) && NearlyEqual(lhs.Y, rhs.Y) &&
+           NearlyEqual(lhs.Z, rhs.Z);
 }
 
 float
