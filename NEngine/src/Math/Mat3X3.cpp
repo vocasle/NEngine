@@ -31,12 +31,12 @@ Mat3X3::Mat3X3(float v0x,
 float &
 Mat3X3::operator()(size_t i, size_t j)
 {
-    return mData[j][i];
+    return mData[i][j];
 }
 float
 Mat3X3::operator()(size_t i, size_t j) const
 {
-    return mData[j][i];
+    return mData[i][j];
 }
 
 Mat3X3
@@ -56,24 +56,36 @@ Mat3X3::Mult(const Mat3X3 &lhs, const Mat3X3 &rhs)
 {
     auto ret = Mat3X3();
 
-    auto rhs_v0 = rhs[0];
-    auto rhs_v1 = rhs[1];
-    auto rhs_v2 = rhs[2];
+    const auto col0 = rhs[0];
+    const auto col1 = rhs[1];
+    const auto col2 = rhs[2];
 
-    auto v0 = Mult(lhs, rhs_v0);
-    auto v1 = Mult(lhs, rhs_v1);
-    auto v2 = Mult(lhs, rhs_v2);
+    const auto v0 = Mult(lhs, col0);
+    const auto v1 = Mult(lhs, col1);
+    const auto v2 = Mult(lhs, col2);
     ret(0, 0) = v0.X;
-    ret(0, 1) = v0.Y;
-    ret(0, 2) = v0.Z;
+    ret(1, 0) = v0.Y;
+    ret(2, 0) = v0.Z;
 
-    ret(1, 0) = v1.X;
+    ret(0, 1) = v1.X;
     ret(1, 1) = v1.Y;
-    ret(1, 2) = v1.Z;
+    ret(2, 1) = v1.Z;
 
-    ret(2, 0) = v2.X;
-    ret(2, 1) = v2.Y;
+    ret(0, 2) = v2.X;
+    ret(1, 2) = v2.Y;
     ret(2, 2) = v2.Z;
+    return ret;
+}
+
+Mat3X3
+Mat3X3::Transpose() const
+{
+    auto ret = *this;
+    for (size_t i = 0; i < 3; ++i) {
+        for (size_t j = 0; j < 3; ++j) {
+            ret(j, i) = ret(i, j);
+        }
+    }
     return ret;
 }
 
@@ -93,9 +105,12 @@ Vec3D
 Mat3X3::Mult(const Mat3X3 &lhs, const Vec3D &rhs)
 {
     auto ret = Vec3D();
-    ret.X = Vec3D::Dot(lhs[0], rhs);
-    ret.Y = Vec3D::Dot(lhs[1], rhs);
-    ret.Z = Vec3D::Dot(lhs[2], rhs);
+    const auto row0 = Vec3D(lhs(0, 0), lhs(0, 1), lhs(0, 2));
+    const auto row1 = Vec3D(lhs(1, 0), lhs(1, 1), lhs(1, 2));
+    const auto row2 = Vec3D(lhs(2, 0), lhs(2, 1), lhs(2, 2));
+    ret.X = Vec3D::Dot(row0, rhs);
+    ret.Y = Vec3D::Dot(row1, rhs);
+    ret.Z = Vec3D::Dot(row2, rhs);
     return ret;
 }
 
@@ -118,8 +133,8 @@ Mat3X3::RotZ(float phi)
     const auto sin = ClampToZero(sinf(phi));
     auto ret = Mat3X3();
     ret(0, 0) = cos;
-    ret(0, 1) = sin;
-    ret(1, 0) = -sin;
+    ret(1, 0) = sin;
+    ret(0, 1) = -sin;
     ret(1, 1) = cos;
     return ret;
 }
@@ -128,7 +143,7 @@ Vec3D
 Mat3X3::operator[](size_t i) const
 {
     return {
-        this->operator()(i, 0), this->operator()(i, 1), this->operator()(i, 2)};
+        this->operator()(0, i), this->operator()(1, i), this->operator()(2, i)};
 }
 
 bool

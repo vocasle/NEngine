@@ -229,9 +229,9 @@ TestMat3X3()
     {
         auto mat = Mat3X3(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        UTILS_ASSERT(mat(0, 0) == 1 && mat(0, 1) == 2 && mat(0, 2) == 3 &&
-                         mat(1, 0) == 4 && mat(1, 1) == 5 && mat(1, 2) == 6 &&
-                         mat(2, 0) == 7 && mat(2, 1) == 8 && mat(2, 2) == 9,
+        UTILS_ASSERT(mat(0, 0) == 1 && mat(1, 0) == 2 && mat(2, 0) == 3 &&
+                         mat(0, 1) == 4 && mat(1, 1) == 5 && mat(2, 1) == 6 &&
+                         mat(0, 2) == 7 && mat(1, 2) == 8 && mat(2, 2) == 9,
                      "Mat3X3(float, float, float,\n"
                      "\tfloat, float, float,\n"
                      "\tfloat, float, float) test failed");
@@ -244,9 +244,9 @@ TestMat3X3()
     {
         auto mat = Mat3X3(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        UTILS_ASSERT(mat(0, 0) == 1 && mat(0, 1) == 2 && mat(0, 2) == 3 &&
-                         mat(1, 0) == 4 && mat(1, 1) == 5 && mat(1, 2) == 6 &&
-                         mat(2, 0) == 7 && mat(2, 1) == 8 && mat(2, 2) == 9,
+        UTILS_ASSERT(mat(0, 0) == 1 && mat(1, 0) == 2 && mat(2, 0) == 3 &&
+                         mat(0, 1) == 4 && mat(1, 1) == 5 && mat(2, 1) == 6 &&
+                         mat(0, 2) == 7 && mat(1, 2) == 8 && mat(2, 2) == 9,
                      "operator()(size_t, size_t) test failed");
         UtilsDebugPrint("operator()(size_t, size_t) test passed\n");
     }
@@ -291,6 +291,15 @@ TestMat3X3()
         UTILS_ASSERT(r == e,
                      "Mult(const Mat3X3 &, const Mat3X3 &) test failed");
         UtilsDebugPrint("Mult(const Mat3X3 &, const Mat3X3 &) test passed\n");
+    }
+
+    {
+        auto m = Mat3X3() * 4;
+        auto e = Vec3D(8, 8, 8);
+        auto r = Mat3X3::Mult(m, Vec3D(2, 2, 2));
+
+        UTILS_ASSERT(r == e, "Mult(const Mat3X3 &, const Vec3D &) test failed");
+        UtilsDebugPrint("Mult(const Mat3X3 &, const Vec3D &) test passed\n");
     }
 }
 
