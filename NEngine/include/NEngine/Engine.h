@@ -4,16 +4,16 @@
 
 #include "NEngine/Game.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Utils/Timer.h"
+#include "glm/vec2.hpp"
 
 namespace NEngine {
 
 struct WindowSettings
 {
-    Math::Vec2D Position;
-    Math::Vec2D Size;
+    glm::vec2 Position;
+    glm::vec2 Size;
 };
 
 class Engine
@@ -28,7 +28,7 @@ public:
     auto Update() -> void;
 
     auto PlayGame(NEngine::Game &game) -> void;
-    auto GetWindowSize() const -> Math::Vec2D;
+    auto GetWindowSize() const -> glm::vec2;
 
     // TODO: Move to private
     auto GetDeviceResources() -> NEngine::Helpers::DeviceResources &;

@@ -8,7 +8,6 @@
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Math/Math.h"
 #include "NEngine/Utils/Utils.h"
 
 #if WITH_IMGUI
@@ -26,7 +25,6 @@
 using namespace Microsoft::WRL;
 using namespace NEngine::Helpers;
 using namespace NEngine::Utils;
-using namespace NEngine::Math;
 using namespace NEngine::Input;
 using namespace NEngine::Renderer;
 using namespace NEngine::ECS;
@@ -171,11 +169,11 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 
     auto winSize = mEngine->GetWindowSize();
 
-    Mouse::Get().SetWindowDimensions(winSize.X, winSize.Y);
+    Mouse::Get().SetWindowDimensions(winSize.x, winSize.y);
 
     m_camera.SetZFar(10000);
     m_camera.SetZNear(0.1f);
-    m_camera.SetViewDimensions(winSize.X, winSize.Y);
+    m_camera.SetViewDimensions(winSize.x, winSize.y);
 
     mSystemManager.SetSystem(std::make_unique<MoveSystem>(mEntityManager));
     mSystemManager.SetSystem(std::make_unique<RenderSystem>(

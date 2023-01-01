@@ -8,9 +8,9 @@
 
 #include "Bindable.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
 #include "NEngine/Utils/Image.h"
 #include "Sampler.h"
+#include "glm/vec2.hpp"
 
 namespace NEngine::Renderer {
 
@@ -43,7 +43,7 @@ public:
     ID3D11RenderTargetView *GetRenderTargetView() const;
     ID3D11DepthStencilView *GetDepthStencilView() const;
     void Resize(Helpers::DeviceResources &deviceResources,
-                const Math::Vec2D &size);
+                const glm::vec2 &size);
 
 private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mSRV;

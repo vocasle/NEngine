@@ -9,11 +9,11 @@
 #include "NEngine/Helpers/Camera.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/LightHelper.h"
-#include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/BasePass.h"
 #include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Renderer/Texture.h"
 #include "NEngine/Utils/Timer.h"
+#include "glm/vec2.hpp"
 
 namespace NEditor {
 class Editor
@@ -29,13 +29,13 @@ private:
     void UpdateImgui();
     void Clear();
     bool OnViewportSizeChanged();
-    void UpdateViewportSize(const NEngine::Math::Vec2D &viewportSize);
+    void UpdateViewportSize(const glm::vec2 &viewportSize);
     void RegisterKeys();
     void ProcessViewportInput();
     void LoadMesh(const std::string &path);
 
     NEngine::Helpers::DeviceResources mDeviceResources;
-    NEngine::Math::Vec2D mWinSize = {1280, 720};
+    glm::vec2 mWinSize = {1280, 720};
 
     D3D11_VIEWPORT mViewport;
     std::unique_ptr<NEngine::Renderer::Texture> mRenderTarget;

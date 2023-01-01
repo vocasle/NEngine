@@ -3,7 +3,9 @@
 #include <stdint.h>
 
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Math/Math.h"
+#include "glm/mat4x4.hpp"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
 
 namespace NEngine {
 namespace Helpers {
@@ -14,25 +16,25 @@ class Camera
 {
 public:
     Camera();
-    Camera(const Math::Vec3D &cameraPos);
+    Camera(const glm::vec3 &cameraPos);
 
-    Math::Vec3D GetPos() const;
-    Math::Vec3D GetAt() const;
-    Math::Vec3D GetUp() const;
-    Math::Vec3D GetRight() const;
+    glm::vec3 GetPos() const;
+    glm::vec3 GetAt() const;
+    glm::vec3 GetUp() const;
+    glm::vec3 GetRight() const;
     float GetZFar() const;
     float GetZNear() const;
-    Math::Mat4X4 GetViewMat() const;
-    Math::Mat4X4 GetProjMat() const;
+    glm::mat4x4 GetViewMat() const;
+    glm::mat4x4 GetProjMat() const;
 
     void SetViewDimensions(uint32_t width, uint32_t height);
     void SetZNear(const float zNear);
     void SetZFar(const float zFar);
-    void LookAt(const Math::Vec3D &pos,
-                const Math::Vec3D &target,
-                const Math::Vec3D &up);
+    void LookAt(const glm::vec3 &pos,
+                const glm::vec3 &target,
+                const glm::vec3 &up);
     void SetFov(float fov);
-    void SetPosition(const Math::Vec3D &position);
+    void SetPosition(const glm::vec3 &position);
     void SetPitch(float pitch);
     void SetYaw(float yaw);
 
@@ -45,29 +47,29 @@ private:
     void UpdateSpeed();
     void ResetCamera();
     void Arcball(double deltaMillis);
-    void OnMouseDown(const Math::Vec2D &pos, Input::Mouse::ButtonType btnType);
-    void OnMouseUp(const Math::Vec2D &pos, Input::Mouse::ButtonType btnType);
-    void OnMouseMove(const Math::Vec2D &pos);
+    void OnMouseDown(const glm::vec2 &pos, Input::Mouse::ButtonType btnType);
+    void OnMouseUp(const glm::vec2 &pos, Input::Mouse::ButtonType btnType);
+    void OnMouseMove(const glm::vec2 &pos);
     void SetupMouseListener();
 
     float m_Pitch;
     float m_Yaw;
-    Math::Vec3D m_Pos;
-    Math::Vec3D m_At;
-    Math::Vec3D m_Right;
-    Math::Vec3D m_Up;
+    glm::vec3 m_Pos;
+    glm::vec3 m_At;
+    glm::vec3 m_Right;
+    glm::vec3 m_Up;
     float m_Speed;
     float m_backBufferWidth;
     float m_backBufferHeight;
     float m_zNear;
     float m_zFar;
     float m_fov = 45.0f;
-    const Math::Vec3D mOriginalPos;
+    const glm::vec3 mOriginalPos;
     // Arcball
     Input::Mouse::MouseEventListener mMouseListener;
-    Math::Vec2D mPrevMousePos;
-    Math::Vec2D mCurMousePos;
-    Math::Mat4X4 mViewMat = Math::MathMat4X4Identity();
+    glm::vec2 mPrevMousePos;
+    glm::vec2 mCurMousePos;
+    glm::mat4x4 mViewMat = glm::mat4x4(1);
 };
 }  // namespace Helpers
 }  // namespace NEngine

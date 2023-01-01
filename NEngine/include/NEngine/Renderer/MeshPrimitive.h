@@ -10,6 +10,8 @@
 #include "NEngine/Helpers/DeviceResources.h"
 #include "Texture.h"
 #include "VertexBuffer.h"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 namespace NEngine {
 namespace Renderer {
@@ -20,12 +22,11 @@ enum class AlphaMode {
     Blend
 };
 
-
 struct KHRMaterial
 {
-    Math::Vec4D DiffuseFactor;
+    glm::vec4 DiffuseFactor;
     std::unique_ptr<Texture> DiffuseTexture;
-    Math::Vec3D SpecularFactor;
+    glm::vec3 SpecularFactor;
     std::unique_ptr<Texture> SpecularTexture;
     float GlossinessFactor = 0;
     std::unique_ptr<Texture> SpecularGlossinessTexture;
@@ -38,7 +39,7 @@ struct Material
     Material(Material &&rhs) = default;
     Material &operator=(Material &&rhs) = default;
     Material &operator=(const Material &rhs);
-    Math::Vec4D BaseColor;
+    glm::vec4 BaseColor;
     float Metalness = 0;
     float Roughness = 0;
     float NormalScale = 0;
@@ -51,7 +52,7 @@ struct Material
     AlphaMode AlphaMode = AlphaMode::Blend;
     KHRMaterial KHRMaterial;
     float OcclusionStrength = 0;
-    Math::Vec3D EmissiveFactor;
+    glm::vec3 EmissiveFactor;
 };
 
 class MeshPrimitive

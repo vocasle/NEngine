@@ -288,10 +288,10 @@ Engine::CreateDefaultWindow() -> void
                           NEngine::Engine::ENGINE_WINDOW_CLASS,
                           L"NEngine v0.0.1",
                           WS_OVERLAPPEDWINDOW,
-                          mWinSettings.Position.X,
-                          mWinSettings.Position.Y,
-                          mWinSettings.Size.X,
-                          mWinSettings.Size.Y,
+                          mWinSettings.Position.x,
+                          mWinSettings.Position.y,
+                          mWinSettings.Size.x,
+                          mWinSettings.Size.y,
                           nullptr,
                           nullptr,
                           nullptr,
@@ -369,7 +369,7 @@ Engine::InitTimer() -> void
 }
 
 auto
-Engine::GetWindowSize() const -> Math::Vec2D
+Engine::GetWindowSize() const -> glm::vec2
 {
     return {static_cast<float>(mDeviceResources.GetBackBufferWidth()),
             static_cast<float>(mDeviceResources.GetBackBufferHeight())};
@@ -410,10 +410,10 @@ Engine::SaveConfig() -> void
     std::ostringstream out;
 
     out << "[window]" << '\n'
-        << "x=" << mWinSettings.Position.X << '\n'
-        << "y=" << mWinSettings.Position.Y << '\n'
-        << "w=" << mWinSettings.Size.X << '\n'
-        << "h=" << mWinSettings.Size.Y << '\n';
+        << "x=" << mWinSettings.Position.x << '\n'
+        << "y=" << mWinSettings.Position.y << '\n'
+        << "w=" << mWinSettings.Size.x << '\n'
+        << "h=" << mWinSettings.Size.y << '\n';
 
     const auto windowConfig = out.str();
 

@@ -4,8 +4,8 @@
 #include <wrl/client.h>
 
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/Bindable.h"
+#include "glm/vec4.hpp"
 
 namespace NEngine::Renderer {
 
@@ -77,7 +77,7 @@ struct SamplerDescription
     float MipLODBias;
     unsigned int MaxAnisotropy;
     ComparisonFunc ComparisonFunc;
-    NEngine::Math::Vec4D BorderColor;
+    glm::vec4 BorderColor;
     float MinLOD;
     float MaxLOD;
 

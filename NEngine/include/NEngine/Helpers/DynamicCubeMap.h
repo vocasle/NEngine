@@ -1,43 +1,50 @@
 #pragma once
 
-#include "Camera.h"
-#include "NEngine/Math/Math.h"
-
 #include <d3d11.h>
 #include <wrl/client.h>
 
+#include <glm/vec3.hpp>
+
+#include "Camera.h"
+
 namespace NEngine {
 namespace Helpers {
-class DynamicCubeMap {
+class DynamicCubeMap
+{
 public:
     DynamicCubeMap();
     ~DynamicCubeMap();
 
     void Init(ID3D11Device *device);
-    void BuildCubeFaceCamera(const Math::Vec3D &origin);
+    void BuildCubeFaceCamera(const glm::vec3 &origin);
 
     D3D11_VIEWPORT
-    GetViewport() const {
+    GetViewport() const
+    {
         return m_cubeMapViewport;
     }
 
     ID3D11RenderTargetView *
-    GetRTV(const uint32_t idx) const {
+    GetRTV(const uint32_t idx) const
+    {
         return m_dynamicCubeMapRTV[idx];
     }
 
     ID3D11DepthStencilView *
-    GetDSV() const {
+    GetDSV() const
+    {
         return m_dynamicCubeMapDSV.Get();
     }
 
     ID3D11ShaderResourceView *
-    GetSRV() const {
+    GetSRV() const
+    {
         return m_dynamicCubeMapSRV.Get();
     }
 
     const Camera &
-    GetCamera(const uint32_t idx) const {
+    GetCamera(const uint32_t idx) const
+    {
         return m_cubeMapCamera[idx];
     }
 
@@ -55,5 +62,5 @@ private:
     static const int CUBEMAP_SIZE = 256;
 };
 
-}
-}
+}  // namespace Helpers
+}  // namespace NEngine

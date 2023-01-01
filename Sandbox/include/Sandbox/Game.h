@@ -14,7 +14,6 @@
 #include "NEngine/Engine.h"
 #include "NEngine/Game.h"
 #include "NEngine/Helpers/Camera.h"
-#include "NEngine/Math/Math.h"
 #include "NEngine/Scene.h"
 
 class MyGame : public NEngine::Game

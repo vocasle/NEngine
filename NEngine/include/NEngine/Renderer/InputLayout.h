@@ -3,11 +3,14 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 
+#include <memory>
 #include <vector>
 
 #include "Bindable.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 namespace NEngine {
 namespace Renderer {
@@ -15,20 +18,20 @@ namespace Renderer {
 struct PosNormTangTex
 {
     PosNormTangTex() = default;
-    PosNormTangTex(const Math::Vec3D &position,
-                                const Math::Vec3D &normal,
-                                const Math::Vec4D &tangent,
-                                const Math::Vec2D &texCoords)
+    PosNormTangTex(const glm::vec3 &position,
+                   const glm::vec3 &normal,
+                   const glm::vec4 &tangent,
+                   const glm::vec2 &texCoords)
         : Position(position),
           Normal(normal),
           Tangent(tangent),
           TexCoords(texCoords)
     {
     }
-    Math::Vec3D Position;
-    Math::Vec3D Normal;
-    Math::Vec4D Tangent;  // Z is a sign of cross(normal, tangent)
-    Math::Vec2D TexCoords;
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec4 Tangent;  // Z is a sign of cross(normal, tangent)
+    glm::vec2 TexCoords;
 };
 
 class InputLayout : public Bindable
@@ -60,9 +63,8 @@ CreateInputLayout(Helpers::DeviceResources &deviceResources,
 
 template <>
 inline std::unique_ptr<InputLayout>
-CreateInputLayout<PosNormTangTex>(
-    Helpers::DeviceResources &deviceResources,
-    const std::vector<uint8_t> &vertexShaderBlob)
+CreateInputLayout<PosNormTangTex>(Helpers::DeviceResources &deviceResources,
+                                  const std::vector<uint8_t> &vertexShaderBlob)
 {
     auto il = std::make_unique<InputLayout>();
 

@@ -1,11 +1,13 @@
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 
-#include "NEngine/Math/Math.h"
+#include "glm/mat3x3.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 namespace NEngine {
 namespace Helpers {
-
-using namespace NEngine::Math;
 
 std::string
 NodeTypeToString(NodeType inType)
@@ -136,6 +138,22 @@ DynamicConstBuffer::Unbind(Helpers::DeviceResources &deviceResources)
 void
 DynamicConstBuffer::InitializeDefaults()
 {
+    static_assert(
+        sizeof glm::vec2 == static_cast<unsigned int>(NodeType::Float2),
+        "Size mismatch!");
+    static_assert(
+        sizeof glm::vec3 == static_cast<unsigned int>(NodeType::Float3),
+        "Size mismatch!");
+    static_assert(
+        sizeof glm::vec4 == static_cast<unsigned int>(NodeType::Float4),
+        "Size mismatch!");
+    static_assert(
+        sizeof glm::mat3x3 == static_cast<unsigned int>(NodeType::Float3X3),
+        "Size mismatch!");
+    static_assert(
+        sizeof glm::mat4x4 == static_cast<unsigned int>(NodeType::Float4X4),
+        "Size mismatch!");
+
     for (const auto &[k, v] : mValues) {
         switch (v.Type) {
             case NodeType::Struct:
@@ -145,19 +163,19 @@ DynamicConstBuffer::InitializeDefaults()
                 *reinterpret_cast<bool *>(v.Ptr) = false;
                 break;
             case NodeType::Float2:
-                *reinterpret_cast<Vec2D *>(v.Ptr) = {0, 0};
+                *reinterpret_cast<glm::vec2 *>(v.Ptr) = {0, 0};
                 break;
             case NodeType::Float3:
-                *reinterpret_cast<Vec3D *>(v.Ptr) = {0, 0, 0};
+                *reinterpret_cast<glm::vec3 *>(v.Ptr) = {0, 0, 0};
                 break;
             case NodeType::Float4:
-                *reinterpret_cast<Vec4D *>(v.Ptr) = {0, 0, 0, 0};
+                *reinterpret_cast<glm::vec4 *>(v.Ptr) = {0, 0, 0, 0};
                 break;
             case NodeType::Float3X3:
-                *reinterpret_cast<Mat3X3 *>(v.Ptr) = Mat3X3();
+                *reinterpret_cast<glm::mat3x3 *>(v.Ptr) = glm::mat3x3(1);
                 break;
             case NodeType::Float4X4:
-                *reinterpret_cast<Mat4X4 *>(v.Ptr) = MathMat4X4Identity();
+                *reinterpret_cast<glm::mat4x4 *>(v.Ptr) = glm::mat4x4(1);
                 break;
             case NodeType::None:
                 break;

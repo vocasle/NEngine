@@ -1,11 +1,9 @@
 #pragma once
 
-#include "NEngine/Math/Math.h"
+#include "glm/vec4.hpp"
 
 namespace NEngine {
 namespace Helpers {
-
-using namespace Math;
 
 struct DirectionalLight
 {
@@ -17,10 +15,10 @@ struct DirectionalLight
     {
     }
 
-    Vec4D Ambient;
-    Vec4D Diffuse;
-    Vec4D Specular;
-    Vec4D Direction;  // W is radius
+    glm::vec4 Ambient;
+    glm::vec4 Diffuse;
+    glm::vec4 Specular;
+    glm::vec4 Direction;  // W is radius
 };
 
 struct PointLight
@@ -33,10 +31,10 @@ struct PointLight
     {
     }
 
-    Vec4D Ambient;
-    Vec4D Diffuse;
-    Vec4D Specular;
-    Vec4D Position;  // W - is range
+    glm::vec4 Ambient;
+    glm::vec4 Diffuse;
+    glm::vec4 Specular;
+    glm::vec4 Position;  // W - is range
 };
 
 struct SpotLight
@@ -50,11 +48,11 @@ struct SpotLight
     {
     }
 
-    Vec4D Ambient;
-    Vec4D Diffuse;
-    Vec4D Specular;
-    Vec4D Position;   // W - is range
-    Vec4D Direction;  // W - is spot
+    glm::vec4 Ambient;
+    glm::vec4 Diffuse;
+    glm::vec4 Specular;
+    glm::vec4 Position;   // W - is range
+    glm::vec4 Direction;  // W - is spot
 };
 
 struct Material
@@ -66,7 +64,7 @@ struct Material
     {
     }
 
-    Vec4D BaseColor;
+    glm::vec4 BaseColor;
     float Metalness;
     float Roughness;
 };

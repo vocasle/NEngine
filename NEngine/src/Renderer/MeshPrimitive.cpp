@@ -63,8 +63,8 @@ NEngine::Renderer::MeshPrimitive::MeshPrimitive(const MeshPrimitive &rhs)
       mMaterial(rhs.mMaterial)
 {
     mIndexBuffer = std::make_unique<IndexBuffer>(*rhs.mIndexBuffer);
-    mVertexBuffer = std::make_unique<VertexBuffer<PosNormTangTex>>(
-        *rhs.mVertexBuffer);
+    mVertexBuffer =
+        std::make_unique<VertexBuffer<PosNormTangTex>>(*rhs.mVertexBuffer);
 }
 
 NEngine::Renderer::Material::Material(const Material &rhs)

@@ -7,7 +7,6 @@
 
 namespace NEngine {
 namespace Input {
-using namespace Math;
 
 std::unique_ptr<Mouse> Mouse::mInstance = nullptr;
 
@@ -33,11 +32,11 @@ Mouse::~Mouse()
 void
 Mouse::SetWindowDimensions(uint32_t width, uint32_t height)
 {
-    mWinSize.X = width;
-    mWinSize.Y = height;
+    mWinSize.x = width;
+    mWinSize.y = height;
 }
 
-Vec2D
+glm::vec2
 Mouse::GetCursorPos()
 {
     return mMousePos;
@@ -84,7 +83,7 @@ Mouse::OnMouseUp(uint32_t message,
 }
 
 void
-Mouse::OnMouseMove(const Math::Vec2D &pos)
+Mouse::OnMouseMove(const glm::vec2 &pos)
 {
     for (auto &cb : mMouseListeners) {
         if (cb->MouseMoveCallback) {
@@ -93,7 +92,7 @@ Mouse::OnMouseMove(const Math::Vec2D &pos)
     }
 }
 void
-Mouse::OnMouseDown(const Math::Vec2D &pos, ButtonType btnType)
+Mouse::OnMouseDown(const glm::vec2 &pos, ButtonType btnType)
 {
     switch (btnType) {
         case Mouse::ButtonType::Left:
@@ -115,7 +114,7 @@ Mouse::OnMouseDown(const Math::Vec2D &pos, ButtonType btnType)
     }
 }
 void
-Mouse::OnMouseUp(const Math::Vec2D &pos, ButtonType btnType)
+Mouse::OnMouseUp(const glm::vec2 &pos, ButtonType btnType)
 {
     switch (btnType) {
         case Mouse::ButtonType::Left:
@@ -140,14 +139,14 @@ Mouse::OnMouseUp(const Math::Vec2D &pos, ButtonType btnType)
 void
 Mouse::StoreMousePosition(LPARAM lParam)
 {
-    mMousePos.X = GET_X_LPARAM(lParam);
-    mMousePos.Y = GET_Y_LPARAM(lParam);
+    mMousePos.x = GET_X_LPARAM(lParam);
+    mMousePos.y = GET_Y_LPARAM(lParam);
 }
 
-Vec2D
+glm::vec2
 Mouse::GetMouseDelta()
 {
-    // Vec2D delta = {};
+    // glm::vec2 delta = {};
     // if (mIsRightButtonPressed && (mMousePos.X > 0.0f || mMousePos.Y > 0.0f))
     // {
     //     delta.X = mWinSize.X / 2.0f - mMousePos.X;

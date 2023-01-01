@@ -4,9 +4,8 @@
 #include <memory>
 #include <set>
 
-#include "NEngine/Math/Math.h"
 #include "Windows.h"
-
+#include "glm/vec2.hpp"
 
 namespace NEngine {
 namespace Input {
@@ -21,10 +20,10 @@ public:
 
     struct MouseEventListener
     {
-        std::function<void(const Math::Vec2D &position)> MouseMoveCallback;
-        std::function<void(const Math::Vec2D &position, ButtonType btnType)>
+        std::function<void(const glm::vec2 &position)> MouseMoveCallback;
+        std::function<void(const glm::vec2 &position, ButtonType btnType)>
             MouseDownCallback;
-        std::function<void(const Math::Vec2D &position, ButtonType btnType)>
+        std::function<void(const glm::vec2 &position, ButtonType btnType)>
             MouseUpCallback;
     };
 
@@ -32,7 +31,7 @@ public:
     ~Mouse();
 
     void SetWindowDimensions(uint32_t width, uint32_t height);
-    Math::Vec2D GetCursorPos();
+    glm::vec2 GetCursorPos();
     void OnMouseMove(uint32_t message, WPARAM wParam, LPARAM lParam);
     void OnMouseDown(uint32_t message,
                      WPARAM wParam,
@@ -43,11 +42,11 @@ public:
                    LPARAM lParam,
                    ButtonType type);
 
-	void OnMouseMove(const Math::Vec2D &pos);
-	void OnMouseDown(const Math::Vec2D &pos, ButtonType btnType);
-	void OnMouseUp(const Math::Vec2D &pos, ButtonType btnType);
+    void OnMouseMove(const glm::vec2 &pos);
+    void OnMouseDown(const glm::vec2 &pos, ButtonType btnType);
+    void OnMouseUp(const glm::vec2 &pos, ButtonType btnType);
 
-    Math::Vec2D GetMouseDelta();
+    glm::vec2 GetMouseDelta();
     [[nodiscard]] bool IsLeftButtonPressed() const;
     [[nodiscard]] bool IsRightButtonPressed() const;
 
@@ -60,8 +59,8 @@ private:
     static std::unique_ptr<Mouse> mInstance;
     bool mIsLeftButtonPressed;
     bool mIsRightButtonPressed;
-    Math::Vec2D mMousePos;
-    Math::Vec2D mWinSize;
+    glm::vec2 mMousePos;
+    glm::vec2 mWinSize;
 
     std::set<const MouseEventListener *> mMouseListeners;
 };

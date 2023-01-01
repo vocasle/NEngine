@@ -9,6 +9,7 @@
 #include "NEngine/Renderer/Texture.h"
 #include "NEngine/Utils/Timer.h"
 #include "NEngine/Utils/Utils.h"
+#include "glm/gtx/string_cast.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
@@ -88,14 +89,14 @@ Editor::Initialize(HWND wnd, uint32_t width, uint32_t height)
 void
 Editor::GetDefaultSize(uint32_t *width, uint32_t *height)
 {
-    *width = mWinSize.X;
-    *height = mWinSize.Y;
+    *width = mWinSize.x;
+    *height = mWinSize.y;
 }
 void
 Editor::OnWindowSizeChanged(int width, int height)
 {
-    mWinSize.X = width;
-    mWinSize.Y = height;
+    mWinSize.x = width;
+    mWinSize.y = height;
 
     mDeviceResources.WindowSizeChanged(width, height);
 }
@@ -118,7 +119,7 @@ Editor::ProcessViewportInput()
     const bool isRightDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
 
     const auto mousePosAbs =
-        Vec2D(mousePositionAbsolute.x, mousePositionAbsolute.y);
+        glm::vec2(mousePositionAbsolute.x, mousePositionAbsolute.y);
 
     if (isLeftDown && !prevIsLeftDown) {
         Mouse::Get().OnMouseDown(mousePosAbs, Mouse::ButtonType::Left);
@@ -400,12 +401,11 @@ Editor::OnViewportSizeChanged()
 {
     auto min = ImGui::GetWindowContentRegionMin();
     auto max = ImGui::GetWindowContentRegionMax();
-    auto viewportSize = Vec2D(max.x - min.x, max.y - min.y);
-    const auto oldViewportSize = Vec2D(mViewport.Width, mViewport.Height);
+    auto viewportSize = glm::vec2(max.x - min.x, max.y - min.y);
+    const auto oldViewportSize = glm::vec2(mViewport.Width, mViewport.Height);
     const auto epsilon = 0.01f;
 
-    const bool isEqual = MathNearlyEqual(viewportSize.X, oldViewportSize.X) &&
-                         MathNearlyEqual(viewportSize.Y, oldViewportSize.Y);
+    const bool isEqual = viewportSize == oldViewportSize;
 
     if (!isEqual) {
         UpdateViewportSize(viewportSize);
@@ -415,21 +415,21 @@ Editor::OnViewportSizeChanged()
 }
 
 void
-Editor::UpdateViewportSize(const NEngine::Math::Vec2D &viewportSize)
+Editor::UpdateViewportSize(const glm::vec2 &viewportSize)
 {
-    if (viewportSize.X == 0 || viewportSize.Y == 0) {
+    if (viewportSize.x == 0 || viewportSize.y == 0) {
         UtilsDebugPrint("WARN: Invalid viewport size %s.\n",
-                        viewportSize.ToString().c_str());
+                        glm::to_string(viewportSize).c_str());
         return;
     }
 
-    mViewport.Width = viewportSize.X;
-    mViewport.Height = viewportSize.Y;
+    mViewport.Width = viewportSize.x;
+    mViewport.Height = viewportSize.y;
 
-    mCamera.SetViewDimensions(viewportSize.X, viewportSize.Y);
+    mCamera.SetViewDimensions(viewportSize.x, viewportSize.y);
     {
-        const float aspectRatio = static_cast<float>(viewportSize.Y) /
-                                  static_cast<float>(viewportSize.X);
+        const float aspectRatio = static_cast<float>(viewportSize.y) /
+                                  static_cast<float>(viewportSize.x);
         float fovAngleY = 45.0f;
 
         // portrait or snapped view.
@@ -437,7 +437,7 @@ Editor::UpdateViewportSize(const NEngine::Math::Vec2D &viewportSize)
             fovAngleY *= 2.0f;
         }
 
-        mCamera.SetFov(MathToRadians(fovAngleY));
+        mCamera.SetFov(glm::radians(fovAngleY));
     }
 
     mRenderTarget->Resize(mDeviceResources, viewportSize);

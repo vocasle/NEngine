@@ -1,15 +1,17 @@
 #include "NEngine/ECS/Systems/RenderSystem.h"
 
+#include <glm/ext.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/ECS/Components/RenderComponent.h"
 #include "NEngine/Helpers/LightHelper.h"
-#include "NEngine/Math/Math.h"
 
 namespace NEngine::ECS::Systems {
 
 using namespace NEngine::Renderer;
 using namespace NEngine::ECS::Components;
-using namespace NEngine::Math;
 using namespace NEngine::Helpers;
 
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
@@ -36,21 +38,20 @@ RenderSystem::Update(float dt) -> void
 
         if (dirLight) {
             constexpr float radius = 100;
-            dirLight->Direction = Vec4D(cos(dirLightTime) * radius,
-                                        0,
-                                        sin(dirLightTime) * radius,
-                                        radius);
+            dirLight->Direction = glm::vec4(cos(dirLightTime) * radius,
+                                            0,
+                                            sin(dirLightTime) * radius,
+                                            radius);
         }
     }
 
     for (auto entity : mEntities) {
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
         const auto position =
-            Vec3D(pc.Position.x, pc.Position.y, pc.Position.z);
+            glm::vec3(pc.Position.x, pc.Position.y, pc.Position.z);
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
         for (auto &mesh : rc.Mesh) {
-            mesh->GetTransform().SetTranslation(
-                MathMat4X4TranslateFromVec3D(&position));
+            mesh->GetTransform().SetTranslation(glm::translate({}, position));
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
     }

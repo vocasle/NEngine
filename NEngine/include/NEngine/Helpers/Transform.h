@@ -1,6 +1,7 @@
 #pragma once
 
-#include "NEngine/Math/Math.h"
+#include "glm/mat4x4.hpp"
+#include "glm/vec3.hpp"
 
 namespace NEngine::Helpers {
 class Transform
@@ -8,26 +9,26 @@ class Transform
 public:
     Transform();
 
-    const Math::Mat4X4 &GetTranslation() const;
-    const Math::Mat4X4 &GetRotation() const;
-    const Math::Mat4X4 &GetScale() const;
-    const Math::Mat4X4 GetTransform() const;
+    const glm::mat4x4 &GetTranslation() const;
+    const glm::mat4x4 &GetRotation() const;
+    const glm::mat4x4 &GetScale() const;
+    const glm::mat4x4 GetTransform() const;
 
-    void SetTranslation(const Math::Mat4X4 &translation);
-    void SetRotation(const Math::Mat4X4 &rotation);
-    void SetScale(const Math::Mat4X4 &scale);
+    void SetTranslation(const glm::mat4x4 &translation);
+    void SetRotation(const glm::mat4x4 &rotation);
+    void SetScale(const glm::mat4x4 &scale);
 
     void Translate(float x, float y, float z);
-    void Translate(const Math::Vec3D &offset);
+    void Translate(const glm::vec3 &offset);
 
     void Rotate(float pitch, float roll, float yaw);
-    void Rotate(const Math::Vec3D &angles);
+    void Rotate(const glm::vec3 &angles);
 
     void Scale(float factor);
 
 private:
-    Math::Mat4X4 mTranslation;
-    Math::Mat4X4 mRotation;
-    Math::Mat4X4 mScale;
+    glm::mat4x4 mTranslation;
+    glm::mat4x4 mRotation;
+    glm::mat4x4 mScale;
 };
 }  // namespace NEngine::Helpers

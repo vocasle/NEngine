@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <d3dcommon.h>
 
+#include <glm/mat4x4.hpp>
 #include <memory>
 
 #include "NEngine/Helpers/LightHelper.h"
@@ -12,7 +13,6 @@
 using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
 using namespace NEngine::Renderer;
-using namespace NEngine::Math;
 using namespace Microsoft::WRL;
 
 void
@@ -46,8 +46,7 @@ NEngine::Renderer::BasePass::Draw(
     for (auto &mesh : meshes) {
         const auto world = mesh->GetTransform().GetTransform();
         mPerObjectBuffer->SetValue("world", world);
-        auto invWorld = MathMat4X4Inverse(world);
-        MathMat4X4Transpose(&invWorld);
+        const auto invWorld = glm::transpose(glm::inverse(world));
         mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
         for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {

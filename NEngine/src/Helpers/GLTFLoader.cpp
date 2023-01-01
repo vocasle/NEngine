@@ -9,18 +9,20 @@
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/Renderer.h"
 #include "NEngine/Helpers/Transform.h"
-#include "NEngine/Math/Math.h"
 #include "NEngine/Renderer/InputLayout.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
 #include "NEngine/Renderer/Sampler.h"
 #include "NEngine/Renderer/Texture.h"
 #include "NEngine/Utils/Utils.h"
+#include "glm/gtx/quaternion.hpp"
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 #include "mikktspace/mikktspace.h"
 #include "tinygltf/tiny_gltf.h"
 
 using namespace NEngine::Utils;
 using namespace NEngine::Helpers;
-using namespace NEngine::Math;
 using namespace NEngine::Renderer;
 
 Transform
@@ -33,22 +35,22 @@ GetNodeTransform(const tinygltf::Node &node)
     }
     else {
         if (!node.rotation.empty()) {
-            const auto rot =
-                MathQuaternionToRotationMat(Vec4D(node.rotation[0],
-                                                  node.rotation[1],
-                                                  node.rotation[2],
-                                                  node.rotation[3]));
+            const auto rot = glm::toMat4(glm::quat(node.rotation[0],
+                                                   node.rotation[1],
+                                                   node.rotation[2],
+                                                   node.rotation[3]));
 
             t.SetRotation(rot);
         }
         if (!node.translation.empty()) {
-            const Vec3D offset(
+            const auto offset = glm::vec3(
                 node.translation[0], node.translation[1], node.translation[2]);
-            t.SetTranslation(MathMat4X4TranslateFromVec3D(&offset));
+            t.SetTranslation(glm::translate({}, offset));
         }
         if (!node.scale.empty()) {
-            const Vec3D scale(node.scale[0], node.scale[1], node.scale[2]);
-            t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
+            const auto scale =
+                glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+            t.SetScale(glm::scale({}, scale));
         }
     }
 
@@ -157,30 +159,30 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
     return std::make_unique<Mesh>(m_deviceResources, std::move(meshPrimitives));
 }
 
-static std::vector<NEngine::Math::Vec4D>
+static std::vector<glm::vec4>
 GenerateTangents(const std::vector<unsigned int> &indices,
-                 const std::vector<NEngine::Math::Vec3D> &normals,
-                 const std::vector<NEngine::Math::Vec2D> &texCoords,
-                 const std::vector<NEngine::Math::Vec3D> &positions)
+                 const std::vector<glm::vec3> &normals,
+                 const std::vector<glm::vec2> &texCoords,
+                 const std::vector<glm::vec3> &positions)
 {
     struct Mesh
     {
         Mesh(const std::vector<unsigned int> &indices,
-             const std::vector<NEngine::Math::Vec3D> &normals,
-             const std::vector<NEngine::Math::Vec2D> &texCoords,
-             const std::vector<NEngine::Math::Vec3D> &positions)
+             const std::vector<glm::vec3> &normals,
+             const std::vector<glm::vec2> &texCoords,
+             const std::vector<glm::vec3> &positions)
             : indices(indices),
               normals(normals),
               texCoords(texCoords),
               positions(positions),
-              tangents(positions.size(), Vec4D())
+              tangents(positions.size(), glm::vec4())
         {
         }
         const std::vector<unsigned int> &indices;
-        const std::vector<NEngine::Math::Vec3D> &normals;
-        const std::vector<NEngine::Math::Vec2D> &texCoords;
-        const std::vector<NEngine::Math::Vec3D> &positions;
-        std::vector<NEngine::Math::Vec4D> tangents;
+        const std::vector<glm::vec3> &normals;
+        const std::vector<glm::vec2> &texCoords;
+        const std::vector<glm::vec3> &positions;
+        std::vector<glm::vec4> tangents;
     };
 
     Mesh mesh(indices, normals, texCoords, positions);
@@ -220,9 +222,9 @@ GenerateTangents(const std::vector<unsigned int> &indices,
         const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
         const auto idx = mesh->indices[iFace * 3 + iVert];
         const auto pos = mesh->positions[idx];
-        fvPosOut[0] = pos.X;
-        fvPosOut[1] = pos.Y;
-        fvPosOut[2] = pos.Z;
+        fvPosOut[0] = pos.x;
+        fvPosOut[1] = pos.y;
+        fvPosOut[2] = pos.z;
     };
 
     auto GetNormalCB = [](const SMikkTSpaceContext *pContext,
@@ -233,9 +235,9 @@ GenerateTangents(const std::vector<unsigned int> &indices,
         const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
         const auto idx = mesh->indices[iFace * 3 + iVert];
         const auto norm = mesh->normals[idx];
-        fvNormOut[0] = norm.X;
-        fvNormOut[1] = norm.Y;
-        fvNormOut[2] = norm.Z;
+        fvNormOut[0] = norm.x;
+        fvNormOut[1] = norm.y;
+        fvNormOut[2] = norm.z;
     };
 
     auto GetTexCoordCB = [](const SMikkTSpaceContext *pContext,
@@ -246,8 +248,8 @@ GenerateTangents(const std::vector<unsigned int> &indices,
         const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
         const auto idx = mesh->indices[iFace * 3 + iVert];
         const auto texCoord = mesh->texCoords[idx];
-        fvTexcOut[0] = texCoord.X;
-        fvTexcOut[1] = texCoord.Y;
+        fvTexcOut[0] = texCoord.x;
+        fvTexcOut[1] = texCoord.y;
     };
 
     auto SetTSpaceCB = [](const SMikkTSpaceContext *pContext,
@@ -261,10 +263,10 @@ GenerateTangents(const std::vector<unsigned int> &indices,
     {
         const auto mesh = reinterpret_cast<Mesh *>(pContext->m_pUserData);
         const auto idx = mesh->indices[iFace * 3 + iVert];
-        mesh->tangents[idx] = Vec4D(fvTangent[0],
-                                    fvTangent[1],
-                                    fvTangent[2],
-                                    bIsOrientationPreserving ? 1 : -1);
+        mesh->tangents[idx] = glm::vec4(fvTangent[0],
+                                        fvTangent[1],
+                                        fvTangent[2],
+                                        bIsOrientationPreserving ? 1 : -1);
     };
 
     spaceInterface.m_getNumFaces = GetNumFacesCB;
@@ -301,10 +303,10 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                  const tinygltf::Model &model)
 {
     std::vector<unsigned int> indices;
-    std::vector<Math::Vec3D> positions;
-    std::vector<Math::Vec3D> normals;
-    std::vector<Math::Vec4D> tangents;
-    std::vector<Math::Vec2D> texCoords;
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec4> tangents;
+    std::vector<glm::vec2> texCoords;
     Material tmpMaterial;
     KHRMaterial khrMaterial;
     std::unique_ptr<Texture> baseColorTex;
@@ -325,22 +327,20 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
         const size_t byteOffset = accessor.byteOffset + bufferView.byteOffset;
 
         if (name == "POSITION") {
-            assert(sizeof(Vec3D) == byteStride);
             positions =
-                ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
+                ReadData<glm::vec3>(buffer.data, accessor.count, byteOffset);
         }
         else if (name == "NORMAL") {
-            assert(sizeof(Vec3D) == byteStride);
-            normals = ReadData<Vec3D>(buffer.data, accessor.count, byteOffset);
+            normals =
+                ReadData<glm::vec3>(buffer.data, accessor.count, byteOffset);
         }
         else if (name == "TANGENT") {
-            assert(sizeof(Vec4D) == byteStride);
-            tangents = ReadData<Vec4D>(buffer.data, accessor.count, byteOffset);
+            tangents =
+                ReadData<glm::vec4>(buffer.data, accessor.count, byteOffset);
         }
         else if (name == "TEXCOORD_0") {
-            assert(sizeof(Vec2D) == byteStride);
             texCoords =
-                ReadData<Vec2D>(buffer.data, accessor.count, byteOffset);
+                ReadData<glm::vec2>(buffer.data, accessor.count, byteOffset);
         }
         else if (name == "COLOR_0") {
             UtilsDebugPrint("WARN: COLOR_0 is not supported yet\n");
@@ -429,9 +429,9 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                         material.emissiveTexture.index,
                                         TextureBindTarget::ShaderResourceView,
                                         4);
-            tmpMaterial.EmissiveFactor = Vec3D(material.emissiveFactor[0],
-                                               material.emissiveFactor[1],
-                                               material.emissiveFactor[2]);
+            tmpMaterial.EmissiveFactor = glm::vec3(material.emissiveFactor[0],
+                                                   material.emissiveFactor[1],
+                                                   material.emissiveFactor[2]);
         }
     }
 

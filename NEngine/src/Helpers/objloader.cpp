@@ -1,3 +1,5 @@
+#include "NEngine/Helpers/objloader.h"
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -5,25 +7,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "NEngine/Math/Math.h"
-#include "NEngine/Helpers/objloader.h"
-
 namespace NEngine {
 namespace Helpers {
 void
-OLLogInfo(const char *fmt, ...) {
+OLLogInfo(const char *fmt, ...)
+{
 #if OBJLOADER_VERBOSE
-			static char out[512];
-			va_list args;
-			va_start(args, fmt);
-			vsprintf_s(out, 512, fmt, args);
-			va_end(args);
-			fprintf(stdout, "%s\n", out);
+    static char out[512];
+    va_list args;
+    va_start(args, fmt);
+    vsprintf_s(out, 512, fmt, args);
+    va_end(args);
+    fprintf(stdout, "%s\n", out);
 #endif
 }
 
 void
-OLLogError(const char *fmt, ...) {
+OLLogError(const char *fmt, ...)
+{
     static char out[512];
     va_list args;
     va_start(args, fmt);
@@ -33,7 +34,8 @@ OLLogError(const char *fmt, ...) {
 }
 
 uint32_t
-OLReadLine(FILE *f, char *out, uint32_t sz) {
+OLReadLine(FILE *f, char *out, uint32_t sz)
+{
     uint32_t len = 0;
     char ch = 0;
     while (sz--) {
@@ -48,12 +50,14 @@ OLReadLine(FILE *f, char *out, uint32_t sz) {
     return len;
 }
 
-struct MeshInfo {
+struct MeshInfo
+{
     MeshInfo()
         : NumPositions{0},
           NumNormals{0},
           NumTexCoords{0},
-          NumFaces{0} {
+          NumFaces{0}
+    {
     }
 
     uint32_t NumPositions;
@@ -63,7 +67,8 @@ struct MeshInfo {
 };
 
 static uint32_t
-OLGetNumMeshes(FILE *objfile) {
+OLGetNumMeshes(FILE *objfile)
+{
     uint32_t numMeshes = 0;
     char line[128];
     while (OLReadLine(objfile, line, 128)) {
@@ -76,7 +81,8 @@ OLGetNumMeshes(FILE *objfile) {
 }
 
 static uint32_t
-OLNumFacesInLine(const char *line) {
+OLNumFacesInLine(const char *line)
+{
     uint32_t numSlashes = 0;
     while (*line++) {
         if (*line == '/') {
@@ -88,21 +94,26 @@ OLNumFacesInLine(const char *line) {
 }
 
 static void
-OLGetMeshInfos(std::vector<MeshInfo> &infos, FILE *objfile) {
+OLGetMeshInfos(std::vector<MeshInfo> &infos, FILE *objfile)
+{
     char line[128];
     int32_t meshIdx = -1;
     while (OLReadLine(objfile, line, 128)) {
         if (strstr(line, "o ")) {
             ++meshIdx;
-        } else if (strstr(line, "v ")) {
+        }
+        else if (strstr(line, "v ")) {
             infos[meshIdx].NumPositions++;
-        } else if (strstr(line, "vt")) {
+        }
+        else if (strstr(line, "vt")) {
             infos[meshIdx].NumTexCoords++;
-        } else if (strstr(line, "vn")) {
+        }
+        else if (strstr(line, "vn")) {
             infos[meshIdx].NumNormals++;
-        } else if (strstr(line, "f ")) {
-            infos[meshIdx].NumFaces += OLNumFacesInLine(
-                line); // we expect 3 faces in row
+        }
+        else if (strstr(line, "f ")) {
+            infos[meshIdx].NumFaces +=
+                OLNumFacesInLine(line);  // we expect 3 faces in row
         }
     }
     assert(meshIdx + 1 == infos.size());
@@ -112,7 +123,8 @@ OLGetMeshInfos(std::vector<MeshInfo> &infos, FILE *objfile) {
 static void
 OLParseMeshes(std::vector<Mesh> &meshes,
               std::vector<MeshInfo> &infos,
-              FILE *objfile) {
+              FILE *objfile)
+{
     char line[128];
     char prefix[4];
     float vec[3];
@@ -130,51 +142,31 @@ OLParseMeshes(std::vector<Mesh> &meshes,
             mesh = &meshes[meshIdx];
             info = &infos[meshIdx];
             mesh->Name = std::string(line + 2);
-        } else if (strcmp(prefix, "v ") == 0) {
-            result = sscanf_s(line,
-                              "%s%f%f%f",
-                              prefix,
-                              4,
-                              vec,
-                              vec + 1,
-                              vec + 2);
+        }
+        else if (strcmp(prefix, "v ") == 0) {
+            result =
+                sscanf_s(line, "%s%f%f%f", prefix, 4, vec, vec + 1, vec + 2);
             assert(result == 4);
             mesh->Positions.emplace_back(vec[0], vec[1], vec[2]);
             assert(mesh->Positions.size() <= info->NumPositions);
-            OLLogInfo("Position { %f %f %f }",
-                      vec[0],
-                      vec[1],
-                      vec[2]);
-        } else if (strcmp(prefix, "vt") == 0) {
-            result = sscanf_s(line,
-                              "%s%f%f",
-                              prefix,
-                              4,
-                              vec,
-                              vec + 1);
+            OLLogInfo("Position { %f %f %f }", vec[0], vec[1], vec[2]);
+        }
+        else if (strcmp(prefix, "vt") == 0) {
+            result = sscanf_s(line, "%s%f%f", prefix, 4, vec, vec + 1);
             assert(result == 3);
             mesh->TexCoords.emplace_back(vec[0], vec[1]);
             assert(mesh->TexCoords.size() <= info->NumTexCoords);
-            OLLogInfo("TexCoord { pref: %s %f %f }",
-                      prefix,
-                      vec[0],
-                      vec[1]);
-        } else if (strcmp(prefix, "vn") == 0) {
-            result = sscanf_s(line,
-                              "%s%f%f%f",
-                              prefix,
-                              4,
-                              vec,
-                              vec + 1,
-                              vec + 2);
+            OLLogInfo("TexCoord { pref: %s %f %f }", prefix, vec[0], vec[1]);
+        }
+        else if (strcmp(prefix, "vn") == 0) {
+            result =
+                sscanf_s(line, "%s%f%f%f", prefix, 4, vec, vec + 1, vec + 2);
             assert(result == 4);
             mesh->Normals.emplace_back(vec[0], vec[1], vec[2]);
             assert(mesh->Normals.size() <= info->NumNormals);
-            OLLogInfo("Normal { %f %f %f }",
-                      vec[0],
-                      vec[1],
-                      vec[2]);
-        } else if (strcmp(prefix, "f ") == 0) {
+            OLLogInfo("Normal { %f %f %f }", vec[0], vec[1], vec[2]);
+        }
+        else if (strcmp(prefix, "f ") == 0) {
             result = sscanf_s(line,
                               "%s%d/%d/%d%d/%d/%d%d/%d/%d",
                               prefix,
@@ -206,39 +198,39 @@ OLParseMeshes(std::vector<Mesh> &meshes,
                 mesh->Faces.emplace_back(face);
                 assert(mesh->Faces.size() <= info->NumFaces);
             }
-        } else {
-            OLLogInfo("Skip %s, because unknown prefix: %s\n",
-                      line,
-                      prefix);
+        }
+        else {
+            OLLogInfo("Skip %s, because unknown prefix: %s\n", line, prefix);
         }
     }
 }
 
 static uint32_t
 OLValidateMeshes(const std::vector<Mesh> &meshes,
-                 const std::vector<MeshInfo> &infos) {
+                 const std::vector<MeshInfo> &infos)
+{
     uint32_t areMeshesValid = 1;
     for (uint32_t i = 0; i < meshes.size(); ++i) {
         const Mesh *m = &meshes[i];
         const MeshInfo *mi = &infos[i];
-        areMeshesValid = areMeshesValid &&
-                         (m->Faces.size() == mi->NumFaces);
+        areMeshesValid = areMeshesValid && (m->Faces.size() == mi->NumFaces);
         assert(m->Faces.size() == mi->NumFaces);
-        areMeshesValid = areMeshesValid &&
-                         (m->Normals.size() == mi->NumNormals);
+        areMeshesValid =
+            areMeshesValid && (m->Normals.size() == mi->NumNormals);
         assert(m->Normals.size() == mi->NumNormals);
-        areMeshesValid = areMeshesValid &&
-                         (m->TexCoords.size() == mi->NumTexCoords);
+        areMeshesValid =
+            areMeshesValid && (m->TexCoords.size() == mi->NumTexCoords);
         assert(m->TexCoords.size() == mi->NumTexCoords);
-        areMeshesValid = areMeshesValid &&
-                         (m->Positions.size() == mi->NumPositions);
+        areMeshesValid =
+            areMeshesValid && (m->Positions.size() == mi->NumPositions);
         assert(m->Positions.size() == mi->NumPositions);
     }
     return areMeshesValid;
 }
 
 static std::string
-OLGetCwd(const char *filename) {
+OLGetCwd(const char *filename)
+{
     const char *lastSlash = NULL;
     uint32_t len = 0;
     lastSlash = strrchr(filename, '/');
@@ -250,14 +242,16 @@ OLGetCwd(const char *filename) {
     if (len > 0) {
         dir = std::string(filename, len);
         return dir;
-    } else {
+    }
+    else {
         dir = filename;
     }
     return dir;
 }
 
 void
-OLDumpModelToFile(const struct Model *model, const char *filename) {
+OLDumpModelToFile(const struct Model *model, const char *filename)
+{
     FILE *f = NULL;
     fopen_s(&f, filename, "w");
     if (!f) {
@@ -276,26 +270,26 @@ OLDumpModelToFile(const struct Model *model, const char *filename) {
         for (uint32_t j = 0; j < m->Positions.size(); ++j) {
             fprintf(f,
                     "Position { %f %f %f }\n",
-                    m->Positions[j].X,
-                    m->Positions[j].Y,
-                    m->Positions[j].Z);
+                    m->Positions[j].x,
+                    m->Positions[j].y,
+                    m->Positions[j].z);
         }
 
         fprintf(f, "NumTexCoords: %llu\n", m->TexCoords.size());
         for (uint32_t j = 0; j < m->TexCoords.size(); ++j) {
             fprintf(f,
                     "TexCoord { %f %f }\n",
-                    m->TexCoords[j].X,
-                    m->TexCoords[j].Y);
+                    m->TexCoords[j].x,
+                    m->TexCoords[j].y);
         }
 
         fprintf(f, "NumNormals: %llu\n", m->Normals.size());
         for (uint32_t j = 0; j < m->Normals.size(); ++j) {
             fprintf(f,
                     "Normal { %f %f %f }\n",
-                    m->Normals[j].X,
-                    m->Normals[j].Y,
-                    m->Normals[j].Z);
+                    m->Normals[j].x,
+                    m->Normals[j].y,
+                    m->Normals[j].z);
         }
 
         fprintf(f, "NumFaces: %llu\n", m->Faces.size());
@@ -311,7 +305,8 @@ OLDumpModelToFile(const struct Model *model, const char *filename) {
 }
 
 std::unique_ptr<Model>
-OLLoad(const char *filename) {
+OLLoad(const char *filename)
+{
     FILE *f = NULL;
     fopen_s(&f, filename, "r");
     if (!f) {
@@ -348,5 +343,5 @@ OLLoad(const char *filename) {
     return model;
 }
 
-}
-}
+}  // namespace Helpers
+}  // namespace NEngine
