@@ -15,7 +15,6 @@ set(source_file_list
         src/Helpers/VertexBuffer.cpp
         src/Input/Keyboard.cpp
         src/Input/Mouse.cpp
-        src/Math/Math.cpp
         src/Renderer/IndexBuffer.cpp
         src/Renderer/InputLayout.cpp
         src/Renderer/MeshPrimitive.cpp
@@ -29,18 +28,11 @@ set(source_file_list
         src/Helpers/Transform.cpp
         src/Renderer/Sampler.cpp 
         src/Helpers/ModelImporter.cpp
-        src/Math/Vec2D.cpp
-        src/Math/Vec3D.cpp
-        src/Math/Vec4D.cpp
-        src/Math/Mat3X3.cpp
-        src/Math/Mat4X4.cpp
         src/Engine.cpp 
         "src/ECS/Systems/MoveSystem.cpp" 
         "src/ECS/Systems/RenderSystem.cpp" 
         "src/ECS/Systems/InputSystem.cpp" 
-        "src/Scene.cpp" 
-        "src/Math/MathUtils.cpp"
-        "src/Math/MathTest.cpp")
+        "src/Scene.cpp")
 
 set(header_file_list
         include/NEngine/Helpers/Buffer.h
@@ -58,7 +50,6 @@ set(header_file_list
         include/NEngine/Helpers/ShadowMap.h
         include/NEngine/Input/Keyboard.h
         include/NEngine/Input/Mouse.h
-        include/NEngine/Math/Math.h
         include/NEngine/Renderer/Bindable.h
         include/NEngine/Renderer/Drawable.h
         include/NEngine/Renderer/IndexBuffer.h
@@ -77,11 +68,6 @@ set(header_file_list
         include/NEngine/Helpers/Transform.h
         include/NEngine/Renderer/Sampler.h 
         include/NEngine/Helpers/ModelImporter.h
-        include/NEngine/Math/Vec2D.h
-        include/NEngine/Math/Vec3D.h
-        include/NEngine/Math/Vec4D.h
-        include/NEngine/Math/Mat3X3.h
-        include/NEngine/Math/Mat4X4.h
         include/NEngine/Engine.h 
         include/NEngine/Game.h 
         include/NEngine/ECS/EntityManager.h
@@ -94,9 +80,7 @@ set(header_file_list
         "include/NEngine/ECS/SystemManager.h" 
         "include/NEngine/ECS/Components/InputComponent.h" 
         "include/NEngine/ECS/Systems/InputSystem.h" 
-        "include/NEngine/Scene.h" 
-        "include/NEngine/Math/MathUtils.h"
-        "include/NEngine/Math/MathTest.h")
+        "include/NEngine/Scene.h")
 
 set(vertex_shader_list
         shader/BasePassVS.hlsl)
