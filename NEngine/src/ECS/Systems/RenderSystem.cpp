@@ -51,7 +51,8 @@ RenderSystem::Update(float dt) -> void
             glm::vec3(pc.Position.x, pc.Position.y, pc.Position.z);
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
         for (auto &mesh : rc.Mesh) {
-            mesh->GetTransform().SetTranslation(glm::translate({}, position));
+            mesh->GetTransform().SetTranslation(
+                glm::translate(glm::mat4x4(1), position));
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
     }
@@ -83,7 +84,8 @@ RenderSystem::RegisterEntity(Entity entity) -> void
         mEntityManager->HasComponent<RenderComponent>(entity)) {
         auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
         if (it != std::end(mEntities)) {
-            UtilsDebugPrint("Entity %ld already registered with RenderSystem\n", entity);
+            UtilsDebugPrint("Entity %ld already registered with RenderSystem\n",
+                            entity);
             return;
         }
         mEntities.push_back(entity);

@@ -45,7 +45,7 @@ GetNodeTransform(const tinygltf::Node &node)
         if (!node.translation.empty()) {
             const auto offset = glm::vec3(
                 node.translation[0], node.translation[1], node.translation[2]);
-            t.SetTranslation(glm::translate({}, offset));
+            t.SetTranslation(glm::translate(glm::mat4x4(1), offset));
         }
         if (!node.scale.empty()) {
             const auto scale =

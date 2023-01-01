@@ -56,7 +56,7 @@ Transform::Translate(float x, float y, float z)
 void
 Transform::Translate(const glm::vec3 &offset)
 {
-    mTranslation = glm::translate({}, offset);
+    mTranslation = glm::translate(glm::mat4x4(1), offset);
 }
 
 void
@@ -74,6 +74,6 @@ Transform::Rotate(const glm::vec3 &angles)
 void
 Transform::Scale(float factor)
 {
-    mScale = glm::scale({}, glm::vec3(factor));
+    mScale = glm::scale(glm::mat4x4(1), glm::vec3(factor));
 }
 }  // namespace NEngine::Helpers
