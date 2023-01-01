@@ -156,7 +156,8 @@ target_link_libraries(${library_name}
         PUBLIC stb_image
         PUBLIC mikktspace
         PUBLIC wictexloader
-        PUBLIC ImGuizmo)
+        PUBLIC ImGuizmo
+        PUBLIC glm::glm)
 
 set(HLSL_SHADER_FILES)
 list(APPEND HLSL_SHADER_FILES ${pixel_shader_list})
