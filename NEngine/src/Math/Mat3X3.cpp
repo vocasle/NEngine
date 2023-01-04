@@ -139,6 +139,20 @@ Mat3X3::RotZ(float phi)
     return ret;
 }
 
+
+float Mat3X3::Determinant() const {
+    const auto &self = *this;
+    /*
+     * | a00 a01 a02 |
+     * | a10 a11 a12 |
+     * | a20 a21 a22 |
+     */
+    const auto minor00 = self(1, 1) * self(2, 2) - self(2, 1) * self(1, 2);
+    const auto minor01 = self(1, 0) * self(2, 2) - self(2, 0) * self(1, 2);
+    const auto minor02 = self(1, 0) * self(2, 1) - self(2, 0) * self(1, 1);
+    return self(0, 0) * minor00 - self(0, 1) * minor01 + self(0, 2) * minor02;
+}
+
 Vec3D
 Mat3X3::operator[](size_t i) const
 {

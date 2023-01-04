@@ -301,6 +301,16 @@ TestMat3X3()
         UTILS_ASSERT(r == e, "Mult(const Mat3X3 &, const Vec3D &) test failed");
         UtilsDebugPrint("Mult(const Mat3X3 &, const Vec3D &) test passed\n");
     }
+
+    {
+        auto m = Mat3X3(4,4,7,2,1,8,8,6,9);
+        auto e = 56.0f;
+        auto r = m.Determinant();
+        
+        UTILS_PRINTLN("r=%f, e=%f", r, e);
+        UTILS_ASSERT(r == e, "Determinant() test failed");
+        UtilsDebugPrint("Determinant() test passed\n");
+    }
 }
 
 void
