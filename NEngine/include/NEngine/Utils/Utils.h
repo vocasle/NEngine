@@ -77,6 +77,13 @@ std::vector<std::wstring> UtilsGlobFiles(const std::string &dir,
 
 #if NENGINE_DEBUG
 #define UTILS_ASSERT(x, msg) assert((x) && (msg))
+#define UTILS_PRINT(msg, ...) \
+    NEngine::Utils::UtilsDeUtilsDebugPrint(msg, __VA_ARGS__)
+#define UTILS_PRINTLN(msg, ...) \
+    NEngine::Utils::UtilsDebugPrint("%s\n", \
+            NEngine::Utils::UtilsFormatStr(msg, __VA_ARGS__).c_str())
 #else
 #define UTILS_ASSERT(...)
+#define UTILS_PRINT(...)
+#define UTILS_PRINTLN(...)
 #endif
