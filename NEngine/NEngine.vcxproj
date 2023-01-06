@@ -40,13 +40,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -72,9 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -190,6 +192,7 @@
     <ClCompile Include="thirdparty\tinygltf\src\tiny_gltf.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\NEngine\Config.h" />
     <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\PositionComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\RenderComponent.h" />
