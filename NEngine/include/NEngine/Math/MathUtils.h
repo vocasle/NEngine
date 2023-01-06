@@ -1,12 +1,13 @@
 #pragma once
 
 #include <limits>
+#include <numbers>
 
 namespace NEngine::Math {
 struct Vec3D;
 
-constexpr static const auto PI = 3.14159265f;
-constexpr static const auto EPSILON = 4.0f * std::numeric_limits<float>::epsilon();
+constexpr static const auto PI = std::numbers::pi;
+constexpr static const auto EPSILON = 5.0f * std::numeric_limits<float>::epsilon();
 float ToRadians(float degrees);
 float ToDegrees(float radians);
 bool NearlyEqual(float lhs, float rhs);
