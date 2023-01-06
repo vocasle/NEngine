@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NEngine", "NEngine\NEngine.vcxproj", "{443746E1-5763-4224-889D-DE85A38D0F1E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{9A685F30-E7D1-460A-A8D9-96B1536674FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{443746E1-5763-4224-889D-DE85A38D0F1E}.Release|x64.Build.0 = Release|x64
 		{443746E1-5763-4224-889D-DE85A38D0F1E}.Release|x86.ActiveCfg = Release|Win32
 		{443746E1-5763-4224-889D-DE85A38D0F1E}.Release|x86.Build.0 = Release|Win32
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Debug|x64.ActiveCfg = Debug|x64
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Debug|x64.Build.0 = Debug|x64
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Debug|x86.ActiveCfg = Debug|Win32
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Debug|x86.Build.0 = Debug|Win32
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Release|x64.ActiveCfg = Release|x64
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Release|x64.Build.0 = Release|x64
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Release|x86.ActiveCfg = Release|Win32
+		{9A685F30-E7D1-460A-A8D9-96B1536674FB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
