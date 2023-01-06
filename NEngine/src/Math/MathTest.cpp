@@ -303,35 +303,100 @@ TestMat3X3()
     }
 
     {
-        auto m = Mat3X3(4,4,7,2,1,8,8,6,9);
+        auto m = Mat3X3(4, 4, 7, 2, 1, 8, 8, 6, 9);
         auto e = 56.0f;
         auto r = m.Determinant();
-        
+
         UTILS_ASSERT(r == e, "Determinant() test failed");
         UtilsDebugPrint("Determinant() test passed\n");
     }
 
     {
-        auto m = Mat3X3(4,4,7,2,1,8,8,6,9);
-        auto e = Mat3X3(4,2,8,4,1,6,7,8,9);
+        auto m = Mat3X3(4, 4, 7, 2, 1, 8, 8, 6, 9);
+        auto e = Mat3X3(4, 2, 8, 4, 1, 6, 7, 8, 9);
         auto r = m.Transpose();
         UTILS_ASSERT(e == r, "Transpose() test failed");
         UTILS_PRINTLN("Transpose() test passed");
     }
 
     {
-        auto m = Mat3X3(4,4,7,2,1,8,8,6,9);
-        auto e = Mat3X3(
-   -0.696429f,   0.821429f,   0.071429f,
-   0.107143f,  -0.357143f,   0.142857f,
-   0.446429f,  -0.321429f,  -0.071429f
-                );
+        auto m = Mat3X3(4, 4, 7, 2, 1, 8, 8, 6, 9);
+        auto e = Mat3X3(-0.696429f,
+                        0.821429f,
+                        0.071429f,
+                        0.107143f,
+                        -0.357143f,
+                        0.142857f,
+                        0.446429f,
+                        -0.321429f,
+                        -0.071429f);
         auto ei = Mat3X3();
         auto r = m.Inverse();
         auto ri = r * m;
-        
+
         UTILS_ASSERT(ri == ei, "Inverse() test failed");
         UTILS_PRINTLN("Inverse() test passed");
+    }
+
+    {
+        auto m = Mat3X3::RotX(ToRadians(90));
+        auto v = Vec3D(0, 1, 0);
+        auto e = Vec3D(0, 0, 1);
+        auto r = m * v;
+        UTILS_ASSERT(e == r, "RotX(float) test failed");
+        UTILS_PRINTLN("RotX(float) test passed");
+    }
+
+    {
+        auto m = Mat3X3::RotY(ToRadians(90));
+        auto v = Vec3D(0, 0, 1);
+        auto e = Vec3D(1, 0, 0);
+        auto r = m * v;
+        UTILS_PRINTLN("m=%s", m.ToString().c_str());
+        UTILS_PRINTLN("e=%s, r=%s", e.ToString().c_str(),
+                r.ToString().c_str());
+        UTILS_ASSERT(e == r, "RotY(float) test failed");
+        UTILS_PRINTLN("RotY(float) test passed");
+    }
+
+    {
+        auto m = Mat3X3::RotZ(ToRadians(90));
+        auto v = Vec3D(1, 0, 0);
+        auto e = Vec3D(0, 1, 0);
+        auto r = m * v;
+        UTILS_ASSERT(e == r, "RotZ(float) test failed");
+        UTILS_PRINTLN("RotZ(float) test passed");
+    }
+
+    {
+        auto m1 = Mat3X3(5);
+        auto m2 = Mat3X3(5);
+        auto e = Mat3X3(10);
+        auto r = m1 + m2;
+        UTILS_ASSERT(e == r,
+                     "operator+(const Mat3X3 &, const Mat3X3 &) test failed");
+        UTILS_PRINTLN("operator+(const Mat3X3 &, const Mat3X3 &) test passed");
+    }
+
+    {
+        const auto m1 = Mat3X3(10);
+        const auto m2 = Mat3X3(50);
+        const auto e = Mat3X3(-40);
+        const auto r = m1 - m2;
+        UTILS_ASSERT(e == r, "operator-(const Mat3X3 &, const Mat3X3 &) test failed");
+
+        UTILS_PRINTLN("operator-(const Mat3X3 &, const Mat3X3 &) test passed");
+    } 
+
+    {
+        const auto m1 = Mat3X3::RotY(ToRadians(45));
+        const auto m2 = Mat3X3::RotY(ToRadians(45));
+        const auto e = Vec3D(1, 0, 0);
+        const auto r = Mat3X3::Mult(m1 * m2, Vec3D(0, 0, 1));
+        UTILS_ASSERT(e == r, "operator*(const Mat3X3 &, const Mat3X3 &) test failed");
+
+        UTILS_PRINTLN("operator*(const Mat3X3 &, const Mat3X3 &) test passed");
+
     }
 }
 

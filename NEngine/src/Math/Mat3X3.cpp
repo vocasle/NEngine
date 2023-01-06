@@ -1,7 +1,8 @@
 #include "NEngine/Math/Mat3X3.h"
-#include <sstream>
+
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
@@ -132,18 +133,19 @@ Mat3X3::Subtract(const Mat3X3 &lhs, const Mat3X3 &rhs)
 Mat3X3
 Mat3X3::RotZ(float phi)
 {
-    const auto cos = ClampToZero(cosf(phi));
-    const auto sin = ClampToZero(sinf(phi));
+    const auto cos = std::cos(phi);
+    const auto sin = std::sin(phi);
     auto ret = Mat3X3();
     ret(0, 0) = cos;
-    ret(1, 0) = sin;
     ret(0, 1) = -sin;
+    ret(1, 0) = sin;
     ret(1, 1) = cos;
     return ret;
 }
 
-
-float Mat3X3::Determinant() const {
+float
+Mat3X3::Determinant() const
+{
     const auto &self = *this;
     const auto minor00 = self(1, 1) * self(2, 2) - self(2, 1) * self(1, 2);
     const auto minor01 = self(1, 0) * self(2, 2) - self(2, 0) * self(1, 2);
@@ -151,8 +153,9 @@ float Mat3X3::Determinant() const {
     return self(0, 0) * minor00 - self(0, 1) * minor01 + self(0, 2) * minor02;
 }
 
-
-Mat3X3 Mat3X3::Inverse() const {
+Mat3X3
+Mat3X3::Inverse() const
+{
     const auto det = Determinant();
     UTILS_ASSERT(det != 0, "Determinant is zero, matrix has no inverse!");
     const auto &self = *this;
@@ -164,7 +167,7 @@ Mat3X3 Mat3X3::Inverse() const {
      * | a20 a21 a22 |
      */
 
-    const auto A00 = self(1, 1) * self(2, 2) - self(2, 1) *self(1, 2);
+    const auto A00 = self(1, 1) * self(2, 2) - self(2, 1) * self(1, 2);
     const auto A01 = self(1, 0) * self(2, 2) - self(2, 0) * self(1, 2);
     const auto A02 = self(1, 0) * self(2, 1) - self(2, 0) * self(1, 1);
     const auto A10 = self(0, 1) * self(2, 2) - self(2, 1) * self(0, 2);
@@ -188,23 +191,47 @@ Mat3X3 Mat3X3::Inverse() const {
     return (1 / det) * ret;
 }
 
-
-std::string Mat3X3::ToString() const {
+std::string
+Mat3X3::ToString() const
+{
     std::ostringstream out;
     const auto &self = *this;
 
-    out << std::fixed << std::setprecision(4)
-        << "\n" << std::setw(4) << self(0, 0) 
-        << ' ' << std::setw(4) << self(0, 1) 
-        << ' ' << std::setw(4) << self(0, 2)
-        << "\n" << std::setw(4) << self(1, 0) 
-        << ' ' << std::setw(4) << self(1, 1) 
-        << ' ' << std::setw(4) << self(1, 2)
-        << "\n" << std::setw(4) << self(2, 0) 
-        << ' ' << std::setw(4) << self(2, 1) 
+    out << std::fixed << std::setprecision(4) << "\n"
+        << std::setw(4) << self(0, 0) << ' ' << std::setw(4) << self(0, 1)
+        << ' ' << std::setw(4) << self(0, 2) << "\n"
+        << std::setw(4) << self(1, 0) << ' ' << std::setw(4) << self(1, 1)
+        << ' ' << std::setw(4) << self(1, 2) << "\n"
+        << std::setw(4) << self(2, 0) << ' ' << std::setw(4) << self(2, 1)
         << ' ' << std::setw(4) << self(2, 2);
 
     return out.str();
+}
+
+Mat3X3
+Mat3X3::RotX(float phi)
+{
+    auto ret = Mat3X3();
+    const auto cos = std::cos(phi);
+    const auto sin = std::sin(phi);
+    ret(1, 1) = cos;
+    ret(1, 2) = -sin;
+    ret(2, 1) = sin;
+    ret(2, 2) = cos;
+    return ret;
+}
+
+Mat3X3
+Mat3X3::RotY(float phi)
+{
+    auto ret = Mat3X3();
+    const auto cos = std::cos(phi);
+    const auto sin = std::sin(phi);
+    ret(0, 0) = cos;
+    ret(0, 2) = sin;
+    ret(2, 0) = -sin;
+    ret(2, 2) = cos;
+    return ret;
 }
 
 Vec3D
