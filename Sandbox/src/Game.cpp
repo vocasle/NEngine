@@ -190,7 +190,8 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
                     pos.Position.z);
 
     auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(helmet);
-    renderComp.Mesh = mEngine->LoadMesh("D:\\Assets\\cube.glb");
+    renderComp.Mesh = mEngine->LoadMesh(
+        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\DamagedHelmet.glb"));
     auto &ic = mEntityManager.CreateComponent<InputComponent>(helmet);
 
     mScene.AddToScene({helmet, "Player", mEntityManager.GetBitmask(helmet)});
