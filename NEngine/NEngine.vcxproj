@@ -72,11 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <PublicIncludeDirectories>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <PublicIncludeDirectories>$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <PublicIncludeDirectories>$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <PublicIncludeDirectories>$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -261,6 +261,45 @@
     <ClInclude Include="thirdparty\stb_image_write\include\stb_image_write\stb_image_write.h" />
     <ClInclude Include="thirdparty\tinygltf\include\tinygltf\json.hpp" />
     <ClInclude Include="thirdparty\tinygltf\include\tinygltf\tiny_gltf.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\BasePass.hlsli" />
+    <None Include="shader\PBR\PBR.hlsli" />
+    <None Include="shader\PBR\ToneMapping.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shader\BasePassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\BasePassVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\PBRPassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\PBRPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

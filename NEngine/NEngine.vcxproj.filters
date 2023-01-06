@@ -378,4 +378,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\BasePass.hlsli" />
+    <None Include="shader\PBR\PBR.hlsli" />
+    <None Include="shader\PBR\ToneMapping.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shader\BasePassPS.hlsl" />
+    <FxCompile Include="shader\PBRPassPS.hlsl" />
+    <FxCompile Include="shader\PBRPS.hlsl" />
+    <FxCompile Include="shader\BasePassVS.hlsl" />
+  </ItemGroup>
 </Project>
