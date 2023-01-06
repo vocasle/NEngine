@@ -193,6 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\Config.h" />
+    <ClInclude Include="include\NEngine\ECS\Components\CameraComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\PositionComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\RenderComponent.h" />

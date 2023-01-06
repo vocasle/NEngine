@@ -5,6 +5,7 @@
 #include <functional>
 #include <unordered_map>
 
+#include "Components/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/PositionComponent.h"
 #include "Components/RenderComponent.h"
@@ -184,11 +185,13 @@ private:
 
 using DefaultEntityManager = EntityManager<Components::PositionComponent,
                                            Components::RenderComponent,
-                                           Components::InputComponent>;
+                                           Components::InputComponent,
+                                           Components::CameraComponent>;
 
 enum ComponentType {
     ComponentType_POSITION = 0x1,
     ComponentType_RENDER = 0x2,
     ComponentType_INPUT = 0x4,
+    ComponentType_CAMERA = 0x8,
 };
 }  // namespace NEngine::ECS
