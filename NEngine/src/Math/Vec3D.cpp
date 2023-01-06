@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Utils/Utils.h"
 
 namespace NEngine::Math {
 std::string
@@ -96,6 +97,29 @@ Vec3D
 operator/(const Vec3D &lhs, const float s)
 {
     return lhs * (1 / s);
+}
+
+float
+Vec3D::operator[](size_t i) const
+{
+    UTILS_ASSERT(i < 3, "Invalid index");
+    if (i == 0)
+        return X;
+    else if (i == 1)
+        return Y;
+    else
+        return Z;
+}
+float &
+Vec3D::operator[](size_t i)
+{
+    UTILS_ASSERT(i < 3, "Invalid index");
+    if (i == 0)
+        return X;
+    else if (i == 1)
+        return Y;
+    else
+        return Z;
 }
 
 }  // namespace NEngine::Math

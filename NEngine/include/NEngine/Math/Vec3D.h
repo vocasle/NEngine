@@ -13,6 +13,8 @@ struct Vec3D
     Vec3D &operator=(Vec3D &&rhs) noexcept = default;
     bool operator==(const Vec3D &rhs) const;
     bool operator!=(const Vec3D &rhs) const;
+    float operator[](size_t i) const;
+    float &operator[](size_t i);
 
     std::string ToString() const;
 
