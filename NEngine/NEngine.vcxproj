@@ -40,13 +40,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -102,12 +108,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -116,14 +124,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -167,6 +177,17 @@
     <ClCompile Include="src\Renderer\VertexShader.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Utils\Utils.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx11.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx12.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_win32.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_tables.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp" />
+    <ClCompile Include="thirdparty\mikktspace\src\mikktspace.c" />
+    <ClCompile Include="thirdparty\stb_image\src\stb_image.cpp" />
+    <ClCompile Include="thirdparty\stb_image_write\src\stb_image_write.cpp" />
+    <ClCompile Include="thirdparty\tinygltf\src\tiny_gltf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h" />
@@ -223,6 +244,20 @@
     <ClInclude Include="include\NEngine\Utils\Image.h" />
     <ClInclude Include="include\NEngine\Utils\Timer.h" />
     <ClInclude Include="include\NEngine\Utils\Utils.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_internal.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_truetype.h" />
+    <ClInclude Include="thirdparty\mikktspace\include\mikktspace\mikktspace.h" />
+    <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
+    <ClInclude Include="thirdparty\stb_image_write\include\stb_image_write\stb_image_write.h" />
+    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\json.hpp" />
+    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\tiny_gltf.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
