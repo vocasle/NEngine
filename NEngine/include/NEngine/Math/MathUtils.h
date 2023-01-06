@@ -6,7 +6,7 @@ namespace NEngine::Math {
 struct Vec3D;
 
 constexpr static const auto PI = 3.14159265f;
-constexpr static const auto EPSILON = std::numeric_limits<float>::epsilon();
+constexpr static const auto EPSILON = 4.0f * std::numeric_limits<float>::epsilon();
 float ToRadians(float degrees);
 float ToDegrees(float radians);
 bool NearlyEqual(float lhs, float rhs);
