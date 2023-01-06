@@ -128,6 +128,10 @@ else()
     set(NENGINE_DEBUG 0)
 endif()
 
+if(NOT DEFINED USE_GLM)
+    set(USE_GLM 0)
+endif()
+
 target_compile_definitions(${library_name} 
         PUBLIC NOMINMAX=1 
         PUBLIC UNICODE=1 
@@ -137,7 +141,8 @@ target_compile_definitions(${library_name}
         PUBLIC NENGINE_SHADER_BUILD_DIR="${CMAKE_BINARY_DIR}/shaders"
         PUBLIC NENGINE_SHADER_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader"
         PUBLIC NENGINE_RES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/res"
-        PUBLIC NENGINE_DEBUG=${NENGINE_DEBUG})
+        PUBLIC NENGINE_DEBUG=${NENGINE_DEBUG}
+        PUBLIC NENGINE_USE_GLM=${USE_GLM})
 
 
 
