@@ -198,7 +198,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     auto plane = mEntityManager.CreateEntity();
     auto &planeMesh = mEntityManager.CreateComponent<RenderComponent>(plane);
     planeMesh.Mesh = mEngine->LoadMesh(
-        UtilsFormatStr("%s/%s", NENGINE_RES_DIR, "\\gLTF\\plane.glb"));
+        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\plane.glb"));
     auto &planePos = mEntityManager.CreateComponent<PositionComponent>(plane);
     mScene.AddToScene({plane, "Ground", mEntityManager.GetBitmask(plane)});
 }
