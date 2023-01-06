@@ -307,9 +307,31 @@ TestMat3X3()
         auto e = 56.0f;
         auto r = m.Determinant();
         
-        UTILS_PRINTLN("r=%f, e=%f", r, e);
         UTILS_ASSERT(r == e, "Determinant() test failed");
         UtilsDebugPrint("Determinant() test passed\n");
+    }
+
+    {
+        auto m = Mat3X3(4,4,7,2,1,8,8,6,9);
+        auto e = Mat3X3(4,2,8,4,1,6,7,8,9);
+        auto r = m.Transpose();
+        UTILS_ASSERT(e == r, "Transpose() test failed");
+        UTILS_PRINTLN("Transpose() test passed");
+    }
+
+    {
+        auto m = Mat3X3(4,4,7,2,1,8,8,6,9);
+        auto e = Mat3X3(
+   -0.696429f,   0.821429f,   0.071429f,
+   0.107143f,  -0.357143f,   0.142857f,
+   0.446429f,  -0.321429f,  -0.071429f
+                );
+        auto ei = Mat3X3();
+        auto r = m.Inverse();
+        auto ri = r * m;
+        
+        UTILS_ASSERT(ri == ei, "Inverse() test failed");
+        UTILS_PRINTLN("Inverse() test passed");
     }
 }
 

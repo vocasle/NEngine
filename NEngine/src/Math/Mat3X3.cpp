@@ -1,4 +1,7 @@
 #include "NEngine/Math/Mat3X3.h"
+#include <sstream>
+#include <iomanip>
+#include <iostream>
 
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
@@ -83,7 +86,7 @@ Mat3X3::Transpose() const
     auto ret = *this;
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
-            ret(j, i) = ret(i, j);
+            ret(i, j) = operator()(j, i);
         }
     }
     return ret;
@@ -142,15 +145,66 @@ Mat3X3::RotZ(float phi)
 
 float Mat3X3::Determinant() const {
     const auto &self = *this;
+    const auto minor00 = self(1, 1) * self(2, 2) - self(2, 1) * self(1, 2);
+    const auto minor01 = self(1, 0) * self(2, 2) - self(2, 0) * self(1, 2);
+    const auto minor02 = self(1, 0) * self(2, 1) - self(2, 0) * self(1, 1);
+    return self(0, 0) * minor00 - self(0, 1) * minor01 + self(0, 2) * minor02;
+}
+
+
+Mat3X3 Mat3X3::Inverse() const {
+    const auto det = Determinant();
+    UTILS_ASSERT(det != 0, "Determinant is zero, matrix has no inverse!");
+    const auto &self = *this;
+    auto ret = Mat3X3();
+
     /*
      * | a00 a01 a02 |
      * | a10 a11 a12 |
      * | a20 a21 a22 |
      */
-    const auto minor00 = self(1, 1) * self(2, 2) - self(2, 1) * self(1, 2);
-    const auto minor01 = self(1, 0) * self(2, 2) - self(2, 0) * self(1, 2);
-    const auto minor02 = self(1, 0) * self(2, 1) - self(2, 0) * self(1, 1);
-    return self(0, 0) * minor00 - self(0, 1) * minor01 + self(0, 2) * minor02;
+
+    const auto A00 = self(1, 1) * self(2, 2) - self(2, 1) *self(1, 2);
+    const auto A01 = self(1, 0) * self(2, 2) - self(2, 0) * self(1, 2);
+    const auto A02 = self(1, 0) * self(2, 1) - self(2, 0) * self(1, 1);
+    const auto A10 = self(0, 1) * self(2, 2) - self(2, 1) * self(0, 2);
+    const auto A11 = self(0, 0) * self(2, 2) - self(2, 0) * self(0, 2);
+    const auto A12 = self(0, 0) * self(2, 1) - self(2, 0) * self(0, 1);
+    const auto A20 = self(0, 1) * self(1, 2) - self(1, 1) * self(0, 2);
+    const auto A21 = self(0, 0) * self(1, 2) - self(1, 0) * self(0, 2);
+    const auto A22 = self(0, 0) * self(1, 1) - self(1, 0) * self(0, 1);
+
+    ret(0, 0) = A00;
+    ret(0, 1) = -A01;
+    ret(0, 2) = A02;
+    ret(1, 0) = -A10;
+    ret(1, 1) = A11;
+    ret(1, 2) = -A12;
+    ret(2, 0) = A20;
+    ret(2, 1) = -A21;
+    ret(2, 2) = A22;
+    ret = ret.Transpose();
+
+    return (1 / det) * ret;
+}
+
+
+std::string Mat3X3::ToString() const {
+    std::ostringstream out;
+    const auto &self = *this;
+
+    out << std::fixed << std::setprecision(4)
+        << "\n" << std::setw(4) << self(0, 0) 
+        << ' ' << std::setw(4) << self(0, 1) 
+        << ' ' << std::setw(4) << self(0, 2)
+        << "\n" << std::setw(4) << self(1, 0) 
+        << ' ' << std::setw(4) << self(1, 1) 
+        << ' ' << std::setw(4) << self(1, 2)
+        << "\n" << std::setw(4) << self(2, 0) 
+        << ' ' << std::setw(4) << self(2, 1) 
+        << ' ' << std::setw(4) << self(2, 2);
+
+    return out.str();
 }
 
 Vec3D
