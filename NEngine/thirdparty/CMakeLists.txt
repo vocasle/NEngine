@@ -1,8 +1,0 @@
-add_subdirectory(imgui)
-add_subdirectory(stb_image)
-add_subdirectory(stb_image_write)
-add_subdirectory(tinygltf)
-add_subdirectory(mikktspace)
-add_subdirectory(wictexloader)
-add_subdirectory(ImGuizmo)
-add_subdirectory(glm)
