@@ -28,7 +28,7 @@ RenderSystem::Update(float dt) -> void
 
     {
         static auto dirLightTime = 0.0f;
-        dirLightTime += dt;
+        dirLightTime += (dt / 1000);
         auto dirLight = mBasePass->GetBufferValue<DirectionalLight>(
             "dirLight", BufferType::PerScene);
 
@@ -78,7 +78,6 @@ RenderSystem::RegisterEntity(Entity entity) -> void
 {
     if (mEntityManager->HasComponent<PositionComponent>(entity) &&
         mEntityManager->HasComponent<RenderComponent>(entity)) {
-
         if (mEntityManager->HasComponent<CameraComponent>(entity)) {
             auto &camComp =
                 *mEntityManager->GetComponent<CameraComponent>(entity);
@@ -88,7 +87,7 @@ RenderSystem::RegisterEntity(Entity entity) -> void
 
         auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
         if (it != std::end(mEntities)) {
-            UtilsDebugPrint("Entity %l already registered with RenderSystem");
+            UTILS_PRINTLN("Entity %l already registered with RenderSystem");
             return;
         }
 
