@@ -1,4 +1,4 @@
-#include "Sandbox/Game.h"
+#include "Sandbox/MyGame.h"
 
 #include <d3dcompiler.h>
 
@@ -51,14 +51,20 @@ MyGame::UpdateImgui()
     }
 
     if (ImGui::CollapsingHeader("Camera settings")) {
-        static float zFar = m_camera.GetZFar();
-        static float zNear = m_camera.GetZNear();
+        static float zFar = 100;
+        static float zNear = 0.1;
 
         ImGui::InputFloat("z far", &zFar);
         ImGui::InputFloat("z near", &zNear);
         if (ImGui::Button("Apply##Camera")) {
-            m_camera.SetZFar(zFar);
-            m_camera.SetZNear(zNear);
+            const auto player = mScene.FindEntityByName("Player");
+
+            if (player) {
+                auto &cam =
+                    *mEntityManager.GetComponent<CameraComponent>(player->ID);
+                cam.Camera.SetZFar(zFar);
+                cam.Camera.SetZNear(zNear);
+            }
         }
     }
 
@@ -94,8 +100,7 @@ MyGame::UpdateImgui()
 #endif
 
 MyGame::MyGame()
-    : m_camera({0, 0, -5}),
-      mEngine(nullptr)
+    : mEngine(nullptr)
 {
 }
 
@@ -134,9 +139,6 @@ void
 MyGame::Update(float dt)
 {
     {
-        m_camera.ProcessKeyboard(dt);
-        m_camera.ProcessMouse(dt);
-
         static float elapsedTime = 0.0f;
         const auto deltaSeconds = static_cast<float>(dt / 1000.0);
         elapsedTime += deltaSeconds;
@@ -173,28 +175,12 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 
     Mouse::Get().SetWindowDimensions(winSize.X, winSize.Y);
 
-    m_camera.SetZFar(10000);
-    m_camera.SetZNear(0.1f);
-    m_camera.SetViewDimensions(winSize.X, winSize.Y);
-
     mSystemManager.SetSystem(std::make_unique<MoveSystem>(mEntityManager));
     mSystemManager.SetSystem(std::make_unique<RenderSystem>(
-        mEngine->GetDeviceResources(), mEntityManager, m_camera));
+        mEngine->GetDeviceResources(), mEntityManager));
     mSystemManager.SetSystem(std::make_unique<InputSystem>(mEntityManager));
 
-    auto helmet = mEntityManager.CreateEntity();
-    auto &pos = mEntityManager.CreateComponent<PositionComponent>(helmet);
-    UtilsDebugPrint("Helmet default position: %f %f %f\n",
-                    pos.Position.x,
-                    pos.Position.y,
-                    pos.Position.z);
-
-    auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(helmet);
-    renderComp.Mesh = mEngine->LoadMesh(
-        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\DamagedHelmet.glb"));
-    auto &ic = mEntityManager.CreateComponent<InputComponent>(helmet);
-
-    mScene.AddToScene({helmet, "Player", mEntityManager.GetBitmask(helmet)});
+    CreatePlayer();
 
     auto plane = mEntityManager.CreateEntity();
     auto &planeMesh = mEntityManager.CreateComponent<RenderComponent>(plane);
@@ -214,4 +200,28 @@ auto
 MyGame::OnComponentRemove(NEngine::ECS::Entity entity) -> void
 {
     mSystemManager.UnregisterEntity(entity);
+}
+
+auto
+MyGame::CreatePlayer() -> void
+{
+    auto player = mEntityManager.CreateEntity();
+    auto &pos = mEntityManager.CreateComponent<PositionComponent>(player);
+    UtilsDebugPrint("Helmet default position: %f %f %f\n",
+                    pos.Position.x,
+                    pos.Position.y,
+                    pos.Position.z);
+
+    auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(player);
+    renderComp.Mesh = mEngine->LoadMesh(
+        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\DamagedHelmet.glb"));
+    auto &ic = mEntityManager.CreateComponent<InputComponent>(player);
+
+    auto &camComp = mEntityManager.CreateComponent<CameraComponent>(player);
+    camComp.Camera.SetZFar(10000);
+    camComp.Camera.SetZNear(0.1f);
+    const auto winSize = mEngine->GetWindowSize();
+    camComp.Camera.SetViewDimensions(winSize.X, winSize.Y);
+
+    mScene.AddToScene({player, "Player", mEntityManager.GetBitmask(player)});
 }

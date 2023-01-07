@@ -34,7 +34,7 @@ private:
     auto OnComponentAdd(NEngine::ECS::Entity entity) -> void;
     auto OnComponentRemove(NEngine::ECS::Entity entity) -> void;
 
-    NEngine::Helpers::Camera m_camera;
+    auto CreatePlayer() -> void;
 
     NEngine::Engine *mEngine;
 
