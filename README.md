@@ -27,6 +27,7 @@ To build with VS 2022 you just need to open `NEngine.sln`.
 
 **Obsolete**
 
+I have removed CMake support in 381c63646348358d7cf96bb0f97988a28cabdafd. You can undo this commit and update CMake files.
 CMake is not being used starting from 01.07.2023. Most likely you need to update CMake files to build everything.
 
 To build with CMake navigate to root of the repo and execute:
