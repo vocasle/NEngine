@@ -20,6 +20,9 @@ public:
     auto UnregisterEntity(Entity entity) -> void;
 
 private:
+    auto UpdateCamera(float dt, Entity entity, const Components::PositionComponent &pc)
+        -> void;
+
     ECS::DefaultEntityManager *mEntityManager;
     std::vector<Entity> mEntities;
 };
