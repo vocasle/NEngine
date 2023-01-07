@@ -21,9 +21,13 @@ List of third party libs:
 
 **How to build**
 
-For now I use CMake + Visual Studio 2022 to build the project. 
+For now I use Visual Studio 2022 to build the project. 
 
-To build with VS 2022 you just need to open the project as CMake project.
+To build with VS 2022 you just need to open `NEngine.sln`.
+
+**Obsolete**
+
+CMake is not being used starting from 01.07.2023. Most likely you need to update CMake files to build everything.
 
 To build with CMake navigate to root of the repo and execute:
 
