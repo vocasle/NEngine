@@ -60,10 +60,8 @@ Camera::~Camera()
 Mat4X4
 Camera::GetViewMat() const
 {
-    auto at = Vec3D(0, 0, 0);
-    const Vec3D direction = MathVec3DSubtraction(&at, &m_Pos);
-    const auto negDir = MathVec3DSubtraction(m_Pos, direction);
-    return MathMat4X4ViewAt(&m_Pos, &negDir, &m_Up);
+    auto at = m_Pos - m_At;
+    return MathMat4X4ViewAt(&m_Pos, &at, &m_Up);
 }
 
 Mat4X4
@@ -263,8 +261,8 @@ Camera::SetYaw(float yaw)
 void
 Camera::Tick(double deltaMillis)
 {
-    ProcessMouse(deltaMillis);
-    ProcessKeyboard(deltaMillis);
+    //ProcessMouse(deltaMillis);
+    //ProcessKeyboard(deltaMillis);
 }
 
 void
