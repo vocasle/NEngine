@@ -52,6 +52,11 @@ Camera::Camera(const Vec3D &cameraPos)
     SetupMouseListener();
 }
 
+Camera::~Camera()
+{
+    Mouse::Get().RemoveMouseEventListener(mMouseListener);
+}
+
 Mat4X4
 Camera::GetViewMat() const
 {
