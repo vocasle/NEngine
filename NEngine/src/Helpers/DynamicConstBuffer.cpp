@@ -154,7 +154,7 @@ DynamicConstBuffer::InitializeDefaults()
                 *reinterpret_cast<Vec4D *>(v.Ptr) = {0, 0, 0, 0};
                 break;
             case NodeType::Float3X3:
-                *reinterpret_cast<Mat3X3 *>(v.Ptr) = MathMat3X3Identity();
+                *reinterpret_cast<Mat3X3 *>(v.Ptr) = Mat3X3();
                 break;
             case NodeType::Float4X4:
                 *reinterpret_cast<Mat4X4 *>(v.Ptr) = MathMat4X4Identity();

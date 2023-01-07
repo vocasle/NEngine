@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-#include "DirectXMath.h"
 #include "NEngine/Input/Mouse.h"
 #include "NEngine/Math/Math.h"
 
@@ -16,6 +15,7 @@ class Camera
 public:
     Camera();
     Camera(const Math::Vec3D &cameraPos);
+    ~Camera();
 
     Math::Vec3D GetPos() const;
     Math::Vec3D GetAt() const;
@@ -33,7 +33,7 @@ public:
                 const Math::Vec3D &target,
                 const Math::Vec3D &up);
     void SetFov(float fov);
-    void SetPosition(DirectX::XMFLOAT3 position);
+    void SetPosition(const Math::Vec3D &position);
     void SetPitch(float pitch);
     void SetYaw(float yaw);
 

@@ -181,9 +181,9 @@ Texture::GetDepthStencilView() const
 
 void
 Texture::Resize(Helpers::DeviceResources &deviceResources,
-                DirectX::XMFLOAT2 size)
+                const Math::Vec2D &size)
 {
-    auto tmp = Texture(deviceResources, size.x, size.y, mBindTarget, mName);
+    auto tmp = Texture(deviceResources, size.X, size.Y, mBindTarget, mName);
     *this = std::move(tmp);
 }
 

@@ -75,91 +75,6 @@ MathVec4DFromXYZW(float x, float y, float z, float w)
     return v;
 }
 
-Mat3X3
-MathMat3X3Identity()
-{
-    Mat3X3 mat = {};
-    mat.A00 = mat.A11 = mat.A22 = 1.0f;
-    return mat;
-}
-
-Mat3X3
-MathMat3X3Addition(const Mat3X3 *mat1, const Mat3X3 *mat2)
-{
-    Mat3X3 res = {};
-    MathVec3DAddition(&mat1->V[0], &mat2->V[0]);
-    MathVec3DAddition(&mat1->V[1], &mat2->V[1]);
-    MathVec3DAddition(&mat1->V[2], &mat2->V[2]);
-    return res;
-}
-
-void
-MathMat3X3ModulateByScalar(Mat3X3 *mat, const float s)
-{
-    mat->V[0] = MathVec3DModulateByScalar(&mat->V[0], s);
-    mat->V[1] = MathVec3DModulateByScalar(&mat->V[1], s);
-    mat->V[2] = MathVec3DModulateByScalar(&mat->V[2], s);
-}
-
-Vec3D
-MathMat3X3MultByVec3D(const Mat3X3 *mat, const Vec3D *vec)
-{
-    Vec3D res = {};
-    res.X = MathVec3DDot(&mat->V[0], vec);
-    res.Y = MathVec3DDot(&mat->V[1], vec);
-    res.Z = MathVec3DDot(&mat->V[2], vec);
-    return res;
-}
-
-Mat3X3
-MathMat3X3MultByMat3X3(const Mat3X3 *mat1, const Mat3X3 *mat2)
-{
-    Mat3X3 res = {};
-
-    float x = mat1->A00;
-    float y = mat1->A01;
-    float z = mat1->A02;
-
-    res.A00 = x * mat2->A00 + y * mat2->A10 + z * mat2->A20;
-    res.A01 = x * mat2->A01 + y * mat2->A11 + z * mat2->A21;
-    res.A02 = x * mat2->A02 + y * mat2->A12 + z * mat2->A22;
-
-    x = mat1->A10;
-    y = mat1->A11;
-    z = mat1->A12;
-
-    res.A10 = x * mat2->A00 + y * mat2->A10 + z * mat2->A20;
-    res.A11 = x * mat2->A01 + y * mat2->A11 + z * mat2->A21;
-    res.A12 = x * mat2->A02 + y * mat2->A12 + z * mat2->A22;
-
-    x = mat1->A20;
-    y = mat1->A21;
-    z = mat1->A22;
-
-    res.A20 = x * mat2->A00 + y * mat2->A10 + z * mat2->A20;
-    res.A21 = x * mat2->A01 + y * mat2->A11 + z * mat2->A21;
-    res.A22 = x * mat2->A02 + y * mat2->A12 + z * mat2->A22;
-
-    return res;
-}
-
-void
-MathMat3X3Transpose(Mat3X3 *mat)
-{
-    Mat3X3 out = {};
-    for (unsigned char i = 0; i < 3; ++i)
-        for (unsigned char j = 0; j < 3; ++j)
-            out.A[i][j] = mat->A[j][i];
-    *mat = out;
-}
-
-void
-MathMat3X3Copy(const Mat3X3 *from, Mat3X3 *to)
-{
-    for (unsigned char i = 0; i < 3; ++i)
-        to->V[i] = from->V[i];
-}
-
 Mat4X4
 MathMat4X4Identity()
 {
@@ -1083,14 +998,6 @@ MathMat4X4Inverse(const Mat4X4 &mat)
 }
 
 std::string
-Vec2D::ToString() const
-{
-    std::stringstream out;
-    out << "{ " << X << ", " << Y << " }";
-    return out.str();
-}
-
-std::string
 Mat4X4::ToString() const
 {
     std::stringstream out;
@@ -1103,114 +1010,6 @@ Mat4X4::ToString() const
     return out.str();
 }
 
-std::string
-Mat3X3::ToString() const
-{
-    std::stringstream out;
-    out << "{\n";
-    for (uint32_t i = 0; i < 3; ++i) {
-        const Vec3D &v = V[i];
-        out << "\t" << v.ToString() << ",\n";
-    }
-    out << "}";
-    return out.str();
-}
-float
-Mat3X3::Determinant() const
-{
-    return A00 * (A11 * A22 - A21 * A12) - A01 * (A10 * A22 - A20 * A12) +
-           A02 * (A10 * A21 - A20 * A11);
-}
-
-std::string
-Vec4D::ToString() const
-{
-    std::stringstream out;
-    out << "{ " << X << ", " << Y << ", " << Z << ", " << W << " }";
-    return out.str();
-}
-
-std::string
-Vec3D::ToString() const
-{
-    std::stringstream out;
-    out << "{ " << X << ", " << Y << ", " << Z << " }";
-    return out.str();
-}
-
-Vec3D
-operator+(const Vec3D &lhs, const Vec3D &rhs)
-{
-    return {lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z};
-}
-
-Vec3D
-operator-(const Vec3D &lhs, const Vec3D &rhs)
-{
-    return {lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z};
-}
-
-Vec3D
-operator*(const Vec3D &lhs, const float s)
-{
-    return {lhs.X * s, lhs.Y * s, lhs.Z * s};
-}
-
-Vec3D
-operator*(const float s, const Vec3D &rhs)
-{
-    return rhs * s;
-}
-
-Vec3D
-Vec3D::Cross(const Vec3D &rhs) const
-{
-    return MathVec3DCross(this, &rhs);
-}
-
-float
-Vec3D::Dot(const Vec3D &rhs) const
-{
-    return MathVec3DDot(this, &rhs);
-}
-
-float
-Vec3D::Length() const
-{
-    return MathVec3DLength(*this);
-}
-
-void
-Vec3D::Normalize()
-{
-    MathVec3DNormalize(this);
-}
-
-bool
-Vec3D::operator==(const Vec3D &rhs) const
-{
-    return X == rhs.X && Y == rhs.Y && Z == rhs.Z;
-}
-
-bool
-Vec3D::operator!=(const Vec3D &rhs) const
-{
-    return !(*this == rhs);
-}
-
-Vec4D &
-Vec4D::operator*(const float scalar)
-{
-    MathVec4DModulateByScalar(this, scalar, this);
-    return *this;
-}
-
-Vec4D &
-Vec4D::operator/(const float scalar)
-{
-    return *this * (1 / scalar);
-}
-
 bool
 Mat4X4::operator==(const Mat4X4 &rhs) const
 {
@@ -1218,11 +1017,6 @@ Mat4X4::operator==(const Mat4X4 &rhs) const
            V[3] == rhs.V[3];
 }
 
-bool
-Vec4D::operator==(const Vec4D &rhs) const
-{
-    return X == rhs.X && Y == rhs.Y && Z == rhs.Z && W == rhs.W;
-}
 #endif
 
 // TODO: This must be tested. Calculations were performed for column major that
@@ -1248,33 +1042,6 @@ MathQuaternionToRotationMat(const Vec4D &quat)
     return mat;
 }
 
-float
-MathMat3X3Determinant(const Mat3X3 &mat)
-{
-    return mat.A00 * (mat.A11 * mat.A22 - mat.A12 * mat.A21) -
-           mat.A01 * (mat.A10 * mat.A22 - mat.A20 - mat.A12) +
-           mat.A02 * (mat.A10 * mat.A21 - mat.A20 - mat.A11);
-}
-
-#if NENGINE_USE_DIRECTXMATH
-Mat4X4
-MathXMMatrixToMat4X4(DirectX::XMMATRIX xmMat)
-{
-    using namespace DirectX;
-
-    Mat4X4 out;
-
-    XMFLOAT4X4 tmp;
-    XMStoreFloat4x4(&tmp, xmMat);
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            out.A[i][j] = tmp.m[i][j];
-        }
-    }
-
-    return out;
-}
-#endif
 }  // namespace Math
 
 }  // namespace NEngine

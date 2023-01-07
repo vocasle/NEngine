@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{443746e1-5763-4224-889d-de85a38d0f1e}</ProjectGuid>
+    <RootNamespace>NEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ECS\Systems\InputSystem.cpp" />
+    <ClCompile Include="src\ECS\Systems\MoveSystem.cpp" />
+    <ClCompile Include="src\ECS\Systems\RenderSystem.cpp" />
+    <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\Helpers\Camera.cpp" />
+    <ClCompile Include="src\Helpers\DeviceResources.cpp" />
+    <ClCompile Include="src\Helpers\DynamicConstBuffer.cpp" />
+    <ClCompile Include="src\Helpers\DynamicCubeMap.cpp" />
+    <ClCompile Include="src\Helpers\GLTFLoader.cpp" />
+    <ClCompile Include="src\Helpers\InputLayoutOld.cpp" />
+    <ClCompile Include="src\Helpers\MeshGenerator.cpp" />
+    <ClCompile Include="src\Helpers\ModelImporter.cpp" />
+    <ClCompile Include="src\Helpers\objloader.cpp" />
+    <ClCompile Include="src\Helpers\Renderer.cpp" />
+    <ClCompile Include="src\Helpers\ShaderManager.cpp" />
+    <ClCompile Include="src\Helpers\ShadowMap.cpp" />
+    <ClCompile Include="src\Helpers\Transform.cpp" />
+    <ClCompile Include="src\Helpers\VertexBuffer.cpp" />
+    <ClCompile Include="src\Input\Keyboard.cpp" />
+    <ClCompile Include="src\Input\Mouse.cpp" />
+    <ClCompile Include="src\Math\Mat3X3.cpp" />
+    <ClCompile Include="src\Math\Mat4X4.cpp" />
+    <ClCompile Include="src\Math\Math.cpp" />
+    <ClCompile Include="src\Math\MathTest.cpp" />
+    <ClCompile Include="src\Math\MathUtils.cpp" />
+    <ClCompile Include="src\Math\Vec2D.cpp" />
+    <ClCompile Include="src\Math\Vec3D.cpp" />
+    <ClCompile Include="src\Math\Vec4D.cpp" />
+    <ClCompile Include="src\Renderer\BasePass.cpp" />
+    <ClCompile Include="src\Renderer\IndexBuffer.cpp" />
+    <ClCompile Include="src\Renderer\InputLayout.cpp" />
+    <ClCompile Include="src\Renderer\Mesh.cpp" />
+    <ClCompile Include="src\Renderer\MeshPrimitive.cpp" />
+    <ClCompile Include="src\Renderer\PixelShader.cpp" />
+    <ClCompile Include="src\Renderer\RasterizerState.cpp" />
+    <ClCompile Include="src\Renderer\Sampler.cpp" />
+    <ClCompile Include="src\Renderer\Texture.cpp" />
+    <ClCompile Include="src\Renderer\VertexShader.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Utils\Utils.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx11.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx12.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_win32.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_tables.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp" />
+    <ClCompile Include="thirdparty\mikktspace\src\mikktspace.c" />
+    <ClCompile Include="thirdparty\stb_image\src\stb_image.cpp" />
+    <ClCompile Include="thirdparty\stb_image_write\src\stb_image_write.cpp" />
+    <ClCompile Include="thirdparty\tinygltf\src\tiny_gltf.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\NEngine\Config.h" />
+    <ClInclude Include="include\NEngine\ECS\Components\CameraComponent.h" />
+    <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h" />
+    <ClInclude Include="include\NEngine\ECS\Components\PositionComponent.h" />
+    <ClInclude Include="include\NEngine\ECS\Components\RenderComponent.h" />
+    <ClInclude Include="include\NEngine\ECS\Entity.h" />
+    <ClInclude Include="include\NEngine\ECS\EntityManager.h" />
+    <ClInclude Include="include\NEngine\ECS\Repo.h" />
+    <ClInclude Include="include\NEngine\ECS\SystemManager.h" />
+    <ClInclude Include="include\NEngine\ECS\Systems\InputSystem.h" />
+    <ClInclude Include="include\NEngine\ECS\Systems\MoveSystem.h" />
+    <ClInclude Include="include\NEngine\ECS\Systems\RenderSystem.h" />
+    <ClInclude Include="include\NEngine\Engine.h" />
+    <ClInclude Include="include\NEngine\Game.h" />
+    <ClInclude Include="include\NEngine\Helpers\Buffer.h" />
+    <ClInclude Include="include\NEngine\Helpers\Camera.h" />
+    <ClInclude Include="include\NEngine\Helpers\DeviceResources.h" />
+    <ClInclude Include="include\NEngine\Helpers\DynamicConstBuffer.h" />
+    <ClInclude Include="include\NEngine\Helpers\DynamicCubeMap.h" />
+    <ClInclude Include="include\NEngine\Helpers\GLTFLoader.h" />
+    <ClInclude Include="include\NEngine\Helpers\InputLayout.h" />
+    <ClInclude Include="include\NEngine\Helpers\LightHelper.h" />
+    <ClInclude Include="include\NEngine\Helpers\MeshGenerator.h" />
+    <ClInclude Include="include\NEngine\Helpers\ModelImporter.h" />
+    <ClInclude Include="include\NEngine\Helpers\objloader.h" />
+    <ClInclude Include="include\NEngine\Helpers\Renderer.h" />
+    <ClInclude Include="include\NEngine\Helpers\ShaderManager.h" />
+    <ClInclude Include="include\NEngine\Helpers\ShadowMap.h" />
+    <ClInclude Include="include\NEngine\Helpers\Transform.h" />
+    <ClInclude Include="include\NEngine\Input\Keyboard.h" />
+    <ClInclude Include="include\NEngine\Input\Mouse.h" />
+    <ClInclude Include="include\NEngine\Math\Mat3X3.h" />
+    <ClInclude Include="include\NEngine\Math\Mat4X4.h" />
+    <ClInclude Include="include\NEngine\Math\Math.h" />
+    <ClInclude Include="include\NEngine\Math\MathTest.h" />
+    <ClInclude Include="include\NEngine\Math\MathUtils.h" />
+    <ClInclude Include="include\NEngine\Math\Vec2D.h" />
+    <ClInclude Include="include\NEngine\Math\Vec3D.h" />
+    <ClInclude Include="include\NEngine\Math\Vec4D.h" />
+    <ClInclude Include="include\NEngine\Renderer\BasePass.h" />
+    <ClInclude Include="include\NEngine\Renderer\Bindable.h" />
+    <ClInclude Include="include\NEngine\Renderer\Drawable.h" />
+    <ClInclude Include="include\NEngine\Renderer\IndexBuffer.h" />
+    <ClInclude Include="include\NEngine\Renderer\InputLayout.h" />
+    <ClInclude Include="include\NEngine\Renderer\Mesh.h" />
+    <ClInclude Include="include\NEngine\Renderer\MeshPrimitive.h" />
+    <ClInclude Include="include\NEngine\Renderer\PixelShader.h" />
+    <ClInclude Include="include\NEngine\Renderer\RasterizerState.h" />
+    <ClInclude Include="include\NEngine\Renderer\Sampler.h" />
+    <ClInclude Include="include\NEngine\Renderer\Texture.h" />
+    <ClInclude Include="include\NEngine\Renderer\VertexBuffer.h" />
+    <ClInclude Include="include\NEngine\Renderer\VertexShader.h" />
+    <ClInclude Include="include\NEngine\Scene.h" />
+    <ClInclude Include="include\NEngine\Utils\Image.h" />
+    <ClInclude Include="include\NEngine\Utils\Timer.h" />
+    <ClInclude Include="include\NEngine\Utils\Utils.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_internal.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_truetype.h" />
+    <ClInclude Include="thirdparty\mikktspace\include\mikktspace\mikktspace.h" />
+    <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
+    <ClInclude Include="thirdparty\stb_image_write\include\stb_image_write\stb_image_write.h" />
+    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\json.hpp" />
+    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\tiny_gltf.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\BasePass.hlsli" />
+    <None Include="shader\PBR\PBR.hlsli" />
+    <None Include="shader\PBR\ToneMapping.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shader\BasePassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\BasePassVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\PBRPassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\PBRPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

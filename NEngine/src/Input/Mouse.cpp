@@ -176,5 +176,15 @@ Mouse::SetMouseEventListener(const MouseEventListener &listener)
     }
 }
 
+void
+Mouse::RemoveMouseEventListener(const MouseEventListener &listener)
+{
+    auto it = std::find(
+        std::begin(mMouseListeners), std::end(mMouseListeners), &listener);
+    if (it != std::end(mMouseListeners)) {
+        mMouseListeners.erase(it);
+    }
+}
+
 }  // namespace Input
 }  // namespace NEngine

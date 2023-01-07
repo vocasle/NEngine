@@ -7,7 +7,6 @@
 #include "NEngine/Math/Math.h"
 #include "Windows.h"
 
-
 namespace NEngine {
 namespace Input {
 class Mouse
@@ -43,15 +42,16 @@ public:
                    LPARAM lParam,
                    ButtonType type);
 
-	void OnMouseMove(const Math::Vec2D &pos);
-	void OnMouseDown(const Math::Vec2D &pos, ButtonType btnType);
-	void OnMouseUp(const Math::Vec2D &pos, ButtonType btnType);
+    void OnMouseMove(const Math::Vec2D &pos);
+    void OnMouseDown(const Math::Vec2D &pos, ButtonType btnType);
+    void OnMouseUp(const Math::Vec2D &pos, ButtonType btnType);
 
     Math::Vec2D GetMouseDelta();
     [[nodiscard]] bool IsLeftButtonPressed() const;
     [[nodiscard]] bool IsRightButtonPressed() const;
 
     void SetMouseEventListener(const MouseEventListener &listener);
+    void RemoveMouseEventListener(const MouseEventListener &listener);
 
 private:
     Mouse();

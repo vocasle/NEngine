@@ -18,12 +18,6 @@ void UtilsFatalError(const char *fmt, ...);
 
 std::string UtilsFormatStr(const char *fmt, ...);
 
-#define UTILS_FATAL_ERROR(msg, ...)     \
-    UtilsFatalError("ERROR: %s:%d: %s", \
-                    __FILE__,           \
-                    __LINE__,           \
-                    UtilsFormatStr(msg, __VA_ARGS__).c_str())
-
 int UtilStrFindLastChar(const char *str, const char ch);
 
 void UtilsStrSub(const char *str,
@@ -38,72 +32,6 @@ void UtilsWriteData(const char *filepath,
                     const char *bytes,
                     const size_t sz,
                     const bool isBinary = false);
-
-/* Dynamic Array */
-
-#define DEFINE_ARRAY_TYPE(DataType, ClassSuffix)                          \
-                                                                          \
-    void Array##ClassSuffix##Resize(struct Array##ClassSuffix *arr,       \
-                                    size_t capacity)                      \
-    {                                                                     \
-        DataType *Data = realloc(arr->Data, capacity * sizeof(DataType)); \
-        assert(Data);                                                     \
-        arr->Data = Data;                                                 \
-        arr->Capacity = capacity;                                         \
-    }                                                                     \
-                                                                          \
-    void Array##ClassSuffix##PushBack(struct Array##ClassSuffix *arr,     \
-                                      DataType v)                         \
-    {                                                                     \
-        if (!arr->Data || arr->Count + 1 > arr->Capacity) {               \
-            size_t size = arr->Data ? arr->Capacity * 2 : 4;              \
-            Array##ClassSuffix##Resize(arr, size);                        \
-        }                                                                 \
-        arr->Data[arr->Count++] = v;                                      \
-    }                                                                     \
-                                                                          \
-    void Array##ClassSuffix##Free(struct Array##ClassSuffix *arr)         \
-    {                                                                     \
-        arr->Count = 0;                                                   \
-        free(arr->Data);                                                  \
-    }                                                                     \
-                                                                          \
-    void Array##ClassSuffix##FreeCustom(                                  \
-        struct Array##ClassSuffix *arr,                                   \
-        void (*CustomFree)(struct Array##ClassSuffix * arr))              \
-    {                                                                     \
-        for (uint32_t i = 0; i < arr->Count; ++i)                         \
-            CustomFree(&arr->Data[i]);                                    \
-        arr->Count = 0;                                                   \
-        free(arr->Data);                                                  \
-    }
-
-#define DECLARE_ARRAY_TYPE(DataType, ClassSuffix)                     \
-    struct Array##ClassSuffix                                         \
-    {                                                                 \
-        size_t Count;                                                 \
-        size_t Capacity;                                              \
-        DataType *Data;                                               \
-    };                                                                \
-                                                                      \
-    void Array##ClassSuffix##Resize(struct Array##ClassSuffix *arr,   \
-                                    size_t capacity);                 \
-                                                                      \
-    void Array##ClassSuffix##PushBack(struct Array##ClassSuffix *arr, \
-                                      DataType v);                    \
-                                                                      \
-    void Array##ClassSuffix##Free(struct Array##ClassSuffix *arr);    \
-                                                                      \
-    void Array##ClassSuffix##FreeCustom(                              \
-        struct Array##ClassSuffix *arr,                               \
-        void (*CustomFree)(struct Array##ClassSuffix * arr))
-
-#define COM_FREE(This) (This->Release())
-
-#define HR(x)                                                               \
-    if (FAILED(x)) {                                                        \
-        UtilsDebugPrint("%s:%d - Operation failed.\n", __FILE__, __LINE__); \
-    }
 
 void UtilsCreateIndexBuffer(ID3D11Device *device,
                             const void *data,
@@ -131,3 +59,31 @@ std::vector<std::wstring> UtilsGlobFiles(const std::string &dir,
 
 }  // namespace Utils
 }  // namespace NEngine
+
+#define UTILS_FATAL_ERROR(msg, ...)  \
+    NEngine::Utils::UtilsFatalError( \
+        "ERROR: %s:%d: %s",          \
+        __FILE__,                    \
+        __LINE__,                    \
+        NEngine::Utils::UtilsFormatStr(msg, __VA_ARGS__).c_str())
+
+#define COM_FREE(This) (This->Release())
+
+#define HR(x)                                                   \
+    if (FAILED(x)) {                                            \
+        NEngine::Utils::UtilsDebugPrint(                        \
+            "%s:%d - Operation failed.\n", __FILE__, __LINE__); \
+    }
+
+#if NENGINE_DEBUG
+#define UTILS_ASSERT(x, msg) assert((x) && (msg))
+#define UTILS_PRINT(msg, ...) \
+    NEngine::Utils::UtilsDebugPrint(msg, __VA_ARGS__)
+#define UTILS_PRINTLN(msg, ...) \
+    NEngine::Utils::UtilsDebugPrint("%s\n", \
+            NEngine::Utils::UtilsFormatStr(msg, __VA_ARGS__).c_str())
+#else
+#define UTILS_ASSERT(...)
+#define UTILS_PRINT(...)
+#define UTILS_PRINTLN(...)
+#endif

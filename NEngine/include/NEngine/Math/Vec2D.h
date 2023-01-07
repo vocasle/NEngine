@@ -15,6 +15,7 @@ struct Vec2D
     {
     }
     std::string ToString() const;
+    float Length() const;
 
     float X;
     float Y;
