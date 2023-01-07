@@ -1,45 +1,18 @@
 #pragma once
 
+#include "NEngine/Math/Mat4X4.h"
+#include "NEngine/Math/Vec3D.h"
+
 namespace NEngine::ECS::Components {
-
-struct Position
-{
-    Position(float x, float y, float z)
-        : x(x),
-          y(y),
-          z(z)
-    {
-    }
-    Position()
-        : Position(0, 0, 0)
-    {
-    }
-    float x;
-    float y;
-    float z;
-};
-
-struct Velocity
-{
-    Velocity(float x, float y, float z)
-        : x(x),
-          y(y),
-          z(z)
-    {
-    }
-    Velocity()
-        : Velocity(0, 0, 0)
-    {
-    }
-    float x;
-    float y;
-    float z;
-};
 
 struct PositionComponent
 {
-    struct Velocity Velocity;
-    struct Position Position;
+    Math::Mat4X4 World;
+    Math::Vec3D Velocity;
+    Math::Vec3D Position;
+    Math::Vec3D Direction;
+    float Yaw;
+    float Pitch;
 };
 
 }  // namespace NEngine::ECS::Components
