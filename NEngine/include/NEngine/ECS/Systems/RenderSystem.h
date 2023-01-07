@@ -13,8 +13,7 @@ class RenderSystem
 {
 public:
     RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
-                 ECS::DefaultEntityManager &entityManager,
-                 NEngine::Helpers::Camera &camera);
+                 ECS::DefaultEntityManager &entityManager);
 
     auto Update(float dt) -> void;
     auto RegisterEntity(Entity entity) -> void;

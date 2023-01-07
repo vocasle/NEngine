@@ -13,14 +13,12 @@ using namespace NEngine::Math;
 using namespace NEngine::Helpers;
 
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
-                           ECS::DefaultEntityManager &entityManager,
-                           NEngine::Helpers::Camera &camera)
+                           ECS::DefaultEntityManager &entityManager)
     : mDeviceResources(&deviceResources),
       mBasePass(std::make_unique<BasePass>(deviceResources)),
       mEntityManager(&entityManager),
-      mCamera(&camera)
+      mCamera(nullptr)
 {
-    mBasePass->SetCamera(*mCamera);
 }
 
 auto
@@ -80,11 +78,20 @@ RenderSystem::RegisterEntity(Entity entity) -> void
 {
     if (mEntityManager->HasComponent<PositionComponent>(entity) &&
         mEntityManager->HasComponent<RenderComponent>(entity)) {
+
+        if (mEntityManager->HasComponent<CameraComponent>(entity)) {
+            auto &camComp =
+                *mEntityManager->GetComponent<CameraComponent>(entity);
+            mCamera = &camComp.Camera;
+            mBasePass->SetCamera(*mCamera);
+        }
+
         auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);
         if (it != std::end(mEntities)) {
             UtilsDebugPrint("Entity %l already registered with RenderSystem");
             return;
         }
+
         mEntities.push_back(entity);
     }
 }
