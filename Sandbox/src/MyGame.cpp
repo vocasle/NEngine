@@ -220,6 +220,7 @@ MyGame::CreatePlayer() -> void
     auto &camComp = mEntityManager.CreateComponent<CameraComponent>(player);
     camComp.Camera.SetZFar(10000);
     camComp.Camera.SetZNear(0.1f);
+    camComp.Camera.SetPosition({0, 2, -5});
     const auto winSize = mEngine->GetWindowSize();
     camComp.Camera.SetViewDimensions(winSize.X, winSize.Y);
 
