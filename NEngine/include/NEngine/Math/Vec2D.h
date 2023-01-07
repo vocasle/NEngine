@@ -20,4 +20,6 @@ struct Vec2D
     float X;
     float Y;
 };
+
+bool operator==(const Vec2D &lhs, const Vec2D &rhs);
 }  // namespace NEngine::Math
