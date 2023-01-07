@@ -75,7 +75,7 @@ std::vector<std::wstring> UtilsGlobFiles(const std::string &dir,
             "%s:%d - Operation failed.\n", __FILE__, __LINE__); \
     }
 
-#if NENGINE_DEBUG
+#if _DEBUG
 #define UTILS_ASSERT(x, msg) assert((x) && (msg))
 #define UTILS_PRINT(msg, ...) \
     NEngine::Utils::UtilsDebugPrint(msg, __VA_ARGS__)
