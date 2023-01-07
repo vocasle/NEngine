@@ -21,7 +21,7 @@ struct Vec3D
     static Vec3D Cross(const Vec3D &lhs, const Vec3D &rhs);
     static float Dot(const Vec3D &lhs, const Vec3D &rhs);
     float Length() const;
-    Vec3D &Normalize();
+    Vec3D Normalize() const;
     
     float X;
     float Y;

@@ -46,14 +46,15 @@ Vec3D::Dot(const Vec3D &lhs, const Vec3D &rhs)
     return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z;
 }
 
-Vec3D &
-Vec3D::Normalize()
+Vec3D
+Vec3D::Normalize() const
 {
+    auto ret = *this;
     const auto length = Length();
-    X /= length;
-    Y /= length;
-    Z /= length;
-    return *this;
+    if (length != 0) {
+        ret = ret / length;
+    }
+    return ret;
 }
 
 bool
