@@ -188,6 +188,14 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
         UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\plane.glb"));
     auto &planePos = mEntityManager.CreateComponent<PositionComponent>(plane);
     mScene.AddToScene({plane, "Ground", mEntityManager.GetBitmask(plane)});
+
+    auto obj = mEntityManager.CreateEntity();
+    auto &objMesh = mEntityManager.CreateComponent<RenderComponent>(obj);
+    objMesh.Mesh = mEngine->LoadMesh(
+        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\cube.glb"));
+    auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
+    objPos.Position = {5, 2, 5};
+    mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
 }
 
 auto
@@ -207,14 +215,11 @@ MyGame::CreatePlayer() -> void
 {
     auto player = mEntityManager.CreateEntity();
     auto &pos = mEntityManager.CreateComponent<PositionComponent>(player);
-    UtilsDebugPrint("Helmet default position: %f %f %f\n",
-                    pos.Position.x,
-                    pos.Position.y,
-                    pos.Position.z);
+    pos.Position.y = 2;
 
     auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(player);
     renderComp.Mesh = mEngine->LoadMesh(
-        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\DamagedHelmet.glb"));
+        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\player.glb"));
     auto &ic = mEntityManager.CreateComponent<InputComponent>(player);
 
     auto &camComp = mEntityManager.CreateComponent<CameraComponent>(player);
