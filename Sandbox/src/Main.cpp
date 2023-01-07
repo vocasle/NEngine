@@ -1,5 +1,5 @@
 #include "NEngine/Engine.h"
-#include "Sandbox/Game.h"
+#include "Sandbox/MyGame.h"
 
 auto
 main(int argc, const char *argv[]) -> int
