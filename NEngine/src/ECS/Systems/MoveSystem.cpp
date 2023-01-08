@@ -45,15 +45,10 @@ auto
 MoveSystem::UpdateCamera(float dt, Entity entity, const PositionComponent &pc)
     -> void
 {
-    // auto &camComp = *mEntityManager->GetComponent<CameraComponent>(entity);
-    // auto entityPos = pc.Position;
-    // auto at = Vec3D(0, 0, 10);
-    // const auto v = pc.Velocity;
+    auto &camComp = *mEntityManager->GetComponent<CameraComponent>(entity);
+    auto &posComp = *mEntityManager->GetComponent<PositionComponent>(entity);
 
-    // camComp.Camera.LookAt(Vec3D(entityPos.X, entityPos.Y + 2, entityPos.Z -
-    // 10),
-    //                       entityPos,
-    //                       Vec3D(0, 1, 0));
+    camComp.Camera.LookAt(posComp.Velocity, posComp.Position, vec3(0, 1, 0));
 }
 
 }  // namespace NEngine::ECS::Systems

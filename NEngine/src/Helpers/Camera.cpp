@@ -231,9 +231,9 @@ Camera::SetZFar(const float zFar)
 void
 Camera::LookAt(const Vec3D &pos, const Vec3D &target, const Vec3D &up)
 {
-    m_Pos = pos;
+    m_Pos = m_Pos + pos;
     m_At = target;
-    m_Up = up;
+    m_Up = vec3(0, 1, 0);
 }
 
 void
