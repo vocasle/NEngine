@@ -7,12 +7,11 @@ namespace NEngine::ECS::Components {
 
 struct PositionComponent
 {
-    Math::Mat4X4 World;
     Math::Vec3D Velocity;
     Math::Vec3D Position;
-    Math::Vec3D Direction;
     float Yaw;
     float Pitch;
+    bool Movable;
 };
 
 }  // namespace NEngine::ECS::Components
