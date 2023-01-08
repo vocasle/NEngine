@@ -48,12 +48,13 @@ auto
 InputSystem::Update(float dt) -> void
 {
     const auto delta = dt * 0.004f;
-
+    const auto rotDelta = dt * 0.04f;
+    auto dir = vec3();
     if (mProcessInput && mPrevMousePos != mMousePos) {
         auto xoffset = mMousePos.X - mPrevMousePos.X;
         auto yoffset = mPrevMousePos.Y - mMousePos.Y;
-        xoffset *= dt * 0.02f;
-        yoffset *= dt * 0.02f;
+        xoffset *= rotDelta;
+        yoffset *= rotDelta;
 
         mAngles.Pitch += yoffset;
         mAngles.Yaw += xoffset;
@@ -67,6 +68,12 @@ InputSystem::Update(float dt) -> void
             mAngles.Pitch = 89.0f;
         if (mAngles.Pitch < -89.0f)
             mAngles.Pitch = -89.0f;
+
+        dir.X = cos(ToRadians(mAngles.Yaw)) * cos(ToRadians(0));
+        dir.Y = sin(ToRadians(0));
+        dir.Z = sin(ToRadians(mAngles.Yaw)) * cos(ToRadians(0));
+
+        dir = dir * delta;
 
         mPrevMousePos = mMousePos;
     }
@@ -86,6 +93,13 @@ InputSystem::Update(float dt) -> void
 
     if (Keyboard::Get().IsKeyDown('D')) {
         v.X += -delta;
+    }
+
+    if (mAngles.Yaw != 0) {
+        auto rot = RotateAxis(ToRadians(mAngles.Yaw), Vec3D(0, 1, 0));
+        auto v4 = vec4(v, 0);
+        v4 = MathMat4X4MultVec4DByMat4X4(&v4, &rot);
+        v = vec3(v4.X, v4.Y, v4.Z);
     }
 
     for (auto entity : mEntities) {

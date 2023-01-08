@@ -48,9 +48,9 @@ RenderSystem::Update(float dt) -> void
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
         for (auto &mesh : rc.Mesh) {
             auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
-            auto angles = Vec3D(0, ToRadians(pc.Yaw), 0);
-            auto rotate = MathMat4X4RotateFromVec3D(&angles);
-            mesh->GetTransform().SetWorld(translate * rotate);
+            auto axis = vec3(0, 1, 0);
+            auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
+            mesh->GetTransform().SetWorld(rotate * translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
     }
