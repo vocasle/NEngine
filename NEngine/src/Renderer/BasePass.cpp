@@ -44,7 +44,7 @@ NEngine::Renderer::BasePass::Draw(
     mPerFrameBuffer->Bind(deviceResources);
 
     for (auto &mesh : meshes) {
-        const auto world = mesh->GetTransform().GetTransform();
+        const auto world = mesh->GetTransform().GetWorld();
         mPerObjectBuffer->SetValue("world", world);
         auto invWorld = MathMat4X4Inverse(world);
         MathMat4X4Transpose(&invWorld);

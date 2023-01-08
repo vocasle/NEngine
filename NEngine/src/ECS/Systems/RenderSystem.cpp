@@ -4,6 +4,7 @@
 #include "NEngine/ECS/Components/RenderComponent.h"
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Math/Math.h"
+#include "NEngine/Math/MathUtils.h"
 
 namespace NEngine::ECS::Systems {
 
@@ -43,12 +44,13 @@ RenderSystem::Update(float dt) -> void
 
     for (auto entity : mEntities) {
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
-        const auto position =
-            Vec3D(pc.Position.x, pc.Position.y, pc.Position.z);
+        const auto position = pc.Position;
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
         for (auto &mesh : rc.Mesh) {
-            mesh->GetTransform().SetTranslation(
-                MathMat4X4TranslateFromVec3D(&position));
+            auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
+            auto angles = Vec3D(0, ToRadians(pc.Yaw), 0);
+            auto rotate = MathMat4X4RotateFromVec3D(&angles);
+            mesh->GetTransform().SetWorld(translate * rotate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
     }
