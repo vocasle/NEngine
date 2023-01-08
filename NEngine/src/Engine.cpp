@@ -252,6 +252,9 @@ WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 }
 
 namespace NEngine {
+
+Engine *Engine::GEngine = nullptr;
+
 Engine::Engine(int argc, const char *argv[])
 {
     UtilsDebugPrint("Engine init with args:\n");
@@ -274,6 +277,8 @@ Engine::Engine(int argc, const char *argv[])
     InitTimer();
 
     ShowWindow(mWnd, SW_SHOW);
+
+    GEngine = this;
 }
 
 auto
@@ -386,6 +391,7 @@ Engine::~Engine()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+    GEngine = nullptr;
 }
 
 auto

@@ -19,6 +19,9 @@ struct WindowSettings
 class Engine
 {
 public:
+    static Engine *GEngine;
+
+
     Engine(int argc, const char *argv[]);
     ~Engine();
 
@@ -54,4 +57,5 @@ private:
     NEngine::Utils::Timer mTimer;
     WindowSettings mWinSettings;
 };
+
 }  // namespace NEngine
