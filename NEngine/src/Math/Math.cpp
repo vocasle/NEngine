@@ -1,5 +1,6 @@
 #include "NEngine/Math/Math.h"
 
+#include <DirectXMath.h>
 #include <assert.h>
 #include <corecrt_math_defines.h>
 #include <math.h>
@@ -8,9 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __cplusplus
 #include <string>
-#endif
+
+using namespace DirectX;
 
 namespace NEngine {
 namespace Math {
@@ -1040,6 +1041,65 @@ MathQuaternionToRotationMat(const Vec4D &quat)
     MathMat4X4Transpose(&mat);
 
     return mat;
+}
+
+mat4
+RotateAxis(float radians, const vec3 &axis)
+{
+    auto ret = mat4();
+
+    static_assert(sizeof mat4 == sizeof XMFLOAT4X4,
+                  "Mat4X4 is not the same size as XMFLOAT4X4");
+    static_assert(sizeof vec3 == sizeof XMFLOAT3,
+                  "Vec3D is not the same size as XMFLOAT3");
+
+    auto rotMat = XMMatrixRotationAxis(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&axis)), radians);
+
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret.A00), rotMat);
+
+    return ret;
+}
+
+mat4
+Inverse(const mat4 &mat)
+{
+    auto ret = mat4();
+    auto det = XMVECTOR();
+    auto tmp = XMMatrixInverse(
+        &det, XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&mat)));
+
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret.A00), tmp);
+
+    return ret;
+}
+
+mat4
+LookTo(const vec3 &camPos, const vec3 &target, const vec3 &up)
+{
+    auto ret = mat4();
+    auto tmp = XMMatrixLookToLH(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&camPos)),
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&target)),
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&up)));
+
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret.A00), tmp);
+
+    return ret;
+}
+
+mat4
+LookAt(const vec3 &camPos, const vec3 &target, const vec3 &up)
+{
+    auto ret = mat4();
+    auto tmp = XMMatrixLookAtLH(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&camPos)),
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&target)),
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&up)));
+
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret.A00), tmp);
+
+    return ret;
 }
 
 }  // namespace Math

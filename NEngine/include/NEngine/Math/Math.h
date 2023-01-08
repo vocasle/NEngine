@@ -8,9 +8,19 @@
 #include "Vec2D.h"
 #include "Vec3D.h"
 
-
 namespace NEngine {
 namespace Math {
+
+using mat4 = NEngine::Math::Mat4X4;
+using mat3 = NEngine::Math::Mat3X3;
+using vec2 = NEngine::Math::Vec2D;
+using vec3 = NEngine::Math::Vec3D;
+using vec4 = NEngine::Math::Vec4D;
+
+mat4 RotateAxis(float radians, const vec3 &axis);
+mat4 Inverse(const mat4 &mat);
+mat4 LookTo(const vec3 &camPos, const vec3 &target, const vec3 &up);
+mat4 LookAt(const vec3 &camPos, const vec3 &target, const vec3 &up);
 
 // *** 2D vector math ***
 Vec2D MathVec2DZero(void);
@@ -166,13 +176,8 @@ int32_t MathIsNaN(float n);
 
 float MathRandom(float min, float max);
 
-#ifdef MATH_TEST
-void MathTest(void);
-#endif
-
 Mat4X4 MathQuaternionToRotationMat(const Vec4D &quat);
 
-#ifdef __cplusplus
 Mat4X4 operator*(const Mat4X4 &lhs, const Mat4X4 &rhs);
 
 Vec3D MathVec3DSubtraction(const Vec3D &vec1, const Vec3D &vec2);
@@ -185,7 +190,6 @@ Mat4X4 MathMat4X4Inverse(const Mat4X4 &mat);
 
 float MathMat3X3Determinant(const Mat3X3 &mat);
 
-#endif
 }  // namespace Math
 
 }  // namespace NEngine
