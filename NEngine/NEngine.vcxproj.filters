@@ -380,11 +380,41 @@
     <ClInclude Include="include\NEngine\ECS\Components\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXCollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXColors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXPackedVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\BasePass.hlsli" />
     <None Include="shader\PBR\PBR.hlsli" />
     <None Include="shader\PBR\ToneMapping.hlsli" />
+    <None Include="thirdparty\DirectXMath\Inc\DirectXCollision.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathConvert.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathMatrix.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathMisc.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathVector.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="thirdparty\DirectXMath\Inc\DirectXPackedVector.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\BasePassPS.hlsl" />

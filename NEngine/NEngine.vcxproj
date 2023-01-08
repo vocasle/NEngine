@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/DirectXMath/Inc;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <PublicIncludeDirectories>$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)thirdparty/tinygltf/include;$(ProjectDir)thirdparty/stb_image_write/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)thirdparty/mikktspace/include/mikktspace;$(ProjectDir)thirdparty/mikktspace/include;$(ProjectDir)thirdparty/imgui/include/imgui;$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/DirectXMath/Inc;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <PublicIncludeDirectories>$(ProjectDir)thirdparty/imgui/include;$(ProjectDir)thirdparty/stb_image/include;$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -248,6 +248,10 @@
     <ClInclude Include="include\NEngine\Utils\Image.h" />
     <ClInclude Include="include\NEngine\Utils\Timer.h" />
     <ClInclude Include="include\NEngine\Utils\Utils.h" />
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXCollision.h" />
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXColors.h" />
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXMath.h" />
+    <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXPackedVector.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx11.h" />
@@ -267,6 +271,12 @@
     <None Include="shader\BasePass.hlsli" />
     <None Include="shader\PBR\PBR.hlsli" />
     <None Include="shader\PBR\ToneMapping.hlsli" />
+    <None Include="thirdparty\DirectXMath\Inc\DirectXCollision.inl" />
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathConvert.inl" />
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathMatrix.inl" />
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathMisc.inl" />
+    <None Include="thirdparty\DirectXMath\Inc\DirectXMathVector.inl" />
+    <None Include="thirdparty\DirectXMath\Inc\DirectXPackedVector.inl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\BasePassPS.hlsl">
