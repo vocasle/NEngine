@@ -4,7 +4,7 @@
 
 #include <cassert>
 
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 
 namespace NEngine {
 namespace Helpers {

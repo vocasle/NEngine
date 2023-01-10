@@ -4,7 +4,7 @@
 #include "Drawable.h"
 #include "Mesh.h"
 #include "NEngine/Helpers/Transform.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
 
 namespace NEngine {

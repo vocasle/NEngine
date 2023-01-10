@@ -161,7 +161,7 @@
     <ClCompile Include="src\Input\Mouse.cpp" />
     <ClCompile Include="src\Math\Mat3X3.cpp" />
     <ClCompile Include="src\Math\Mat4X4.cpp" />
-    <ClCompile Include="src\Math\Math.cpp" />
+    <ClCompile Include="src\Math\NEMath.cpp" />
     <ClCompile Include="src\Math\MathTest.cpp" />
     <ClCompile Include="src\Math\MathUtils.cpp" />
     <ClCompile Include="src\Math\Vec2D.cpp" />
@@ -225,7 +225,7 @@
     <ClInclude Include="include\NEngine\Input\Mouse.h" />
     <ClInclude Include="include\NEngine\Math\Mat3X3.h" />
     <ClInclude Include="include\NEngine\Math\Mat4X4.h" />
-    <ClInclude Include="include\NEngine\Math\Math.h" />
+    <ClInclude Include="include\NEngine\Math\NEMath.h" />
     <ClInclude Include="include\NEngine\Math\MathTest.h" />
     <ClInclude Include="include\NEngine\Math\MathUtils.h" />
     <ClInclude Include="include\NEngine\Math\Vec2D.h" />

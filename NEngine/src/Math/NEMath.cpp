@@ -1,4 +1,4 @@
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 
 #include <DirectXMath.h>
 #include <assert.h>
@@ -1043,6 +1043,8 @@ MathQuaternionToRotationMat(const Vec4D &quat)
     return mat;
 }
 
+namespace XM {
+
 mat4
 RotateAxis(float radians, const vec3 &axis)
 {
@@ -1101,6 +1103,8 @@ LookAt(const vec3 &camPos, const vec3 &target, const vec3 &up)
 
     return ret;
 }
+
+}  // namespace XM
 
 }  // namespace Math
 

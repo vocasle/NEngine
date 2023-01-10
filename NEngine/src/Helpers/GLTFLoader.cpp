@@ -9,7 +9,7 @@
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Helpers/Renderer.h"
 #include "NEngine/Helpers/Transform.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Renderer/InputLayout.h"
 #include "NEngine/Renderer/MeshPrimitive.h"
 #include "NEngine/Renderer/Sampler.h"

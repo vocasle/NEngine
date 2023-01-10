@@ -7,7 +7,7 @@
 
 #include "Bindable.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 
 namespace NEngine {
 namespace Renderer {

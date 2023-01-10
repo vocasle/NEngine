@@ -7,14 +7,18 @@
 
 #include "NEngine/Input/Keyboard.h"
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
+#include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
+
+#include <DirectXMath.h>
 
 namespace NEngine {
 namespace Helpers {
 
 using namespace Math;
 using namespace Input;
+using namespace DirectX;
 
 Camera::Camera()
     : Camera({0.0f, 0.0f, 0.0f})
@@ -60,8 +64,26 @@ Camera::~Camera()
 Mat4X4
 Camera::GetViewMat() const
 {
-    auto at = m_Pos - m_At;
-    return MathMat4X4ViewAt(&m_Pos, &at, &m_Up);
+    // auto dir = vec3();
+    // dir.X = cos(ToRadians(-m_Yaw)) * cos(ToRadians(0));
+    // dir.Y = sin(ToRadians(0));
+    // dir.Z = sin(ToRadians(-m_Yaw)) * cos(ToRadians(0));
+
+    // auto at = dir.Normalize();
+    // auto at = -1 * (m_Pos - m_At);
+
+    // MathMat4X4TranslateFromVec3D(&m_Pos);
+
+    // return MathMat4X4TranslateFromVec3D(&at)
+    //      /** RotateAxis(m_Yaw, vec3(0, 1, 0))*/;
+
+    auto ret = MathMat4X4Identity();
+
+    //auto eyePosition = XMLoadFloat3(&m_Pos);
+
+    //XMMatrixLookAtLH()
+
+    return ret;
 }
 
 Mat4X4
@@ -88,54 +110,54 @@ void
 Camera::ProcessKeyboard(double deltaMillis)
 {
     UpdateSpeed();
-    //Vec3D cameraFocus = m_At;
-    //const float delta = (float)deltaMillis * CAMERA_SENSITIVITY * m_Speed;
-    //const float rotDelta = (float)deltaMillis * MOUSE_SENSITIVITY * 4.0f;
+    // Vec3D cameraFocus = m_At;
+    // const float delta = (float)deltaMillis * CAMERA_SENSITIVITY * m_Speed;
+    // const float rotDelta = (float)deltaMillis * MOUSE_SENSITIVITY * 4.0f;
 
-    //if (Keyboard::Get().IsKeyDown('A')) {
-    //    Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
-    //    MathVec3DNormalize(&right);
-    //    right = MathVec3DModulateByScalar(&right, delta);
-    //    m_Pos = MathVec3DSubtraction(&m_Pos, &right);
-    //}
-    //else if (Keyboard::Get().IsKeyDown('D')) {
-    //    Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
-    //    MathVec3DNormalize(&right);
-    //    right = MathVec3DModulateByScalar(&right, delta);
-    //    m_Pos = MathVec3DAddition(&m_Pos, &right);
-    //}
-    //else if (Keyboard::Get().IsKeyDown('W')) {
-    //    cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
-    //    m_Pos = MathVec3DAddition(&m_Pos, &cameraFocus);
-    //}
-    //else if (Keyboard::Get().IsKeyDown('S')) {
-    //    cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
-    //    m_Pos = MathVec3DSubtraction(&m_Pos, &cameraFocus);
-    //}
-    //else if (Keyboard::Get().IsKeyDown('R')) {
-    //    const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
-    //    m_Pos = MathVec3DAddition(&m_Pos, &up);
-    //}
-    //else if (Keyboard::Get().IsKeyDown('F')) {
-    //    const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
-    //    m_Pos = MathVec3DSubtraction(&m_Pos, &up);
-    //}
+    // if (Keyboard::Get().IsKeyDown('A')) {
+    //     Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
+    //     MathVec3DNormalize(&right);
+    //     right = MathVec3DModulateByScalar(&right, delta);
+    //     m_Pos = MathVec3DSubtraction(&m_Pos, &right);
+    // }
+    // else if (Keyboard::Get().IsKeyDown('D')) {
+    //     Vec3D right = MathVec3DCross(&cameraFocus, &m_Up);
+    //     MathVec3DNormalize(&right);
+    //     right = MathVec3DModulateByScalar(&right, delta);
+    //     m_Pos = MathVec3DAddition(&m_Pos, &right);
+    // }
+    // else if (Keyboard::Get().IsKeyDown('W')) {
+    //     cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
+    //     m_Pos = MathVec3DAddition(&m_Pos, &cameraFocus);
+    // }
+    // else if (Keyboard::Get().IsKeyDown('S')) {
+    //     cameraFocus = MathVec3DModulateByScalar(&cameraFocus, delta);
+    //     m_Pos = MathVec3DSubtraction(&m_Pos, &cameraFocus);
+    // }
+    // else if (Keyboard::Get().IsKeyDown('R')) {
+    //     const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
+    //     m_Pos = MathVec3DAddition(&m_Pos, &up);
+    // }
+    // else if (Keyboard::Get().IsKeyDown('F')) {
+    //     const Vec3D up = MathVec3DModulateByScalar(&m_Up, delta);
+    //     m_Pos = MathVec3DSubtraction(&m_Pos, &up);
+    // }
 
-    //else if (Keyboard::Get().IsKeyDown(VK_LEFT)) {
-    //    m_Yaw += rotDelta;
-    //}
-    //else if (Keyboard::Get().IsKeyDown(VK_RIGHT)) {
-    //    m_Yaw -= rotDelta;
-    //}
-    //else if (Keyboard::Get().IsKeyDown(VK_UP)) {
-    //    m_Pitch += rotDelta;
-    //}
-    //else if (Keyboard::Get().IsKeyDown(VK_DOWN)) {
-    //    m_Pitch -= rotDelta;
-    //}
-    //else if (Keyboard::Get().IsKeyDown('X')) {
-    //    ResetCamera();
-    //}
+    // else if (Keyboard::Get().IsKeyDown(VK_LEFT)) {
+    //     m_Yaw += rotDelta;
+    // }
+    // else if (Keyboard::Get().IsKeyDown(VK_RIGHT)) {
+    //     m_Yaw -= rotDelta;
+    // }
+    // else if (Keyboard::Get().IsKeyDown(VK_UP)) {
+    //     m_Pitch += rotDelta;
+    // }
+    // else if (Keyboard::Get().IsKeyDown(VK_DOWN)) {
+    //     m_Pitch -= rotDelta;
+    // }
+    // else if (Keyboard::Get().IsKeyDown('X')) {
+    //     ResetCamera();
+    // }
 }
 
 void
@@ -170,11 +192,11 @@ Camera::UpdateVectors()
 void
 Camera::ProcessMouse(double deltaMillis)
 {
-    if (Mouse::Get().IsLeftButtonPressed()) {
-        Arcball(deltaMillis);
-        return;
-    }
-    return;
+    // if (Mouse::Get().IsLeftButtonPressed()) {
+    //     Arcball(deltaMillis);
+    //     return;
+    // }
+    // return;
 
     const Vec2D mouseDelta = Mouse::Get().GetMouseDelta();
 
@@ -231,9 +253,9 @@ Camera::SetZFar(const float zFar)
 void
 Camera::LookAt(const Vec3D &pos, const Vec3D &target, const Vec3D &up)
 {
-    m_Pos = m_Pos + pos;
+    m_Pos = pos;
     m_At = target;
-    m_Up = vec3(0, 1, 0);
+    // m_Up = m_Up;
 }
 
 void
@@ -261,8 +283,8 @@ Camera::SetYaw(float yaw)
 void
 Camera::Tick(double deltaMillis)
 {
-    //ProcessMouse(deltaMillis);
-    //ProcessKeyboard(deltaMillis);
+    // ProcessMouse(deltaMillis);
+    // ProcessKeyboard(deltaMillis);
 }
 
 void
@@ -289,7 +311,7 @@ Camera::Arcball(double deltaMillis)
         m_Yaw += MathToRadians(yawDelta * 0.4);
 
         Utils::UtilsDebugPrint("pitch: %f, yaw: %f\n", m_Pitch, m_Yaw);
-       float camRadius = m_Pos.Length();
+        float camRadius = m_Pos.Length();
         // calculate camera position depending on pitch
         const auto h = camRadius * cos(m_Pitch);
         const auto x = -h * cos(m_Yaw);
@@ -305,7 +327,7 @@ Camera::Arcball(double deltaMillis)
 
         // XMVECTOR vAt = XMLoadFloat3(&at);
         // XMVECTOR vPos = XMLoadFloat3(&posCalculated);
- 
+
         // Utils::UtilsDebugPrint("cam distance: %f\n", length);
 
         // auto viewMat = XMMatrixLookAtRH(vPos, vAt, XMLoadFloat3(&up));

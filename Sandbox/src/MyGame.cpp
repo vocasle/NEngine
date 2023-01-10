@@ -8,7 +8,8 @@
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
+#include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
 
 #if WITH_IMGUI
@@ -83,6 +84,15 @@ MyGame::UpdateImgui()
         }
     }
 
+    if (ImGui::CollapsingHeader("Player World")) {
+        const auto &pc = *mEntityManager.GetComponent<PositionComponent>(
+            mScene.FindEntityByName("Player")->ID);
+        auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
+        auto axis = Vec3D(0, 1, 0);
+        auto rotate = XM::RotateAxis(ToRadians(pc.Yaw), axis);
+        ImGui::Text("%s", (translate * rotate).ToString().c_str());
+    }
+
     if (ImGui::Begin("Scene")) {
         if (ImGui::CollapsingHeader("Graph")) {
             mScene.Visit(
@@ -92,6 +102,7 @@ MyGame::UpdateImgui()
                     IG_COMPONENT_NAME(POSITION)
                     IG_COMPONENT_NAME(INPUT)
                     IG_COMPONENT_NAME(RENDER)
+                    IG_COMPONENT_NAME(CAMERA)
                 });
         }
     }
@@ -187,6 +198,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     planeMesh.Mesh = mEngine->LoadMesh(
         UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\plane.glb"));
     auto &planePos = mEntityManager.CreateComponent<PositionComponent>(plane);
+    planePos.Movable = false;
     mScene.AddToScene({plane, "Ground", mEntityManager.GetBitmask(plane)});
 
     auto obj = mEntityManager.CreateEntity();
@@ -195,6 +207,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
         UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\cube.glb"));
     auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
     objPos.Position = {5, 2, 5};
+    objPos.Movable = false;
     mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
 }
 
@@ -215,7 +228,7 @@ MyGame::CreatePlayer() -> void
 {
     auto player = mEntityManager.CreateEntity();
     auto &pos = mEntityManager.CreateComponent<PositionComponent>(player);
-    pos.Position.y = 2;
+    pos.Position.Y = 2;
 
     auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(player);
     renderComp.Mesh = mEngine->LoadMesh(
@@ -225,9 +238,10 @@ MyGame::CreatePlayer() -> void
     auto &camComp = mEntityManager.CreateComponent<CameraComponent>(player);
     camComp.Camera.SetZFar(10000);
     camComp.Camera.SetZNear(0.1f);
-    camComp.Camera.SetPosition({0, 2, -5});
+    camComp.Camera.LookAt({0, 10, -20}, {0, 0, -1}, {0, 1, 0});
     const auto winSize = mEngine->GetWindowSize();
     camComp.Camera.SetViewDimensions(winSize.X, winSize.Y);
+    pos.Movable = true;
 
     mScene.AddToScene({player, "Player", mEntityManager.GetBitmask(player)});
 }

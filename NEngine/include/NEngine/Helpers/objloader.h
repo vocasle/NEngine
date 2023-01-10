@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include <cstdint>
 #include <memory>
 #include <string>

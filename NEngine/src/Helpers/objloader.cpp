@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Helpers/objloader.h"
 
 namespace NEngine {

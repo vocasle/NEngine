@@ -1,6 +1,6 @@
 #include "NEngine/Helpers/Transform.h"
 
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 
 using namespace NEngine::Math;
 

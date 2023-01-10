@@ -1,6 +1,7 @@
 #include "NEngine/ECS/Systems/MoveSystem.h"
 
 #include "NEngine/Math/Vec3D.h"
+#include "NEngine/Math/MathUtils.h"
 
 namespace NEngine::ECS::Systems {
 
@@ -46,9 +47,10 @@ MoveSystem::UpdateCamera(float dt, Entity entity, const PositionComponent &pc)
     -> void
 {
     auto &camComp = *mEntityManager->GetComponent<CameraComponent>(entity);
-    auto &posComp = *mEntityManager->GetComponent<PositionComponent>(entity);
 
-    camComp.Camera.LookAt(posComp.Velocity, posComp.Position, vec3(0, 1, 0));
+    camComp.Camera.LookAt(pc.Velocity, pc.Position, vec3(0, pc.Yaw, 0));
+    camComp.Camera.SetYaw(ToRadians(pc.Yaw));
+    camComp.Camera.Tick(dt);
 }
 
 }  // namespace NEngine::ECS::Systems

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 
 namespace NEngine {
 namespace Helpers {

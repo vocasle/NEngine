@@ -3,7 +3,7 @@
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/ECS/Components/RenderComponent.h"
 #include "NEngine/Helpers/LightHelper.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Math/MathUtils.h"
 
 namespace NEngine::ECS::Systems {
@@ -49,7 +49,7 @@ RenderSystem::Update(float dt) -> void
         for (auto &mesh : rc.Mesh) {
             auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
             auto axis = vec3(0, 1, 0);
-            auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
+            auto rotate = XM::RotateAxis(ToRadians(pc.Yaw), axis);
             mesh->GetTransform().SetWorld(rotate * translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);

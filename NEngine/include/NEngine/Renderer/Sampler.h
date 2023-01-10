@@ -4,7 +4,7 @@
 #include <wrl/client.h>
 
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Renderer/Bindable.h"
 
 namespace NEngine::Renderer {

@@ -4,7 +4,7 @@
 
 #include "NEngine/Game.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Utils/Timer.h"
 

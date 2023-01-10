@@ -8,7 +8,7 @@
 
 #include "Bindable.h"
 #include "NEngine/Helpers/DeviceResources.h"
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Utils/Image.h"
 #include "Sampler.h"
 

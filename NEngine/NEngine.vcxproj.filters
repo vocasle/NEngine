@@ -78,7 +78,7 @@
     <ClCompile Include="src\Math\Mat4X4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Math\Math.cpp">
+    <ClCompile Include="src\Math\NEMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Math\MathTest.cpp">
@@ -257,7 +257,7 @@
     <ClInclude Include="include\NEngine\Math\Mat4X4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NEngine\Math\Math.h">
+    <ClInclude Include="include\NEngine\Math\NEMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NEngine\Math\MathTest.h">

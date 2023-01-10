@@ -4,7 +4,7 @@
 #include <memory>
 #include <set>
 
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "Windows.h"
 
 namespace NEngine {

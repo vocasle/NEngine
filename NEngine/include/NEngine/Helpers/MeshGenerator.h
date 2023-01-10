@@ -7,7 +7,7 @@
 
 #include <Windows.h>
 
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "objloader.h"
 
 namespace NEngine {

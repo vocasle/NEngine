@@ -96,7 +96,7 @@ InputSystem::Update(float dt) -> void
     }
 
     if (mAngles.Yaw != 0) {
-        auto rot = RotateAxis(ToRadians(mAngles.Yaw), Vec3D(0, 1, 0));
+        auto rot = XM::RotateAxis(ToRadians(mAngles.Yaw), Vec3D(0, 1, 0));
         auto v4 = vec4(v, 0);
         v4 = MathMat4X4MultVec4DByMat4X4(&v4, &rot);
         v = vec3(v4.X, v4.Y, v4.Z);

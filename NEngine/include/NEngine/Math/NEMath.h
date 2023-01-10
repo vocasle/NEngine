@@ -17,10 +17,12 @@ using vec2 = NEngine::Math::Vec2D;
 using vec3 = NEngine::Math::Vec3D;
 using vec4 = NEngine::Math::Vec4D;
 
+namespace XM {
 mat4 RotateAxis(float radians, const vec3 &axis);
 mat4 Inverse(const mat4 &mat);
 mat4 LookTo(const vec3 &camPos, const vec3 &target, const vec3 &up);
 mat4 LookAt(const vec3 &camPos, const vec3 &target, const vec3 &up);
+}  // namespace XM
 
 // *** 2D vector math ***
 Vec2D MathVec2DZero(void);

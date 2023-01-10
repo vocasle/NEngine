@@ -1,6 +1,6 @@
 #include "NEngine/Math/MathTest.h"
 
-#include "NEngine/Math/Math.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
 
