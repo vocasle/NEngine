@@ -48,9 +48,10 @@ MoveSystem::UpdateCamera(float dt, Entity entity, const PositionComponent &pc)
 {
     auto &camComp = *mEntityManager->GetComponent<CameraComponent>(entity);
 
-    camComp.Camera.LookAt(pc.Velocity, pc.Position, vec3(0, pc.Yaw, 0));
-    camComp.Camera.SetYaw(ToRadians(pc.Yaw));
-    camComp.Camera.Tick(dt);
+    camComp.Camera.m_At = pc.Position;
+    camComp.Camera.m_Yaw = ToRadians(-(pc.Yaw - 90));
+    camComp.Camera.m_Pitch = ToRadians(45.0f);
+    camComp.Camera.Arcball(dt);
 }
 
 }  // namespace NEngine::ECS::Systems

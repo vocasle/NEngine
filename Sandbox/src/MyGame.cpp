@@ -8,8 +8,8 @@
 #include "NEngine/Helpers/DynamicConstBuffer.h"
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Math/NEMath.h"
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Utils/Utils.h"
 
 #if WITH_IMGUI
@@ -57,12 +57,15 @@ MyGame::UpdateImgui()
 
         ImGui::InputFloat("z far", &zFar);
         ImGui::InputFloat("z near", &zNear);
+
         if (ImGui::Button("Apply##Camera")) {
             const auto player = mScene.FindEntityByName("Player");
 
             if (player) {
                 auto &cam =
                     *mEntityManager.GetComponent<CameraComponent>(player->ID);
+                auto &pos =
+                    *mEntityManager.GetComponent<PositionComponent>(player->ID);
                 cam.Camera.SetZFar(zFar);
                 cam.Camera.SetZNear(zNear);
             }

@@ -41,7 +41,7 @@ public:
     void ProcessKeyboard(double deltaMillis);
     void ProcessMouse(double deltaMillis);
 
-private:
+//private:
     void UpdateVectors();
     void UpdateSpeed();
     void ResetCamera();

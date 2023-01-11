@@ -42,7 +42,7 @@ Camera::SetupMouseListener()
 
 Camera::Camera(const Vec3D &cameraPos)
     : m_Pitch(0),
-      m_Yaw(MathToRadians(-90)),
+      m_Yaw(MathToRadians(0)),
       m_Pos(cameraPos),
       m_Speed(1),
       m_backBufferWidth(0),
@@ -79,9 +79,12 @@ Camera::GetViewMat() const
 
     auto ret = MathMat4X4Identity();
 
-    //auto eyePosition = XMLoadFloat3(&m_Pos);
+    auto eyePos = XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&m_Pos));
+    auto focusPos = XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&m_At));
+    auto up = XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&m_Up));
 
-    //XMMatrixLookAtLH()
+    auto tmp = XMMatrixLookAtRH(XMVectorAdd(eyePos, focusPos), focusPos, up);
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret.A00), tmp);
 
     return ret;
 }
@@ -173,7 +176,7 @@ Camera::UpdateVectors()
     // Up:          +Y
     // Forward:     -Z
     const float d = cosf(m_Pitch);
-    const float x = -d * cosf(m_Yaw);
+    const float x = d * cosf(m_Yaw);
     const float z = d * sinf(m_Yaw);
     const float y = sinf(m_Pitch);
 
@@ -300,18 +303,18 @@ Camera::ResetCamera()
 void
 Camera::Arcball(double deltaMillis)
 {
-    if (mPrevMousePos.X != mCurMousePos.X ||
-        mPrevMousePos.Y != mCurMousePos.Y) {
-        const auto pitchDelta = mCurMousePos.Y - mPrevMousePos.Y;
-        const auto yawDelta = mCurMousePos.X - mPrevMousePos.X;
+    //if (mPrevMousePos.X != mCurMousePos.X ||
+    //    mPrevMousePos.Y != mCurMousePos.Y) {
+        //const auto pitchDelta = mCurMousePos.Y - mPrevMousePos.Y;
+        //const auto yawDelta = mCurMousePos.X - mPrevMousePos.X;
 
-        constexpr auto maxPitch = float(M_PI_2) - 0.1f;
-        m_Pitch += MathToRadians(pitchDelta * 0.4);
-        m_Pitch = std::clamp(m_Pitch, -maxPitch, maxPitch);
-        m_Yaw += MathToRadians(yawDelta * 0.4);
+        //constexpr auto maxPitch = float(M_PI_2) - 0.1f;
+        //m_Pitch += MathToRadians(pitchDelta * 0.4);
+        //m_Pitch = std::clamp(m_Pitch, -maxPitch, maxPitch);
+        //m_Yaw += MathToRadians(yawDelta * 0.4);
 
         Utils::UtilsDebugPrint("pitch: %f, yaw: %f\n", m_Pitch, m_Yaw);
-        float camRadius = m_Pos.Length();
+        float camRadius = 10.0f;
         // calculate camera position depending on pitch
         const auto h = camRadius * cos(m_Pitch);
         const auto x = -h * cos(m_Yaw);
@@ -335,8 +338,8 @@ Camera::Arcball(double deltaMillis)
         // XMStoreFloat4x4(&tmp, viewMat);
         // mViewMat = Mat4X4(&tmp._11);
 
-        mPrevMousePos = mCurMousePos;
-    }
+        //mPrevMousePos = mCurMousePos;
+    //}
 }
 
 void
