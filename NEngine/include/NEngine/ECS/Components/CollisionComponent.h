@@ -6,8 +6,8 @@ namespace NEngine::ECS::Components {
 
 struct CollisionComponent
 {
-    NEngine::Math::Vec3D Origin;
-    float Size;
+    NEngine::Math::Vec3D BoxMin;
+    NEngine::Math::Vec3D BoxMax;
 };
 
 }  // namespace NEngine::ECS::Components
