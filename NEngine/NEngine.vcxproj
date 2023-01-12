@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ECS\Systems\CollisionSystem.cpp" />
     <ClCompile Include="src\ECS\Systems\InputSystem.cpp" />
     <ClCompile Include="src\ECS\Systems\MoveSystem.cpp" />
     <ClCompile Include="src\ECS\Systems\RenderSystem.cpp" />

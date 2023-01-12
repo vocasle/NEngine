@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Systems/CollisionSystem.h"
 #include "Systems/InputSystem.h"
 #include "Systems/MoveSystem.h"
 #include "Systems/RenderSystem.h"
@@ -57,6 +58,7 @@ private:
 
 using DefaultSystemManager = SystemManager<Systems::RenderSystem,
                                            Systems::MoveSystem,
-                                           Systems::InputSystem>;
+                                           Systems::InputSystem,
+                                           Systems::CollisionSystem>;
 
 }  // namespace NEngine::ECS

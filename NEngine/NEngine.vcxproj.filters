@@ -168,6 +168,9 @@
     <ClCompile Include="thirdparty\tinygltf\src\tiny_gltf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ECS\Systems\CollisionSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h">
