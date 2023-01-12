@@ -37,10 +37,26 @@ using namespace NEngine;
 
 #if WITH_IMGUI
 
-#define IG_COMPONENT_NAME(componentType)                    \
-    if (go.ComponentMask & ComponentType_##componentType) { \
-        ImGui::Text("\t" #componentType);                   \
+void
+PrintComponents(const GameObject &go)
+{
+    if ((go.ComponentMask & ComponentType_CAMERA) == ComponentType_CAMERA) {
+        ImGui::Text("\tCAMERA");
     }
+    if ((go.ComponentMask & ComponentType_POSITION) == ComponentType_POSITION) {
+        ImGui::Text("\tPOSITION");
+    }
+    if ((go.ComponentMask & ComponentType_RENDER) == ComponentType_RENDER) {
+        ImGui::Text("\tRENDER");
+    }
+    if ((go.ComponentMask & ComponentType_INPUT) == ComponentType_INPUT) {
+        ImGui::Text("\tINPUT");
+    }
+    if ((go.ComponentMask & ComponentType_COLLISION) ==
+        ComponentType_COLLISION) {
+        ImGui::Text("\tCOLLISION");
+    }
+}
 
 void
 MyGame::UpdateImgui()
@@ -102,11 +118,7 @@ MyGame::UpdateImgui()
                 [](const GameObject &go) -> void
                 {
                     ImGui::Text("%s", go.Name.c_str());
-                    IG_COMPONENT_NAME(POSITION)
-                    IG_COMPONENT_NAME(INPUT)
-                    IG_COMPONENT_NAME(RENDER)
-                    IG_COMPONENT_NAME(CAMERA)
-                    IG_COMPONENT_NAME(COLLISION)
+                    PrintComponents(go);
                 });
         }
     }
