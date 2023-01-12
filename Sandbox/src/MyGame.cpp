@@ -106,6 +106,7 @@ MyGame::UpdateImgui()
                     IG_COMPONENT_NAME(INPUT)
                     IG_COMPONENT_NAME(RENDER)
                     IG_COMPONENT_NAME(CAMERA)
+                    IG_COMPONENT_NAME(COLLISION)
                 });
         }
     }

@@ -194,6 +194,7 @@
   <ItemGroup>
     <ClInclude Include="include\NEngine\Config.h" />
     <ClInclude Include="include\NEngine\ECS\Components\CameraComponent.h" />
+    <ClInclude Include="include\NEngine\ECS\Components\CollisionComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\PositionComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\RenderComponent.h" />
@@ -201,6 +202,7 @@
     <ClInclude Include="include\NEngine\ECS\EntityManager.h" />
     <ClInclude Include="include\NEngine\ECS\Repo.h" />
     <ClInclude Include="include\NEngine\ECS\SystemManager.h" />
+    <ClInclude Include="include\NEngine\ECS\Systems\CollisionSystem.h" />
     <ClInclude Include="include\NEngine\ECS\Systems\InputSystem.h" />
     <ClInclude Include="include\NEngine\ECS\Systems\MoveSystem.h" />
     <ClInclude Include="include\NEngine\ECS\Systems\RenderSystem.h" />

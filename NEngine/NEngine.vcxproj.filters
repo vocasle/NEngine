@@ -395,6 +395,12 @@
     <ClInclude Include="include\NEngine\Globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NEngine\ECS\Components\CollisionComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NEngine\ECS\Systems\CollisionSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\BasePass.hlsli" />

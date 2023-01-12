@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Components/CameraComponent.h"
+#include "Components/CollisionComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/PositionComponent.h"
 #include "Components/RenderComponent.h"
@@ -186,12 +187,14 @@ private:
 using DefaultEntityManager = EntityManager<Components::PositionComponent,
                                            Components::RenderComponent,
                                            Components::InputComponent,
-                                           Components::CameraComponent>;
+                                           Components::CameraComponent,
+                                           Components::CollisionComponent>;
 
 enum ComponentType {
     ComponentType_POSITION = 0x1,
     ComponentType_RENDER = 0x2,
     ComponentType_INPUT = 0x4,
     ComponentType_CAMERA = 0x8,
+    ComponentType_COLLISION = 0x16,
 };
 }  // namespace NEngine::ECS
