@@ -317,8 +317,8 @@ Camera::Arcball(double deltaMillis)
         float camRadius = 10.0f;
         // calculate camera position depending on pitch
         const auto h = camRadius * cos(m_Pitch);
-        const auto x = -h * cos(m_Yaw);
-        const auto z = -h * sin(m_Yaw);
+        const auto z = -h * cos(m_Yaw);
+        const auto x = -h * sin(m_Yaw);
         const auto y = camRadius * sin(m_Pitch);
         // XMFLOAT3 posCalculated(camRadius * h * cosf(m_Yaw), camRadius *
         // sinf(m_Pitch), camRadius * cosf(m_Pitch));

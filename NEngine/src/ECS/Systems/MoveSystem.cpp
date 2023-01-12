@@ -49,7 +49,7 @@ MoveSystem::UpdateCamera(float dt, Entity entity, const PositionComponent &pc)
     auto &camComp = *mEntityManager->GetComponent<CameraComponent>(entity);
 
     camComp.Camera.m_At = pc.Position;
-    camComp.Camera.m_Yaw = ToRadians(-(pc.Yaw - 90));
+    camComp.Camera.m_Yaw = ToRadians(pc.Yaw);
     camComp.Camera.m_Pitch = ToRadians(45.0f);
     camComp.Camera.Arcball(dt);
 }
