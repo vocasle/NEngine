@@ -253,7 +253,7 @@ WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
 
 namespace NEngine {
 
-Engine *Engine::GEngine = nullptr;
+Engine *GEngine = nullptr;
 
 Engine::Engine(int argc, const char *argv[])
 {

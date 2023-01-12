@@ -3,6 +3,7 @@
 #include "NEngine/ECS/Components/InputComponent.h"
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/Engine.h"
+#include "NEngine/Globals.h"
 #include "NEngine/Input/Keyboard.h"
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Math/Vec2D.h"
@@ -19,7 +20,7 @@ InputSystem::InputSystem(DefaultEntityManager &entityManager)
       mMouseListener(),
       mProcessInput(false)
 {
-    const auto winSize = Engine::GEngine->GetWindowSize();
+    const auto winSize = GEngine->GetWindowSize();
     mPrevMousePos.X = winSize.X / 2;
     mPrevMousePos.Y = winSize.Y / 2;
 

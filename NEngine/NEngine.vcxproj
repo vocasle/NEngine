@@ -206,6 +206,7 @@
     <ClInclude Include="include\NEngine\ECS\Systems\RenderSystem.h" />
     <ClInclude Include="include\NEngine\Engine.h" />
     <ClInclude Include="include\NEngine\Game.h" />
+    <ClInclude Include="include\NEngine\Globals.h" />
     <ClInclude Include="include\NEngine\Helpers\Buffer.h" />
     <ClInclude Include="include\NEngine\Helpers\Camera.h" />
     <ClInclude Include="include\NEngine\Helpers\DeviceResources.h" />

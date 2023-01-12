@@ -19,9 +19,6 @@ struct WindowSettings
 class Engine
 {
 public:
-    static Engine *GEngine;
-
-
     Engine(int argc, const char *argv[]);
     ~Engine();
 
