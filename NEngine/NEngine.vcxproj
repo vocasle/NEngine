@@ -178,6 +178,7 @@
     <ClCompile Include="src\Renderer\Sampler.cpp" />
     <ClCompile Include="src\Renderer\Texture.cpp" />
     <ClCompile Include="src\Renderer\VertexShader.cpp" />
+    <ClCompile Include="src\Renderer\WireframePass.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Utils\Utils.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
@@ -248,6 +249,7 @@
     <ClInclude Include="include\NEngine\Renderer\Texture.h" />
     <ClInclude Include="include\NEngine\Renderer\VertexBuffer.h" />
     <ClInclude Include="include\NEngine\Renderer\VertexShader.h" />
+    <ClInclude Include="include\NEngine\Renderer\WireframePass.h" />
     <ClInclude Include="include\NEngine\Scene.h" />
     <ClInclude Include="include\NEngine\Utils\Image.h" />
     <ClInclude Include="include\NEngine\Utils\Timer.h" />
@@ -314,6 +316,12 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="shader\WireframePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
