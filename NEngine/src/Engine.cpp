@@ -276,7 +276,7 @@ Engine::Engine(int argc, const char *argv[])
     InitImGui();
     InitTimer();
 
-    ShowWindow(mWnd, SW_SHOW);
+    ShowWindow(mWnd, SW_MAXIMIZE);
 
     GEngine = this;
 }
@@ -288,6 +288,17 @@ Engine::CreateDefaultWindow() -> void
     wc.lpfnWndProc = WinProc;
     wc.lpszClassName = ENGINE_WINDOW_CLASS;
     RegisterClass(&wc);
+    auto workAreaRect = RECT();
+    if (SystemParametersInfo(SPI_GETWORKAREA, 0, &workAreaRect, 0)) {
+        UTILS_PRINTLN("We got some parameters!");
+        mWinSettings.Size.X = workAreaRect.right - workAreaRect.left;
+        mWinSettings.Size.Y = workAreaRect.bottom - workAreaRect.top;
+        mWinSettings.Position = Math::Vec2D(0, 0);
+    }
+    else {
+        UTILS_PRINTLN("Failed to get system parameters: %s",
+                      UtilsGetLastWin32Error().c_str());
+    }
 
     mWnd = CreateWindowEx(0,
                           NEngine::Engine::ENGINE_WINDOW_CLASS,
