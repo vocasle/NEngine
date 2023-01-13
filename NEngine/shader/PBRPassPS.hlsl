@@ -143,9 +143,6 @@ main(PSIn pin)
     if (material.HasBaseColorTex) {
         baseColor *= baseColorTex.Sample(baseColorSam, pin.TexCoords);
     }
-    else {
-        baseColor.rgb += Chessboard(pin);
-    }
 
     float roughness = 1.0;
     float metallic = 0.0;
