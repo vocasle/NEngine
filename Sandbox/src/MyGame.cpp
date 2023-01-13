@@ -258,6 +258,9 @@ MyGame::CreatePlayer() -> void
     const auto winSize = mEngine->GetWindowSize();
     camComp.Camera.SetViewDimensions(winSize.X, winSize.Y);
     pos.Movable = true;
+    auto &cc = mEntityManager.CreateComponent<CollisionComponent>(player);
+    cc.BoxMin = vec3(-1, -1, -1);
+    cc.BoxMax = vec3(1, 1, 1);
 
     mScene.AddToScene({player, "Player", mEntityManager.GetBitmask(player)});
 }
