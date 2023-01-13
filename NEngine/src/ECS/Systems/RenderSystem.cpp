@@ -17,10 +17,11 @@ using namespace NEngine::Helpers;
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
                            ECS::DefaultEntityManager &entityManager)
     : mDeviceResources(&deviceResources),
-      mBasePass(std::make_unique<WireframePass>(deviceResources)),
+      mBasePass(std::make_unique<BasePass>(deviceResources)),
       mEntityManager(&entityManager),
       mCamera(nullptr)
 {
+    mPasses.push_back(std::make_unique<WireframePass>(deviceResources));
 }
 
 auto

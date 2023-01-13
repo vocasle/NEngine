@@ -26,6 +26,7 @@ private:
 
     NEngine::Helpers::DeviceResources *mDeviceResources;
     std::unique_ptr<NEngine::Renderer::BasePass> mBasePass;
+    std::vector<std::unique_ptr<NEngine::Renderer::BasePass>> mPasses;
     ECS::DefaultEntityManager *mEntityManager;
     std::vector<ECS::Entity> mEntities;
     NEngine::Helpers::Camera *mCamera;
