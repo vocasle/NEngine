@@ -2,9 +2,10 @@
 
 #include "NEngine/ECS/Components/PositionComponent.h"
 #include "NEngine/ECS/Components/RenderComponent.h"
+#include "NEngine/Globals.h"
 #include "NEngine/Helpers/LightHelper.h"
-#include "NEngine/Math/NEMath.h"
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Renderer/WireframePass.h"
 
 namespace NEngine::ECS::Systems {
@@ -14,6 +15,10 @@ using namespace NEngine::ECS::Components;
 using namespace NEngine::Math;
 using namespace NEngine::Helpers;
 
+static const std::string COLLISION_MESH_PATH =
+    UtilsFormatStr("%s/gLTF/cube.glb", NENGINE_RES_DIR);
+static std::vector<std::unique_ptr<Mesh>> COLLISION_MESH;
+
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
                            ECS::DefaultEntityManager &entityManager)
     : mDeviceResources(&deviceResources),
@@ -22,6 +27,8 @@ RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
       mCamera(nullptr)
 {
     mPasses.push_back(std::make_unique<WireframePass>(deviceResources));
+    COLLISION_MESH = GEngine->LoadMesh(COLLISION_MESH_PATH);
+    UTILS_ASSERT(COLLISION_MESH.size() > 0, "Failed to load collision mesh");
 }
 
 auto
@@ -55,6 +62,18 @@ RenderSystem::Update(float dt) -> void
             mesh->GetTransform().SetWorld(rotate * translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
+        if (mEntityManager->HasComponent<CollisionComponent>(entity)) {
+            const auto &cc =
+                *mEntityManager->GetComponent<CollisionComponent>(entity);
+            const auto len = (cc.BoxMax - cc.BoxMin).Length();
+            auto scale = vec3(len, len, len);
+            for (auto &mesh : COLLISION_MESH) {
+                auto &t = mesh->GetTransform();
+                //t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
+                t.SetWorld(MathMat4X4ScaleFromVec3D(&scale));
+            }
+            mPasses[0]->Draw(*mDeviceResources, COLLISION_MESH);
+        }
     }
 }
 
@@ -87,6 +106,9 @@ RenderSystem::RegisterEntity(Entity entity) -> void
                 *mEntityManager->GetComponent<CameraComponent>(entity);
             mCamera = &camComp.Camera;
             mBasePass->SetCamera(*mCamera);
+            for (auto &pass : mPasses) {
+                pass->SetCamera(*mCamera);
+            }
         }
 
         auto it = std::find(std::begin(mEntities), std::end(mEntities), entity);

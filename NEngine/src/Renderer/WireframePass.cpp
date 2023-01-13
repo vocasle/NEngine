@@ -26,6 +26,7 @@ WireframePass::Draw(
     Helpers::DeviceResources &deviceResources,
     std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes)
 {
+    deviceResources.PIXBeginEvent(L"WireframePass");
     mRasterizerState->Bind(deviceResources);
     mVertexShader->Bind(deviceResources);
     mPixelShader->Bind(deviceResources);
@@ -49,5 +50,6 @@ WireframePass::Draw(
             DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
         }
     }
+    deviceResources.PIXEndEvent();
 }
 }  // namespace NEngine::Renderer
