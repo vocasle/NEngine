@@ -261,5 +261,29 @@ UtilsGlobFiles(const std::string &dir, const std::string &ext)
     return files;
 }
 
+std::string
+UtilsGetLastWin32Error()
+{
+    auto errCode = GetLastError();
+    char *messageBuffer = nullptr;
+    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                                     FORMAT_MESSAGE_FROM_SYSTEM |
+                                     FORMAT_MESSAGE_IGNORE_INSERTS,
+                                 NULL,
+                                 errCode,
+                                 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                 (LPSTR)&messageBuffer,
+                                 0,
+                                 NULL);
+
+    // Copy the error message into a std::string.
+    std::string message(messageBuffer, size);
+
+    // Free the Win32's string's buffer.
+    LocalFree(messageBuffer);
+
+    return message;
+}
+
 }  // namespace Utils
 }  // namespace NEngine

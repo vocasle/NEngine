@@ -57,6 +57,8 @@ std::string UtilsWstrToStr(const std::wstring &wstr);
 std::vector<std::wstring> UtilsGlobFiles(const std::string &dir,
                                          const std::string &ext);
 
+std::string UtilsGetLastWin32Error();
+
 }  // namespace Utils
 }  // namespace NEngine
 
