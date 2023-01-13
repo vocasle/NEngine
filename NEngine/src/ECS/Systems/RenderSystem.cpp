@@ -5,6 +5,7 @@
 #include "NEngine/Helpers/LightHelper.h"
 #include "NEngine/Math/NEMath.h"
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Renderer/WireframePass.h"
 
 namespace NEngine::ECS::Systems {
 
@@ -16,7 +17,7 @@ using namespace NEngine::Helpers;
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
                            ECS::DefaultEntityManager &entityManager)
     : mDeviceResources(&deviceResources),
-      mBasePass(std::make_unique<BasePass>(deviceResources)),
+      mBasePass(std::make_unique<WireframePass>(deviceResources)),
       mEntityManager(&entityManager),
       mCamera(nullptr)
 {
