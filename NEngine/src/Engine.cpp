@@ -233,6 +233,10 @@ WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
             }
             break;
         case WM_MOUSEWHEEL:
+            if (!ImGui::GetIO().WantCaptureMouse) {
+                Mouse::Get().OnMouseWheel(uMsg, wParam, lParam);
+            }
+            break;
         case WM_XBUTTONDOWN:
         case WM_XBUTTONUP:
         case WM_MOUSEHOVER:

@@ -25,6 +25,7 @@ public:
             MouseDownCallback;
         std::function<void(const Math::Vec2D &position, ButtonType btnType)>
             MouseUpCallback;
+        std::function<void(float scrollLength)> MouseScrollCallback;
     };
 
     static Mouse &Get();
@@ -45,6 +46,7 @@ public:
     void OnMouseMove(const Math::Vec2D &pos);
     void OnMouseDown(const Math::Vec2D &pos, ButtonType btnType);
     void OnMouseUp(const Math::Vec2D &pos, ButtonType btnType);
+    void OnMouseWheel(uint32_t message, WPARAM wParam, LPARAM lParam);
 
     Math::Vec2D GetMouseDelta();
     [[nodiscard]] bool IsLeftButtonPressed() const;
