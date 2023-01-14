@@ -1,5 +1,6 @@
 #include "NEngine/Helpers/Camera.h"
 
+#include <DirectXMath.h>
 #include <corecrt_math_defines.h>
 
 #include <algorithm>
@@ -7,11 +8,9 @@
 
 #include "NEngine/Input/Keyboard.h"
 #include "NEngine/Input/Mouse.h"
-#include "NEngine/Math/NEMath.h"
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Utils/Utils.h"
-
-#include <DirectXMath.h>
 
 namespace NEngine {
 namespace Helpers {
@@ -37,6 +36,13 @@ Camera::SetupMouseListener()
     { OnMouseUp(pos, btnType); };
     mMouseListener.MouseMoveCallback = [this](const Vec2D &pos)
     { OnMouseMove(pos); };
+    mMouseListener.MouseScrollCallback = [this](float mouseOffset)
+    {
+        auto fov = ToDegrees(m_fov);
+        fov = fov - 5 * mouseOffset;
+        fov = MathClamp(30, 120, fov);
+        m_fov = ToRadians(fov);
+    };
     Mouse::Get().SetMouseEventListener(mMouseListener);
 }
 
@@ -53,6 +59,28 @@ Camera::Camera(const Vec3D &cameraPos)
       mOriginalPos(cameraPos)
 {
     UpdateVectors();
+    SetupMouseListener();
+}
+
+Camera::Camera(const Camera &camera)
+    : m_Pitch(camera.m_Pitch),
+      m_Yaw(camera.m_Yaw),
+      m_Pos(camera.m_Pos),
+      m_At(camera.m_At),
+      m_Right(camera.m_Right),
+      m_Up(camera.m_Up),
+      m_Speed(camera.m_Speed),
+      m_backBufferWidth(camera.m_backBufferWidth),
+      m_backBufferHeight(camera.m_backBufferHeight),
+      m_zNear(camera.m_zNear),
+      m_zFar(camera.m_zFar),
+      m_fov(camera.m_fov),
+      mOriginalPos(camera.mOriginalPos),
+      mMouseListener(camera.mMouseListener),
+      mPrevMousePos(camera.mPrevMousePos),
+      mCurMousePos(camera.mCurMousePos),
+      mViewMat(camera.mViewMat)
+{
     SetupMouseListener();
 }
 
@@ -303,41 +331,41 @@ Camera::ResetCamera()
 void
 Camera::Arcball(double deltaMillis)
 {
-    //if (mPrevMousePos.X != mCurMousePos.X ||
-    //    mPrevMousePos.Y != mCurMousePos.Y) {
-        //const auto pitchDelta = mCurMousePos.Y - mPrevMousePos.Y;
-        //const auto yawDelta = mCurMousePos.X - mPrevMousePos.X;
+    // if (mPrevMousePos.X != mCurMousePos.X ||
+    //     mPrevMousePos.Y != mCurMousePos.Y) {
+    // const auto pitchDelta = mCurMousePos.Y - mPrevMousePos.Y;
+    // const auto yawDelta = mCurMousePos.X - mPrevMousePos.X;
 
-        //constexpr auto maxPitch = float(M_PI_2) - 0.1f;
-        //m_Pitch += MathToRadians(pitchDelta * 0.4);
-        //m_Pitch = std::clamp(m_Pitch, -maxPitch, maxPitch);
-        //m_Yaw += MathToRadians(yawDelta * 0.4);
+    // constexpr auto maxPitch = float(M_PI_2) - 0.1f;
+    // m_Pitch += MathToRadians(pitchDelta * 0.4);
+    // m_Pitch = std::clamp(m_Pitch, -maxPitch, maxPitch);
+    // m_Yaw += MathToRadians(yawDelta * 0.4);
 
-        float camRadius = 10.0f;
-        // calculate camera position depending on pitch
-        const auto h = camRadius * cos(m_Pitch);
-        const auto z = -h * cos(m_Yaw);
-        const auto x = -h * sin(m_Yaw);
-        const auto y = camRadius * sin(m_Pitch);
-        // XMFLOAT3 posCalculated(camRadius * h * cosf(m_Yaw), camRadius *
-        // sinf(m_Pitch), camRadius * cosf(m_Pitch));
-        m_Pos = Vec3D(x, y, z);
-        // XMFLOAT3 posCalculated(x, y, z);
+    float camRadius = 10.0f;
+    // calculate camera position depending on pitch
+    const auto h = camRadius * cos(m_Pitch);
+    const auto z = -h * cos(m_Yaw);
+    const auto x = -h * sin(m_Yaw);
+    const auto y = camRadius * sin(m_Pitch);
+    // XMFLOAT3 posCalculated(camRadius * h * cosf(m_Yaw), camRadius *
+    // sinf(m_Pitch), camRadius * cosf(m_Pitch));
+    m_Pos = Vec3D(x, y, z);
+    // XMFLOAT3 posCalculated(x, y, z);
 
-        // XMFLOAT3 at(0, 0, 0);
-        // XMFLOAT3 up(0, 1, 0);
+    // XMFLOAT3 at(0, 0, 0);
+    // XMFLOAT3 up(0, 1, 0);
 
-        // XMVECTOR vAt = XMLoadFloat3(&at);
-        // XMVECTOR vPos = XMLoadFloat3(&posCalculated);
+    // XMVECTOR vAt = XMLoadFloat3(&at);
+    // XMVECTOR vPos = XMLoadFloat3(&posCalculated);
 
-        // Utils::UtilsDebugPrint("cam distance: %f\n", length);
+    // Utils::UtilsDebugPrint("cam distance: %f\n", length);
 
-        // auto viewMat = XMMatrixLookAtRH(vPos, vAt, XMLoadFloat3(&up));
-        // XMFLOAT4X4 tmp;
-        // XMStoreFloat4x4(&tmp, viewMat);
-        // mViewMat = Mat4X4(&tmp._11);
+    // auto viewMat = XMMatrixLookAtRH(vPos, vAt, XMLoadFloat3(&up));
+    // XMFLOAT4X4 tmp;
+    // XMStoreFloat4x4(&tmp, viewMat);
+    // mViewMat = Mat4X4(&tmp._11);
 
-        //mPrevMousePos = mCurMousePos;
+    // mPrevMousePos = mCurMousePos;
     //}
 }
 

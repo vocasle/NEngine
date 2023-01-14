@@ -15,6 +15,7 @@ class Camera
 public:
     Camera();
     Camera(const Math::Vec3D &cameraPos);
+    Camera(const Camera &camera);
     ~Camera();
 
     Math::Vec3D GetPos() const;

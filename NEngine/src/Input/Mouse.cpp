@@ -142,7 +142,8 @@ Mouse::OnMouseWheel(uint32_t message, WPARAM wParam, LPARAM lParam)
 {
     for (auto &cb : mMouseListeners) {
         if (cb->MouseScrollCallback) {
-            cb->MouseScrollCallback(GET_WHEEL_DELTA_WPARAM(wParam) / static_cast<float>(WHEEL_DELTA));
+            cb->MouseScrollCallback(GET_WHEEL_DELTA_WPARAM(wParam) /
+                                    static_cast<float>(WHEEL_DELTA));
         }
     }
 }

@@ -77,7 +77,7 @@ std::string UtilsGetLastWin32Error();
             "%s:%d - Operation failed.\n", __FILE__, __LINE__); \
     }
 
-#if _DEBUG
+#if NENGINE_DEBUG
 #define UTILS_ASSERT(x, msg) assert((x) && (msg))
 #define UTILS_PRINT(msg, ...) \
     NEngine::Utils::UtilsDebugPrint(msg, __VA_ARGS__)
