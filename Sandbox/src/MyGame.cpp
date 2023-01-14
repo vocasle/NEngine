@@ -224,6 +224,9 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
     objPos.Position = {5, 2, 5};
     objPos.Movable = false;
+    auto &dbgCubeCol = mEntityManager.CreateComponent<CollisionComponent>(obj);
+    dbgCubeCol.BoxMin = vec3(-0.5f, -0.5f, -0.5f);
+    dbgCubeCol.BoxMax = vec3(0.5f, 0.5f, 0.5f);
     mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
 }
 
