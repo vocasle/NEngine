@@ -62,6 +62,7 @@ RenderSystem::Update(float dt) -> void
             mesh->GetTransform().SetWorld(rotate * translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
+
         if (mEntityManager->HasComponent<CollisionComponent>(entity)) {
             const auto &cc =
                 *mEntityManager->GetComponent<CollisionComponent>(entity);
@@ -69,8 +70,9 @@ RenderSystem::Update(float dt) -> void
             auto scale = vec3(len, len, len);
             for (auto &mesh : COLLISION_MESH) {
                 auto &t = mesh->GetTransform();
-                //t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
-                t.SetWorld(MathMat4X4ScaleFromVec3D(&scale));
+                // t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
+                t.SetWorld(MathMat4X4ScaleFromVec3D(&scale) *
+                           MathMat4X4TranslateFromVec3D(&position));
             }
             mPasses[0]->Draw(*mDeviceResources, COLLISION_MESH);
         }
