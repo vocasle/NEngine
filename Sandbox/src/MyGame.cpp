@@ -202,10 +202,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 
     Mouse::Get().SetWindowDimensions(winSize.X, winSize.Y);
 
-    mSystemManager.SetSystem(std::make_unique<MoveSystem>(mEntityManager));
-    mSystemManager.SetSystem(std::make_unique<RenderSystem>(
-        mEngine->GetDeviceResources(), mEntityManager));
-    mSystemManager.SetSystem(std::make_unique<InputSystem>(mEntityManager));
+    CreateSystems();
 
     CreatePlayer();
 
@@ -266,4 +263,14 @@ MyGame::CreatePlayer() -> void
     cc.BoxMax = vec3(1, 1, 1);
 
     mScene.AddToScene({player, "Player", mEntityManager.GetBitmask(player)});
+}
+
+auto
+MyGame::CreateSystems() -> void
+{
+    mSystemManager.SetSystem(std::make_unique<MoveSystem>(mEntityManager));
+    mSystemManager.SetSystem(std::make_unique<RenderSystem>(
+        mEngine->GetDeviceResources(), mEntityManager));
+    mSystemManager.SetSystem(std::make_unique<InputSystem>(mEntityManager));
+    mSystemManager.SetSystem(std::make_unique<CollisionSystem>(mEntityManager));
 }

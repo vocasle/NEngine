@@ -35,6 +35,7 @@ private:
     auto OnComponentRemove(NEngine::ECS::Entity entity) -> void;
 
     auto CreatePlayer() -> void;
+    auto CreateSystems() -> void;
 
     NEngine::Engine *mEngine;
 
