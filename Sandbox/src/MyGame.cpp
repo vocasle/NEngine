@@ -261,6 +261,13 @@ MyGame::CreatePlayer() -> void
     auto &cc = mEntityManager.CreateComponent<CollisionComponent>(player);
     cc.BoxMin = vec3(-1, -1, -1);
     cc.BoxMax = vec3(1, 1, 1);
+    cc.OnCollision = [this](Entity e1, Entity e2)
+    {
+        auto &go1 = *mScene.FindEntityById(e1);
+        auto &go2 = *mScene.FindEntityById(e2);
+        UTILS_PRINTLN(
+            "%s collided with %s", go1.Name.c_str(), go2.Name.c_str());
+    };
 
     mScene.AddToScene({player, "Player", mEntityManager.GetBitmask(player)});
 }

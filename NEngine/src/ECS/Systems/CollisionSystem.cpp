@@ -35,6 +35,12 @@ CollisionSystem::Update(float dt) -> void
             if (IsOverlaping(lhs, rhs)) {
                 collidedEntities.insert(e1);
                 collidedEntities.insert(e2);
+                if (col1.OnCollision) {
+                    col1.OnCollision(e1, e2);
+                }
+                if (col2.OnCollision) {
+                    col2.OnCollision(e2, e1);
+                }
             }
         }
     }

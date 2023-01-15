@@ -15,6 +15,7 @@ public:
     auto RemoveFromScene(const std::string &entityName) -> void;
     [[nodiscard]] auto FindEntityByName(const std::string &entityName)
         -> ECS::GameObject *;
+    [[nodiscard]] ECS::GameObject *FindEntityById(ECS::Entity entityID);
 
     auto Visit(std::function<void(const ECS::GameObject &)> callback) const
         -> void;

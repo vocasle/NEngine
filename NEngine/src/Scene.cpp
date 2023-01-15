@@ -42,6 +42,17 @@ Scene::FindEntityByName(const std::string &entityName) -> ECS::GameObject *
     return it == std::end(mEntities) ? nullptr : &*it;
 }
 
+ECS::GameObject *
+Scene::FindEntityById(ECS::Entity entityID)
+{
+    for (auto &entity : mEntities) {
+        if (entity.ID == entityID) {
+            return &entity;
+        }
+    }
+    return nullptr;
+}
+
 auto
 Scene::Visit(std::function<void(const ECS::GameObject &)> callback) const
     -> void
