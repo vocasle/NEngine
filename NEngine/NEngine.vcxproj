@@ -195,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\Config.h" />
+    <ClInclude Include="include\NEngine\ECS\Components\AudioComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\CameraComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\CollisionComponent.h" />
     <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h" />

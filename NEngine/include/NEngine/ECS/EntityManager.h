@@ -5,6 +5,7 @@
 #include <functional>
 #include <unordered_map>
 
+#include "Components/AudioComponent.h"
 #include "Components/CameraComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/InputComponent.h"
@@ -188,7 +189,8 @@ using DefaultEntityManager = EntityManager<Components::PositionComponent,
                                            Components::RenderComponent,
                                            Components::InputComponent,
                                            Components::CameraComponent,
-                                           Components::CollisionComponent>;
+                                           Components::CollisionComponent,
+                                           Components::AudioComponent>;
 
 enum ComponentType {
     ComponentType_POSITION = 0x1,
@@ -196,5 +198,6 @@ enum ComponentType {
     ComponentType_INPUT = 0x4,
     ComponentType_CAMERA = 0x8,
     ComponentType_COLLISION = 0x16,
+    ComponentType_AUDIO = 0x32,
 };
 }  // namespace NEngine::ECS
