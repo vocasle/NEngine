@@ -1,9 +1,32 @@
 #include "NEngine/ECS/Systems/AudioSystem.h"
 
+#include <chrono>
+#include <mutex>
+
+std::mutex GAudioMtx;
+
 namespace NEngine::ECS::Systems {
 AudioSystem::AudioSystem(DefaultEntityManager &entityManager)
     : mEntityManager(&entityManager)
 {
+    mAudioThread = std::thread(
+        [this]
+        {
+            while (mKeepAlive) {
+                GAudioMtx.lock();
+                if (mAudioQueue.size() > 0) {
+                    const auto path = mAudioQueue.front();
+                    PlayAudio(path);
+                    mAudioQueue.pop();
+                }
+                else {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(16));
+                }
+                GAudioMtx.unlock();
+            }
+        });
+
+    mAudioThread.join();
 }
 auto
 AudioSystem::Update(float dt) -> void
@@ -12,7 +35,7 @@ AudioSystem::Update(float dt) -> void
         auto &ac =
             *mEntityManager->GetComponent<Components::AudioComponent>(entity);
         if (ac.IsPlaying) {
-            PlayAudio(ac.Path);
+            AddToQueue(ac.Path);
             ac.IsPlaying = false;
         }
     }
@@ -37,10 +60,21 @@ AudioSystem::UnregisterEntity(Entity entity) -> void
         mEntities.erase(it);
     }
 }
+AudioSystem::~AudioSystem()
+{
+    mKeepAlive = false;
+}
 void
 AudioSystem::PlayAudio(const std::string &path)
 {
     UTILS_PRINTLN("Playing: %s", path.c_str());
     PlaySound(Utils::UtilsStrToWstr(path).c_str(), nullptr, SND_FILENAME);
+}
+void
+AudioSystem::AddToQueue(const std::string &path)
+{
+    GAudioMtx.lock();
+    mAudioQueue.push(path);
+    GAudioMtx.unlock();
 }
 }  // namespace NEngine::ECS::Systems
