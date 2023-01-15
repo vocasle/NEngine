@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ECS\Systems\AudioSystem.cpp" />
     <ClCompile Include="src\ECS\Systems\CollisionSystem.cpp" />
     <ClCompile Include="src\ECS\Systems\InputSystem.cpp" />
     <ClCompile Include="src\ECS\Systems\MoveSystem.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="include\NEngine\ECS\EntityManager.h" />
     <ClInclude Include="include\NEngine\ECS\Repo.h" />
     <ClInclude Include="include\NEngine\ECS\SystemManager.h" />
+    <ClInclude Include="include\NEngine\ECS\Systems\AudioSystem.h" />
     <ClInclude Include="include\NEngine\ECS\Systems\CollisionSystem.h" />
     <ClInclude Include="include\NEngine\ECS\Systems\InputSystem.h" />
     <ClInclude Include="include\NEngine\ECS\Systems\MoveSystem.h" />

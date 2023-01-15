@@ -221,9 +221,17 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
     objPos.Position = {5, 2, 5};
     objPos.Movable = false;
+
+    auto &ac = mEntityManager.CreateComponent<AudioComponent>(obj);
+    ac.IsPlaying = false;
+    ac.Path = UtilsFormatStr("%s/audio/GenericMale_VoicePack/Frustraion_3.wav",
+                             GAME_RES_DIR);
+
     auto &dbgCubeCol = mEntityManager.CreateComponent<CollisionComponent>(obj);
     dbgCubeCol.BoxMin = vec3(-0.5f, -0.5f, -0.5f);
     dbgCubeCol.BoxMax = vec3(0.5f, 0.5f, 0.5f);
+    dbgCubeCol.OnCollision = [&ac](Entity lhs, Entity rhs)
+    { ac.IsPlaying = true; };
     mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
 }
 
@@ -280,4 +288,5 @@ MyGame::CreateSystems() -> void
         mEngine->GetDeviceResources(), mEntityManager));
     mSystemManager.SetSystem(std::make_unique<InputSystem>(mEntityManager));
     mSystemManager.SetSystem(std::make_unique<CollisionSystem>(mEntityManager));
+    mSystemManager.SetSystem(std::make_unique<AudioSystem>(mEntityManager));
 }
