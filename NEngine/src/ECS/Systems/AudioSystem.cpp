@@ -3,30 +3,40 @@
 #include <chrono>
 #include <mutex>
 
+using namespace NEngine::Utils;
+
 std::mutex GAudioMtx;
 
 namespace NEngine::ECS::Systems {
 AudioSystem::AudioSystem(DefaultEntityManager &entityManager)
-    : mEntityManager(&entityManager)
+    : mEntityManager(&entityManager),
+      mKeepAlive(true)
 {
+    UTILS_PRINTLN("AudioSystem was created on thread: %s",
+                  UtilsGetThreadIdAsStr().c_str());
+
     mAudioThread = std::thread(
         [this]
         {
+            UTILS_PRINTLN("Spawning audio thread: %s",
+                          UtilsGetThreadIdAsStr().c_str());
             while (mKeepAlive) {
                 GAudioMtx.lock();
-                if (mAudioQueue.size() > 0) {
+                const auto sz = mAudioQueue.size();
+                GAudioMtx.unlock();
+
+                if (sz > 0) {
+                    GAudioMtx.lock();
                     const auto path = mAudioQueue.front();
-                    PlayAudio(path);
                     mAudioQueue.pop();
+                    GAudioMtx.unlock();
+                    PlayAudio(path);
                 }
                 else {
                     std::this_thread::sleep_for(std::chrono::milliseconds(16));
                 }
-                GAudioMtx.unlock();
             }
         });
-
-    mAudioThread.join();
 }
 auto
 AudioSystem::Update(float dt) -> void
@@ -63,12 +73,15 @@ AudioSystem::UnregisterEntity(Entity entity) -> void
 AudioSystem::~AudioSystem()
 {
     mKeepAlive = false;
+    mAudioThread.join();
 }
 void
 AudioSystem::PlayAudio(const std::string &path)
 {
-    UTILS_PRINTLN("Playing: %s", path.c_str());
-    PlaySound(Utils::UtilsStrToWstr(path).c_str(), nullptr, SND_FILENAME);
+    UTILS_PRINTLN("Playing: %s on thread %s",
+                  path.c_str(),
+                  UtilsGetThreadIdAsStr().c_str());
+    PlaySound(UtilsStrToWstr(path).c_str(), nullptr, SND_FILENAME);
 }
 void
 AudioSystem::AddToQueue(const std::string &path)

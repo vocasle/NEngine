@@ -9,6 +9,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <thread>
 
 namespace NEngine {
 namespace Utils {
@@ -283,6 +284,14 @@ UtilsGetLastWin32Error()
     LocalFree(messageBuffer);
 
     return message;
+}
+
+std::string
+UtilsGetThreadIdAsStr()
+{
+    std::ostringstream out;
+    out << std::this_thread::get_id();
+    return out.str();
 }
 
 }  // namespace Utils
