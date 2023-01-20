@@ -56,10 +56,13 @@ RenderSystem::Update(float dt) -> void
         const auto position = pc.Position;
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
         for (auto &mesh : rc.Mesh) {
+            // TODO: world matrix should be precomputed somewhere else.
             auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
             auto axis = vec3(0, 1, 0);
             auto rotate = XM::RotateAxis(ToRadians(pc.Yaw), axis);
-            mesh->GetTransform().SetWorld(rotate * translate);
+            auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
+            auto scale = MathMat4X4ScaleFromVec3D(&scales);
+            mesh->GetTransform().SetWorld(scale * rotate * translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
 
