@@ -104,12 +104,23 @@ MyGame::UpdateImgui()
     }
 
     if (ImGui::CollapsingHeader("Player World")) {
-        const auto &pc = *mEntityManager.GetComponent<PositionComponent>(
+        static auto scale = 1.0f;
+
+        auto &pc = *mEntityManager.GetComponent<PositionComponent>(
             mScene.FindEntityByName("Player")->ID);
         auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
         auto axis = Vec3D(0, 1, 0);
         auto rotate = XM::RotateAxis(ToRadians(pc.Yaw), axis);
-        ImGui::Text("%s", (translate * rotate).ToString().c_str());
+        const auto scales = vec3(scale, scale, scale);
+        auto scaleMat = MathMat4X4ScaleFromVec3D(&scales);
+
+        ImGui::InputFloat("Player scale", &scale);
+
+        if (ImGui::Button("Apply##World")) {
+            pc.Scale = scale;
+        }
+
+        ImGui::Text("%s", (translate * rotate * scaleMat).ToString().c_str());
     }
 
     if (ImGui::Begin("Scene")) {
