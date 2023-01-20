@@ -10,36 +10,13 @@ std::mutex GAudioMtx;
 
 namespace NEngine::ECS::Systems {
 AudioSystem::AudioSystem(DefaultEntityManager &entityManager)
-    : mEntityManager(&entityManager)
-//,mKeepAlive(true)
+    : mEntityManager(&entityManager),
+      mVoiceCallback(mAudioQueue)
 {
     HR(XAudio2Create(
         mXAudio.ReleaseAndGetAddressOf(), 0, XAUDIO2_DEFAULT_PROCESSOR))
-
+    HR(mXAudio->RegisterForCallbacks(&mEngineCallback))
     HR(mXAudio->CreateMasteringVoice(&mMasterVoice))
-
-    // mAudioThread = std::thread(
-    //     [this]
-    //     {
-    //         UTILS_PRINTLN("Spawning audio thread: %s",
-    //                       UtilsGetThreadIdAsStr().c_str());
-    //         while (mKeepAlive) {
-    //             GAudioMtx.lock();
-    //             const auto sz = mAudioQueue.size();
-    //             GAudioMtx.unlock();
-
-    //            if (sz > 0) {
-    //                GAudioMtx.lock();
-    //                const auto path = mAudioQueue.front();
-    //                mAudioQueue.pop();
-    //                GAudioMtx.unlock();
-    //                PlayAudio(path);
-    //            }
-    //            else {
-    //                std::this_thread::sleep_for(std::chrono::milliseconds(16));
-    //            }
-    //        }
-    //    });
 }
 auto
 AudioSystem::Update(float dt) -> void
@@ -49,7 +26,6 @@ AudioSystem::Update(float dt) -> void
             *mEntityManager->GetComponent<Components::AudioComponent>(entity);
         if (ac.IsPlaying) {
             AddToQueue(ac.Path);
-            ac.IsPlaying = false;
         }
     }
 
@@ -91,9 +67,8 @@ AudioSystem::PlayAudio(const std::string &path)
 void
 AudioSystem::AddToQueue(const std::string &path)
 {
-    if (!mFilesAlreadyInQueue.contains(path)) {
-        mAudioQueue.push(path);
-    }
+    std::lock_guard<std::mutex> lock(GAudioMtx);
+    mAudioQueue.Push(path);
 }
 
 #ifdef _XBOX  // Big-Endian
@@ -241,8 +216,11 @@ AudioSystem::PlayAudio()
 {
     IXAudio2SourceVoice *pSourceVoice = nullptr;
     HRESULT hr = 0;
-    if (FAILED(hr = mXAudio->CreateSourceVoice(
-                   &pSourceVoice, (WAVEFORMATEX *)&mXAudioData.wfx)))
+    if (FAILED(hr = mXAudio->CreateSourceVoice(&pSourceVoice,
+                                               (WAVEFORMATEX *)&mXAudioData.wfx,
+                                               0,
+                                               XAUDIO2_MAX_FREQ_RATIO,
+                                               &mVoiceCallback)))
         return hr;
 
     if (FAILED(hr = pSourceVoice->SubmitSourceBuffer(&mXAudioData.buffer)))
@@ -257,13 +235,106 @@ AudioSystem::PlayAudio()
 void
 AudioSystem::PlayQueuedFiles()
 {
-    GAudioMtx.lock();
-    while (!mAudioQueue.empty()) {
-        HR(OpenAudioFile(mAudioQueue.front()))
-        mAudioQueue.pop();
+    std::lock_guard<std::mutex> lock(GAudioMtx);
+    while (mAudioQueue.Size() > 0 && !mAudioQueue.IsPlaying()) {
+        HR(OpenAudioFile(mAudioQueue.Pop()))
         HR(PlayAudio())
     }
-    GAudioMtx.unlock();
+}
+
+VoiceCallback::VoiceCallback(AudioQueue &audioQueue)
+    : mAudioQueue(&audioQueue)
+{
+}
+
+void
+VoiceCallback::OnBufferEnd(void *pBufferContext) noexcept
+{
+}
+
+void
+VoiceCallback::OnBufferStart(void *pBufferContext) noexcept
+{
+    std::lock_guard<std::mutex> lock(GAudioMtx);
+    mAudioQueue->isPlaying = true;
+}
+
+void
+VoiceCallback::OnLoopEnd(void *pBufferContext) noexcept
+{
+}
+
+void
+VoiceCallback::OnStreamEnd() noexcept
+{
+    std::lock_guard<std::mutex> lock(GAudioMtx);
+    if (mAudioQueue->Size() > 0) {
+        mAudioQueue->Pop();
+    }
+    mAudioQueue->isPlaying = false;
+}
+
+void
+VoiceCallback::OnVoiceError(void *pBufferContext, HRESULT Error) noexcept
+{
+}
+
+void
+VoiceCallback::OnVoiceProcessingPassEnd() noexcept
+{
+}
+
+void
+VoiceCallback::OnVoiceProcessingPassStart(UINT32 BytesRequired) noexcept
+{
+}
+
+void
+EngineCallback::OnCriticalError(HRESULT Error) noexcept
+{
+}
+
+void
+EngineCallback::OnProcessingPassEnd() noexcept
+{
+}
+
+void
+EngineCallback::OnProcessingPassStart() noexcept
+{
+}
+
+void
+AudioQueue::Push(std::string path)
+{
+    if (!mFilesAlreadyInQueue.contains(path)) {
+        mAudioQueue.push(path);
+        mFilesAlreadyInQueue.insert(path);
+    }
+}
+
+std::string
+AudioQueue::Pop()
+{
+    if (mAudioQueue.empty()) {
+        return "";
+    }
+    auto path = mAudioQueue.front();
+    mAudioQueue.pop();
+    mFilesAlreadyInQueue.erase(path);
+    return path;
+}
+
+size_t
+AudioQueue::Size() const
+{
+    return mAudioQueue.size();
+}
+
+bool
+AudioQueue::IsPlaying() const
+{
+    return isPlaying;
 }
 
 }  // namespace NEngine::ECS::Systems

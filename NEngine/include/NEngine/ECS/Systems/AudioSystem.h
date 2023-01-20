@@ -9,6 +9,48 @@
 #include "../EntityManager.h"
 
 namespace NEngine::ECS::Systems {
+
+class AudioQueue
+{
+public:
+    void Push(std::string path);
+    std::string Pop();
+    size_t Size() const;
+    bool IsPlaying() const;
+
+private:
+    std::queue<std::string> mAudioQueue;
+    std::set<std::string> mFilesAlreadyInQueue;
+    bool isPlaying;
+
+    friend class VoiceCallback;
+};
+
+class VoiceCallback : public IXAudio2VoiceCallback
+{
+public:
+    VoiceCallback(AudioQueue &audioQueue);
+    virtual void OnBufferEnd(void *pBufferContext) noexcept override;
+    virtual void OnBufferStart(void *pBufferContext) noexcept override;
+    virtual void OnLoopEnd(void *pBufferContext) noexcept override;
+    virtual void OnStreamEnd() noexcept override;
+    virtual void OnVoiceError(void *pBufferContext,
+                              HRESULT Error) noexcept override;
+    virtual void OnVoiceProcessingPassEnd() noexcept override;
+    virtual void OnVoiceProcessingPassStart(
+        UINT32 BytesRequired) noexcept override;
+
+private:
+    AudioQueue *mAudioQueue;
+};
+
+struct EngineCallback : public IXAudio2EngineCallback
+{
+    virtual void OnCriticalError(HRESULT Error) noexcept override;
+    virtual void OnProcessingPassEnd() noexcept override;
+    virtual void OnProcessingPassStart() noexcept override;
+};
+
 class AudioSystem
 {
 public:
@@ -29,17 +71,16 @@ private:
     std::vector<ECS::Entity> mEntities;
     DefaultEntityManager *mEntityManager;
 
-    std::queue<std::string> mAudioQueue;
-    std::set<std::string> mFilesAlreadyInQueue;
-    //std::thread mAudioThread;
-    //bool mKeepAlive;
     Microsoft::WRL::ComPtr<IXAudio2> mXAudio;
     IXAudio2MasteringVoice *mMasterVoice;
+    AudioQueue mAudioQueue;
+    VoiceCallback mVoiceCallback;
+    EngineCallback mEngineCallback;
 
     struct XAudioData
     {
-        WAVEFORMATEXTENSIBLE wfx;
-        XAUDIO2_BUFFER buffer;
+        WAVEFORMATEXTENSIBLE wfx = {0};
+        XAUDIO2_BUFFER buffer = {0};
         std::unique_ptr<unsigned char[]> rawBuffer;
     } mXAudioData;
 };
