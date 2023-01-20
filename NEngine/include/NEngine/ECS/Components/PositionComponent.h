@@ -12,6 +12,7 @@ struct PositionComponent
     float Yaw;
     float Pitch;
     bool Movable;
+    float Scale = 1;
 };
 
 }  // namespace NEngine::ECS::Components
