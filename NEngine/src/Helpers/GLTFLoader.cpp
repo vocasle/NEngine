@@ -247,7 +247,7 @@ GenerateTangents(const std::vector<unsigned int> &indices,
         const auto idx = mesh->indices[iFace * 3 + iVert];
         const auto texCoord = mesh->texCoords[idx];
         fvTexcOut[0] = texCoord.X;
-        fvTexcOut[1] = texCoord.Y;
+        fvTexcOut[1] = texCoord.Y; // TODO: Fix crash here on Buggy.glb
     };
 
     auto SetTSpaceCB = [](const SMikkTSpaceContext *pContext,
