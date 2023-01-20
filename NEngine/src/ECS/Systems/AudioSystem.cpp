@@ -17,6 +17,21 @@ AudioSystem::AudioSystem(DefaultEntityManager &entityManager)
         mXAudio.ReleaseAndGetAddressOf(), 0, XAUDIO2_DEFAULT_PROCESSOR))
     HR(mXAudio->RegisterForCallbacks(&mEngineCallback))
     HR(mXAudio->CreateMasteringVoice(&mMasterVoice))
+
+    mVoiceCallback.SetStreamEndCallback(
+        [this](std::string path)
+        {
+            // TODO: Potentially unsafe operation.
+            // std::lock_guard<std::mutex> lock(GAudioMtx);
+            for (auto entity : mEntities) {
+                auto &ac =
+                    *mEntityManager->GetComponent<Components::AudioComponent>(
+                        entity);
+                if (ac.Path == path) {
+                    ac.IsPlaying = false;
+                }
+            }
+        });
 }
 auto
 AudioSystem::Update(float dt) -> void
@@ -239,6 +254,7 @@ AudioSystem::PlayQueuedFiles()
     while (mAudioQueue.Size() > 0 && !mAudioQueue.IsPlaying()) {
         HR(OpenAudioFile(mAudioQueue.Pop()))
         HR(PlayAudio())
+        UTILS_PRINTLN("Playing audio...");
     }
 }
 
@@ -269,7 +285,10 @@ VoiceCallback::OnStreamEnd() noexcept
 {
     std::lock_guard<std::mutex> lock(GAudioMtx);
     if (mAudioQueue->Size() > 0) {
-        mAudioQueue->Pop();
+        auto path = mAudioQueue->Pop();
+        if (mOnStreamEndCallback) {
+            mOnStreamEndCallback(path);
+        }
     }
     mAudioQueue->isPlaying = false;
 }
@@ -287,6 +306,12 @@ VoiceCallback::OnVoiceProcessingPassEnd() noexcept
 void
 VoiceCallback::OnVoiceProcessingPassStart(UINT32 BytesRequired) noexcept
 {
+}
+
+void
+VoiceCallback::SetStreamEndCallback(std::function<void(std::string)> callback)
+{
+    mOnStreamEndCallback = callback;
 }
 
 void

@@ -39,9 +39,11 @@ public:
     virtual void OnVoiceProcessingPassEnd() noexcept override;
     virtual void OnVoiceProcessingPassStart(
         UINT32 BytesRequired) noexcept override;
+    void SetStreamEndCallback(std::function<void(std::string)> callback);
 
 private:
     AudioQueue *mAudioQueue;
+    std::function<void(std::string)> mOnStreamEndCallback;
 };
 
 struct EngineCallback : public IXAudio2EngineCallback
