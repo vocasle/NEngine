@@ -51,30 +51,35 @@ Mat3X3::operator()(size_t i, size_t j) const
 Mat3X3
 Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
 {
+    auto ret = Mat3X3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat =
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) +
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
-    auto ret = Mat3X3();
-    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret.mData),
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
                     XMMatrixTranspose(mat));
     return ret;
 #else
-    auto ret = Mat3X3();
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
             ret(i, j) = lhs(i, j) + rhs(i, j);
         }
     }
-    return ret;
 #endif
+    return ret;
 }
 
 Mat3X3
 Mat3X3::Mult(const Mat3X3 &lhs, const Mat3X3 &rhs)
 {
     auto ret = Mat3X3();
-
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat =
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) *
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    (XMMatrixTranspose(mat)));
+#else
     const auto col0 = rhs[0];
     const auto col1 = rhs[1];
     const auto col2 = rhs[2];
@@ -93,6 +98,7 @@ Mat3X3::Mult(const Mat3X3 &lhs, const Mat3X3 &rhs)
     ret(0, 2) = v2.X;
     ret(1, 2) = v2.Y;
     ret(2, 2) = v2.Z;
+#endif
     return ret;
 }
 
@@ -100,11 +106,17 @@ Mat3X3
 Mat3X3::Transpose() const
 {
     auto ret = *this;
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat = XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&ret));
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    XMMatrixTranspose(mat));
+#else
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
             ret(i, j) = operator()(j, i);
         }
     }
+#endif
     return ret;
 }
 
@@ -112,11 +124,18 @@ Mat3X3
 Mat3X3::Mult(const Mat3X3 &lhs, float s)
 {
     auto ret = Mat3X3();
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat =
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&ret)) * s;
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    XMMatrixTranspose(mat));
+#else
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
             ret(i, j) = lhs(i, j) * s;
         }
     }
+#endif
     return ret;
 }
 
@@ -124,12 +143,19 @@ Vec3D
 Mat3X3::Mult(const Mat3X3 &lhs, const Vec3D &rhs)
 {
     auto ret = Vec3D();
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat = XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs));
+    const auto vec = XMVector3Transform(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)), mat);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+#else
     const auto row0 = Vec3D(lhs(0, 0), lhs(0, 1), lhs(0, 2));
     const auto row1 = Vec3D(lhs(1, 0), lhs(1, 1), lhs(1, 2));
     const auto row2 = Vec3D(lhs(2, 0), lhs(2, 1), lhs(2, 2));
     ret.X = Vec3D::Dot(row0, rhs);
     ret.Y = Vec3D::Dot(row1, rhs);
     ret.Z = Vec3D::Dot(row2, rhs);
+#endif
     return ret;
 }
 
@@ -137,40 +163,71 @@ Mat3X3
 Mat3X3::Subtract(const Mat3X3 &lhs, const Mat3X3 &rhs)
 {
     auto ret = Mat3X3();
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat =
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) +
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    XMMatrixTranspose(mat));
+#else
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
             ret(i, j) = lhs(i, j) - rhs(i, j);
         }
     }
+#endif
     return ret;
 }
 
 Mat3X3
 Mat3X3::RotZ(float phi)
 {
+    auto ret = Mat3X3();
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat = XMMatrixRotationZ(phi);
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    XMMatrixTranspose(mat));
+#else
     const auto cos = std::cos(phi);
     const auto sin = std::sin(phi);
-    auto ret = Mat3X3();
     ret(0, 0) = cos;
     ret(0, 1) = -sin;
     ret(1, 0) = sin;
     ret(1, 1) = cos;
+#endif
     return ret;
 }
 
 float
 Mat3X3::Determinant() const
 {
+#if NENGINE_USE_DIRECTXMATH
+    const auto vec = XMMatrixDeterminant(
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(this)));
+    auto det = 0.0f;
+    XMStoreFloat(&det, vec);
+    return det;
+#else
     const auto &self = *this;
     const auto minor00 = self(1, 1) * self(2, 2) - self(2, 1) * self(1, 2);
     const auto minor01 = self(1, 0) * self(2, 2) - self(2, 0) * self(1, 2);
     const auto minor02 = self(1, 0) * self(2, 1) - self(2, 0) * self(1, 1);
     return self(0, 0) * minor00 - self(0, 1) * minor01 + self(0, 2) * minor02;
+#endif
 }
 
 Mat3X3
 Mat3X3::Inverse() const
 {
+#if NENGINE_USE_DIRECTXMATH
+    XMVECTOR det;
+    const auto mat = XMMatrixInverse(
+        &det, XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(this)));
+    auto ret = Mat3X3();
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    XMMatrixTranspose(mat));
+    return ret;
+#else
     const auto det = Determinant();
     UTILS_ASSERT(det != 0, "Determinant is zero, matrix has no inverse!");
     const auto &self = *this;
@@ -204,18 +261,24 @@ Mat3X3::Inverse() const
     ret = ret.Transpose();
 
     return (1 / det) * ret;
+#endif
 }
 
 Mat3X3
 Mat3X3::RotX(float phi)
 {
     auto ret = Mat3X3();
+#if NENGINE_USE_DIRECTXMATH
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    XMMatrixTranspose(XMMatrixRotationX(phi)));
+#else
     const auto cos = std::cos(phi);
     const auto sin = std::sin(phi);
     ret(1, 1) = cos;
     ret(1, 2) = -sin;
     ret(2, 1) = sin;
     ret(2, 2) = cos;
+#endif
     return ret;
 }
 
@@ -223,12 +286,17 @@ Mat3X3
 Mat3X3::RotY(float phi)
 {
     auto ret = Mat3X3();
+#if NENGINE_USE_DIRECTXMATH
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
+                    XMMatrixTranspose(XMMatrixRotationY(phi)));
+#else
     const auto cos = std::cos(phi);
     const auto sin = std::sin(phi);
     ret(0, 0) = cos;
     ret(0, 2) = sin;
     ret(2, 0) = -sin;
     ret(2, 2) = cos;
+#endif
     return ret;
 }
 
