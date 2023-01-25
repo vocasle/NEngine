@@ -135,6 +135,9 @@ public:
     [[nodiscard]] auto
     GetBitmask(Entity entity) -> unsigned long
     {
+        //UTILS_PRINTLN("Bitmask: %s for entity: %d",
+        //              mEntities.at(entity).to_string().c_str(),
+        //              entity);
         return mEntities.at(entity).to_ulong();
     }
 
@@ -168,9 +171,14 @@ private:
     UpdateComponentMask(Entity entity) noexcept -> void
     {
         CheckEntityExists(entity);
-        auto oldMask = mEntities.at(entity);
+        const auto oldMask = mEntities.at(entity);
         auto component = Bitmask<Component>();
-        mEntities.at(entity) = oldMask |= component;
+        const auto newMask = oldMask | component;
+        //UTILS_PRINTLN("\n[%ld]\nOld mask: %s\n, new mask: %s",
+        //              entity,
+        //              oldMask.to_string().c_str(),
+        //              newMask.to_string().c_str());
+        mEntities.at(entity) = newMask;
     }
 
     Repo<Components...> mRepo;
@@ -193,11 +201,11 @@ using DefaultEntityManager = EntityManager<Components::PositionComponent,
                                            Components::AudioComponent>;
 
 enum ComponentType {
-    ComponentType_POSITION = 0x1,
-    ComponentType_RENDER = 0x2,
-    ComponentType_INPUT = 0x4,
-    ComponentType_CAMERA = 0x8,
-    ComponentType_COLLISION = 0x16,
-    ComponentType_AUDIO = 0x32,
+    ComponentType_POSITION = 1 << 0,
+    ComponentType_RENDER = 1 << 1,
+    ComponentType_INPUT = 1 << 2,
+    ComponentType_CAMERA = 1 << 3,
+    ComponentType_COLLISION = 1 << 4,
+    ComponentType_AUDIO = 1 << 5,
 };
 }  // namespace NEngine::ECS
