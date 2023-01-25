@@ -92,7 +92,7 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
     mPerObjectBuffer->Bind(deviceResources);
     meshPrimitive->Bind(deviceResources);
     deviceResources.GetDeviceContext()->DrawIndexed(
-        meshPrimitive->GetIndexNum(), 0, 0);
+        static_cast<unsigned int>(meshPrimitive->GetIndexNum()), 0, 0);
 }
 
 void

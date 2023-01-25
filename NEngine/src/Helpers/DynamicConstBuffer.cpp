@@ -50,7 +50,7 @@ DynamicConstBuffer::CreateConstantBuffer()
 {
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bufferDesc.ByteWidth = mBytes.size();
+    bufferDesc.ByteWidth = static_cast<unsigned int>(mBytes.size());
     bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 

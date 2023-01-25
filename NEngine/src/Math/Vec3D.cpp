@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Math/Vec4D.h"
 #include "NEngine/Utils/Utils.h"
 
 #if NENGINE_USE_DIRECTXMATH
@@ -23,6 +24,13 @@ Vec3D::Vec3D(float x, float y, float z)
     : X{x},
       Y{y},
       Z{z}
+{
+}
+
+Vec3D::Vec3D(const Vec4D &rhs)
+    : X(rhs.X),
+      Y(rhs.Y),
+      Z(rhs.Z)
 {
 }
 

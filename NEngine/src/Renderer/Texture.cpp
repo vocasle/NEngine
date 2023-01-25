@@ -11,18 +11,19 @@ using namespace Microsoft::WRL;
 using namespace NEngine::Utils;
 
 Texture::Texture(Helpers::DeviceResources &deviceResources,
-                 unsigned int width,
-                 unsigned int height,
+                 float width,
+                 float height,
                  TextureBindTarget bindTarget,
                  const std::string &name)
     : mBindTarget(bindTarget),
+      mBindSlot(0),
       mName(name),
       mSampler(deviceResources, {}, 0)
 {
     D3D11_TEXTURE2D_DESC texDesc;
     memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
-    texDesc.Width = width;
-    texDesc.Height = height;
+    texDesc.Width = static_cast<unsigned int>(width);
+    texDesc.Height = static_cast<unsigned int>(height);
     texDesc.MipLevels = 0;
     texDesc.ArraySize = 1;
     texDesc.Format = mBindTarget == TextureBindTarget::DepthStencilView

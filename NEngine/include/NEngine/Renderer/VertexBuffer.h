@@ -1,13 +1,13 @@
 #pragma once
 
+#include <d3d11.h>
+#include <wrl/client.h>
+
+#include <vector>
+
 #include "Bindable.h"
 #include "NEngine/Helpers/DeviceResources.h"
 #include "NEngine/Utils/Utils.h"
-
-#include <wrl/client.h>
-#include <d3d11.h>
-
-#include <vector>
 
 namespace NEngine {
 namespace Renderer {
@@ -32,20 +32,21 @@ VertexBuffer<Vertex>::VertexBuffer(Helpers::DeviceResources &deviceResources,
                                    const std::vector<Vertex> &vertexData)
     : mVertexData(vertexData)
 {
-    const CD3D11_BUFFER_DESC desc(sizeof(Vertex) * mVertexData.size(),
-                                  D3D11_BIND_VERTEX_BUFFER,
-                                  D3D11_USAGE_DEFAULT,
-                                  0,
-                                  0,
-                                  sizeof(Vertex));
+    const CD3D11_BUFFER_DESC desc(
+        static_cast<unsigned int>(sizeof(Vertex) * mVertexData.size()),
+        D3D11_BIND_VERTEX_BUFFER,
+        D3D11_USAGE_DEFAULT,
+        0,
+        0,
+        static_cast<unsigned int>(sizeof(Vertex)));
 
     D3D11_SUBRESOURCE_DATA data;
     data.pSysMem = &mVertexData[0];
 
     using namespace Utils;
 
-    HR(deviceResources.GetDevice()->CreateBuffer(&desc, &data, mVertexBuffer.
-        ReleaseAndGetAddressOf()))
+    HR(deviceResources.GetDevice()->CreateBuffer(
+        &desc, &data, mVertexBuffer.ReleaseAndGetAddressOf()))
 }
 
 template <typename Vertex>
@@ -55,11 +56,7 @@ VertexBuffer<Vertex>::Bind(Helpers::DeviceResources &deviceResources)
     const unsigned int strides = sizeof(Vertex);
     constexpr unsigned int offsets = 0;
     deviceResources.GetDeviceContext()->IASetVertexBuffers(
-        0,
-        1,
-        mVertexBuffer.GetAddressOf(),
-        &strides,
-        &offsets);
+        0, 1, mVertexBuffer.GetAddressOf(), &strides, &offsets);
 }
 
 template <typename Vertex>
@@ -67,5 +64,5 @@ void
 VertexBuffer<Vertex>::Unbind(Helpers::DeviceResources &deviceResources)
 {
 }
-}
-}
+}  // namespace Renderer
+}  // namespace NEngine

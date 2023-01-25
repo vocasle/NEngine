@@ -265,8 +265,8 @@ Camera::ProcessMouse(double deltaMillis)
 void
 Camera::SetViewDimensions(uint32_t width, uint32_t height)
 {
-    m_backBufferWidth = width;
-    m_backBufferHeight = height;
+    m_backBufferWidth = static_cast<float>(width);
+    m_backBufferHeight = static_cast<float>(height);
 }
 
 void

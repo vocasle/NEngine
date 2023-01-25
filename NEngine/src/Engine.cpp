@@ -50,12 +50,7 @@ WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
     switch (uMsg) {
         case WM_COMMAND:
         {
-            int wmId = LOWORD(wParam);
-            // Parse the menu selections:
-            switch (wmId) {
-                default:
-                    return DefWindowProc(hWnd, uMsg, wParam, lParam);
-            }
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
         } break;
         case WM_PAINT:
             if (s_in_sizemove && engine) {
@@ -105,8 +100,9 @@ WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT
                 RECT rc;
                 GetClientRect(hWnd, &rc);
 
-                engine->OnWindowSizeChanged(rc.right - rc.left,
-                                            rc.bottom - rc.top);
+                engine->OnWindowSizeChanged(
+                    static_cast<float>(rc.right - rc.left),
+                    static_cast<float>(rc.bottom - rc.top));
             }
             break;
 
@@ -312,8 +308,10 @@ Engine::CreateDefaultWindow() -> void
     auto workAreaRect = RECT();
     if (SystemParametersInfo(SPI_GETWORKAREA, 0, &workAreaRect, 0)) {
         UTILS_PRINTLN("We got some parameters!");
-        mWinSettings.Size.X = workAreaRect.right - workAreaRect.left;
-        mWinSettings.Size.Y = workAreaRect.bottom - workAreaRect.top;
+        mWinSettings.Size.X =
+            static_cast<float>(workAreaRect.right - workAreaRect.left);
+        mWinSettings.Size.Y =
+            static_cast<float>(workAreaRect.bottom - workAreaRect.top);
         mWinSettings.Position = Math::Vec2D(0, 0);
     }
     else {
@@ -325,10 +323,10 @@ Engine::CreateDefaultWindow() -> void
                           NEngine::Engine::ENGINE_WINDOW_CLASS,
                           L"NEngine v0.0.1",
                           WS_OVERLAPPEDWINDOW,
-                          mWinSettings.Position.X,
-                          mWinSettings.Position.Y,
-                          mWinSettings.Size.X,
-                          mWinSettings.Size.Y,
+                          static_cast<int>(mWinSettings.Position.X),
+                          static_cast<int>(mWinSettings.Position.Y),
+                          static_cast<int>(mWinSettings.Size.X),
+                          static_cast<int>(mWinSettings.Size.Y),
                           nullptr,
                           nullptr,
                           nullptr,

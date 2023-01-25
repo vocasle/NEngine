@@ -33,21 +33,24 @@ GetNodeTransform(const tinygltf::Node &node)
     }
     else {
         if (!node.rotation.empty()) {
-            const auto rot =
-                MathQuaternionToRotationMat(Vec4D(node.rotation[0],
-                                                  node.rotation[1],
-                                                  node.rotation[2],
-                                                  node.rotation[3]));
+            const auto rot = MathQuaternionToRotationMat(
+                Vec4D(static_cast<float>(node.rotation[0]),
+                      static_cast<float>(node.rotation[1]),
+                      static_cast<float>(node.rotation[2]),
+                      static_cast<float>(node.rotation[3])));
 
             t.SetRotation(rot);
         }
         if (!node.translation.empty()) {
-            const Vec3D offset(
-                node.translation[0], node.translation[1], node.translation[2]);
+            const Vec3D offset(static_cast<float>(node.translation[0]),
+                               static_cast<float>(node.translation[1]),
+                               static_cast<float>(node.translation[2]));
             t.SetTranslation(MathMat4X4TranslateFromVec3D(&offset));
         }
         if (!node.scale.empty()) {
-            const Vec3D scale(node.scale[0], node.scale[1], node.scale[2]);
+            const Vec3D scale(static_cast<float>(node.scale[0]),
+                              static_cast<float>(node.scale[1]),
+                              static_cast<float>(node.scale[2]));
             t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
         }
     }
@@ -247,7 +250,7 @@ GenerateTangents(const std::vector<unsigned int> &indices,
         const auto idx = mesh->indices[iFace * 3 + iVert];
         const auto texCoord = mesh->texCoords[idx];
         fvTexcOut[0] = texCoord.X;
-        fvTexcOut[1] = texCoord.Y; // TODO: Fix crash here on Buggy.glb
+        fvTexcOut[1] = texCoord.Y;  // TODO: Fix crash here on Buggy.glb
     };
 
     auto SetTSpaceCB = [](const SMikkTSpaceContext *pContext,
@@ -264,7 +267,7 @@ GenerateTangents(const std::vector<unsigned int> &indices,
         mesh->tangents[idx] = Vec4D(fvTangent[0],
                                     fvTangent[1],
                                     fvTangent[2],
-                                    bIsOrientationPreserving ? 1 : -1);
+                                    bIsOrientationPreserving ? 1.0f : -1.0f);
     };
 
     spaceInterface.m_getNumFaces = GetNumFacesCB;
@@ -286,7 +289,7 @@ GetPropAsVec(const tinygltf::Value &ext, const std::string &propName)
     if (ext.Has(propName)) {
         auto prop = ext.Get(propName);
         for (size_t i = 0; i < prop.ArrayLen(); ++i) {
-            auto val = prop.Get(i);
+            auto val = prop.Get(static_cast<int>(i));
             const float num = val.IsNumber()
                                   ? static_cast<float>(val.Get<double>())
                                   : static_cast<float>(val.Get<int>());
@@ -366,9 +369,12 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
             static_cast<float>(
                 material.pbrMetallicRoughness.baseColorFactor[3])};
 
-        tmpMaterial.Roughness = material.pbrMetallicRoughness.roughnessFactor;
-        tmpMaterial.Metalness = material.pbrMetallicRoughness.metallicFactor;
-        tmpMaterial.NormalScale = material.normalTexture.scale;
+        tmpMaterial.Roughness =
+            static_cast<float>(material.pbrMetallicRoughness.roughnessFactor);
+        tmpMaterial.Metalness =
+            static_cast<float>(material.pbrMetallicRoughness.metallicFactor);
+        tmpMaterial.NormalScale =
+            static_cast<float>(material.normalTexture.scale);
 
         if (material.extensions.size() > 0) {
             for (auto &[extName, ext] : material.extensions) {
@@ -421,7 +427,7 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                          material.occlusionTexture.index,
                                          TextureBindTarget::ShaderResourceView,
                                          3);
-            tmpMaterial.OcclusionStrength = material.occlusionTexture.strength;
+            tmpMaterial.OcclusionStrength = static_cast<float>(material.occlusionTexture.strength);
         }
 
         if (material.emissiveTexture.index >= 0) {
@@ -429,9 +435,9 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                         material.emissiveTexture.index,
                                         TextureBindTarget::ShaderResourceView,
                                         4);
-            tmpMaterial.EmissiveFactor = Vec3D(material.emissiveFactor[0],
-                                               material.emissiveFactor[1],
-                                               material.emissiveFactor[2]);
+            tmpMaterial.EmissiveFactor = Vec3D(static_cast<float>(material.emissiveFactor[0]),
+                                               static_cast<float>(material.emissiveFactor[1]),
+                                               static_cast<float>(material.emissiveFactor[2]));
         }
     }
 

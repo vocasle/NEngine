@@ -3,12 +3,14 @@
 #include <string>
 
 namespace NEngine::Math {
+struct Vec4D;
 struct Vec3D
 {
     Vec3D();
     Vec3D(float x, float y, float z);
     Vec3D(const Vec3D &rhs) = default;
     Vec3D(Vec3D &&rhs) noexcept = default;
+    Vec3D(const Vec4D &rhs);
     Vec3D &operator=(const Vec3D &rhs) = default;
     Vec3D &operator=(Vec3D &&rhs) noexcept = default;
     bool operator==(const Vec3D &rhs) const;
@@ -22,7 +24,7 @@ struct Vec3D
     static float Dot(const Vec3D &lhs, const Vec3D &rhs);
     float Length() const;
     Vec3D Normalize() const;
-    
+
     float X;
     float Y;
     float Z;

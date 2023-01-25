@@ -25,8 +25,8 @@ class Texture : public Bindable
 {
 public:
     Texture(Helpers::DeviceResources &deviceResources,
-            unsigned int width,
-            unsigned int height,
+            float width,
+            float height,
             TextureBindTarget bindTarget,
             const std::string &name);
 

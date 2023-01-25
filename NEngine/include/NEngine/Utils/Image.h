@@ -37,7 +37,9 @@ public:
             return;
         }
 
-        const size_t sz = m_width * m_height * m_channels;
+        const size_t sz = static_cast<size_t>(m_width) *
+                          static_cast<size_t>(m_height) *
+                          static_cast<size_t>(m_channels);
         m_bytes.resize(sz);
         memcpy(&m_bytes[0], bytes, sz);
         stbi_image_free(bytes);
