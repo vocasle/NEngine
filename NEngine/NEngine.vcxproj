@@ -110,7 +110,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NENGINE_DEBUG=1;NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NENGINE_TEST_MATH=1;NENGINE_USE_DIRECTXMATH=1;NENGINE_DEBUG=1;NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NENGINE_DEBUG=1;NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NENGINE_TEST_MATH=1;NENGINE_USE_DIRECTXMATH=1;NENGINE_DEBUG=1;NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>

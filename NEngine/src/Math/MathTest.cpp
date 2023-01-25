@@ -1,8 +1,13 @@
 #include "NEngine/Math/MathTest.h"
 
-#include "NEngine/Math/NEMath.h"
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Math/NEMath.h"
 #include "NEngine/Utils/Utils.h"
+
+#if NENGINE_USE_DIRECTXMATH
+#include <DirectXMath.h>
+using namespace DirectX;
+#endif
 
 namespace NEngine::Math {
 
@@ -10,22 +15,28 @@ void
 TestVec3D()
 {
     using namespace NEngine::Utils;
+#if NENGINE_VERBOSE_MATH_TEST
     UtilsDebugPrint("\n==============================\n");
     UtilsDebugPrint("Running tests for Vec3D\n");
     UtilsDebugPrint("==============================\n");
+#endif
 
     {
         auto v = Vec3D();
 
         UTILS_ASSERT(v.X == 0 && v.Y == 0 && v.Z == 0, "Vec3D() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Vec3D() test passed\n");
+#endif
     }
 
     {
         auto v = Vec3D();
 
         UTILS_ASSERT(v.X == 0 && v.Y == 0 && v.Z == 0, "Vec3D() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Vec3D() test passed\n");
+#endif
     }
 
     {
@@ -33,7 +44,9 @@ TestVec3D()
 
         UTILS_ASSERT(v.X == 1 && v.Y == 2 && v.Z == 3,
                      "Vec3D(float, float, float) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Vec3D(float, float, float) test passed\n");
+#endif
     }
 
     {
@@ -41,7 +54,9 @@ TestVec3D()
         auto vCopy = v;
 
         UTILS_ASSERT(NearlyEqual(v, vCopy), "Vec3D(const Vec3D &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Vec3D(const Vec3D &) test passed\n");
+#endif
     }
 
     {
@@ -49,7 +64,9 @@ TestVec3D()
         auto vCopy = Vec3D(Vec3D(1, 2, 3));
 
         UTILS_ASSERT(NearlyEqual(v, vCopy), "Vec3D(Vec3D &&) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Vec3D(Vec3D &&) test passed\n");
+#endif
     }
 
     {
@@ -59,7 +76,9 @@ TestVec3D()
 
         UTILS_ASSERT(NearlyEqual(v2, v),
                      "operator=(const Vec3D &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("operator=(const Vec3D &) test passed\n");
+#endif
     }
 
     {
@@ -68,7 +87,9 @@ TestVec3D()
         v = Vec3D(3, 2, 1);
 
         UTILS_ASSERT(NearlyEqual(v2, v), "operator=(Vec3D &&) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("operator=(Vec3D &&) test passed\n");
+#endif
     }
 
     {
@@ -76,7 +97,9 @@ TestVec3D()
         auto v2 = Vec3D(1, 2, 3);
 
         UTILS_ASSERT(v == v2, "operator==(const Vec3D &rhs) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("operator==(const Vec3D &rhs) test passed\n");
+#endif
     }
 
     {
@@ -84,7 +107,9 @@ TestVec3D()
         auto v2 = Vec3D(1.0001f, 2, 3);
 
         UTILS_ASSERT(v != v2, "operator!=(const Vec3D &rhs) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("operator!=(const Vec3D &rhs) test passed\n");
+#endif
     }
 
     {
@@ -92,7 +117,9 @@ TestVec3D()
         auto str = std::string("{ 1, 2, 3 }");
 
         UTILS_ASSERT(v.ToString() == str, "ToString() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("ToString() test passed\n");
+#endif
     }
 
     {
@@ -104,7 +131,9 @@ TestVec3D()
         UTILS_ASSERT(
             NearlyEqual(e, k) && NearlyEqual(Vec3D::Cross(j, i), k * (-1)),
             "Cross(const Vec3D &, const Vec3D &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Cross(const Vec3D &, const Vec3D &) test passed\n");
+#endif
     }
 
     {
@@ -115,7 +144,9 @@ TestVec3D()
 
         UTILS_ASSERT(NearlyEqual(e, res),
                      "Dot(const Vec3D &, const Vec3D &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Dot(const Vec3D &, const Vec3D &) test passed\n");
+#endif
     }
 
     {
@@ -124,7 +155,9 @@ TestVec3D()
         auto r = v.Length();
 
         UTILS_ASSERT(NearlyEqual(e, r), "Length() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Length() test passed\n");
+#endif
     }
 
     {
@@ -134,7 +167,9 @@ TestVec3D()
         auto r = v.Normalize();
 
         UTILS_ASSERT(NearlyEqual(e, r), "Normalize() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Normalize() test passed\n");
+#endif
     }
 
     {
@@ -145,8 +180,10 @@ TestVec3D()
 
         UTILS_ASSERT(NearlyEqual(e, r),
                      "operator+(const Vec3D &, const Vec3D &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint(
             "operator+(const Vec3D &, const Vec3D &) test passed\n");
+#endif
     }
 
     {
@@ -157,8 +194,10 @@ TestVec3D()
 
         UTILS_ASSERT(NearlyEqual(e, r),
                      "operator-(const Vec3D &, const Vec3D &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint(
             "operator-(const Vec3D &, const Vec3D &) test passed\n");
+#endif
     }
 
     {
@@ -168,8 +207,10 @@ TestVec3D()
 
         UTILS_ASSERT(NearlyEqual(e, r),
                      "operator*(const Vec3D &, const float &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint(
             "operator*(const Vec3D &, const float &) test passed\n");
+#endif
     }
 
     {
@@ -179,8 +220,10 @@ TestVec3D()
 
         UTILS_ASSERT(NearlyEqual(e, r),
                      "operator/(const Vec3D &, const float &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint(
             "operator/(const Vec3D &, const float &) test passed\n");
+#endif
     }
 }
 
@@ -188,10 +231,11 @@ void
 TestMat3X3()
 {
     using namespace NEngine::Utils;
-
+#if NENGINE_VERBOSE_MATH_TEST
     UtilsDebugPrint("\n==============================\n");
     UtilsDebugPrint("Running tests for Mat3X3\n");
     UtilsDebugPrint("==============================\n");
+#endif
 
     {
         auto mat = Mat3X3();
@@ -209,7 +253,9 @@ TestMat3X3()
         }
 
         UTILS_ASSERT(isIdentity, "Mat3X3() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Mat3X3() test passed\n");
+#endif
     }
 
     {
@@ -223,7 +269,9 @@ TestMat3X3()
         }
 
         UTILS_ASSERT(isPassed, "Mat3X3(float) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Mat3X3(float) test passed\n");
+#endif
     }
 
     {
@@ -235,10 +283,12 @@ TestMat3X3()
                      "Mat3X3(float, float, float,\n"
                      "\tfloat, float, float,\n"
                      "\tfloat, float, float) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint(
             "Mat3X3(float, float, float,\n"
             "\tfloat, float, float,\n"
             "\tfloat, float, float) test passed\n");
+#endif
     }
 
     {
@@ -248,7 +298,9 @@ TestMat3X3()
                          mat(0, 1) == 4 && mat(1, 1) == 5 && mat(2, 1) == 6 &&
                          mat(0, 2) == 7 && mat(1, 2) == 8 && mat(2, 2) == 9,
                      "operator()(size_t, size_t) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("operator()(size_t, size_t) test passed\n");
+#endif
     }
 
     {
@@ -260,7 +312,9 @@ TestMat3X3()
 
         UTILS_ASSERT(v0 == mat[0] && v1 == mat[1] && v2 == mat[2],
                      "operator[](size_t) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("operator[](size_t) test passed\n");
+#endif
     }
 
     {
@@ -269,7 +323,9 @@ TestMat3X3()
         auto e = Mat3X3(10);
         auto r = m0 + m1;
         UTILS_ASSERT(r == e, "Add(const Mat3X3 &, const Mat3X3 &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Add(const Mat3X3 &, const Mat3X3 &) test passed\n");
+#endif
     }
 
     {
@@ -279,8 +335,10 @@ TestMat3X3()
         auto r = m0 - m1;
         UTILS_ASSERT(r == e,
                      "Subtract(const Mat3X3 &, const Mat3X3 &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint(
             "Subtract(const Mat3X3 &, const Mat3X3 &) test passed\n");
+#endif
     }
 
     {
@@ -290,7 +348,9 @@ TestMat3X3()
         auto r = Mat3X3::Mult(scale, rotZ);
         UTILS_ASSERT(r == e,
                      "Mult(const Mat3X3 &, const Mat3X3 &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Mult(const Mat3X3 &, const Mat3X3 &) test passed\n");
+#endif
     }
 
     {
@@ -299,7 +359,9 @@ TestMat3X3()
         auto r = Mat3X3::Mult(m, Vec3D(2, 2, 2));
 
         UTILS_ASSERT(r == e, "Mult(const Mat3X3 &, const Vec3D &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Mult(const Mat3X3 &, const Vec3D &) test passed\n");
+#endif
     }
 
     {
@@ -308,15 +370,20 @@ TestMat3X3()
         auto r = m.Determinant();
 
         UTILS_ASSERT(r == e, "Determinant() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("Determinant() test passed\n");
+#endif
     }
 
     {
         auto m = Mat3X3(4, 4, 7, 2, 1, 8, 8, 6, 9);
         auto e = Mat3X3(4, 2, 8, 4, 1, 6, 7, 8, 9);
         auto r = m.Transpose();
+
         UTILS_ASSERT(e == r, "Transpose() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("Transpose() test passed");
+#endif
     }
 
     {
@@ -335,7 +402,9 @@ TestMat3X3()
         auto ri = r * m;
 
         UTILS_ASSERT(ri == ei, "Inverse() test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("Inverse() test passed");
+#endif
     }
 
     {
@@ -344,7 +413,9 @@ TestMat3X3()
         auto e = Vec3D(0, 0, 1);
         auto r = m * v;
         UTILS_ASSERT(e == r, "RotX(float) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("RotX(float) test passed");
+#endif
     }
 
     {
@@ -352,11 +423,14 @@ TestMat3X3()
         auto v = Vec3D(0, 0, 1);
         auto e = Vec3D(1, 0, 0);
         auto r = m * v;
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("m=%s", m.ToString().c_str());
-        UTILS_PRINTLN("e=%s, r=%s", e.ToString().c_str(),
-                r.ToString().c_str());
+        UTILS_PRINTLN("e=%s, r=%s", e.ToString().c_str(), r.ToString().c_str());
+#endif
         UTILS_ASSERT(e == r, "RotY(float) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("RotY(float) test passed");
+#endif
     }
 
     {
@@ -365,7 +439,9 @@ TestMat3X3()
         auto e = Vec3D(0, 1, 0);
         auto r = m * v;
         UTILS_ASSERT(e == r, "RotZ(float) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("RotZ(float) test passed");
+#endif
     }
 
     {
@@ -375,7 +451,9 @@ TestMat3X3()
         auto r = m1 + m2;
         UTILS_ASSERT(e == r,
                      "operator+(const Mat3X3 &, const Mat3X3 &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("operator+(const Mat3X3 &, const Mat3X3 &) test passed");
+#endif
     }
 
     {
@@ -383,26 +461,41 @@ TestMat3X3()
         const auto m2 = Mat3X3(50);
         const auto e = Mat3X3(-40);
         const auto r = m1 - m2;
-        UTILS_ASSERT(e == r, "operator-(const Mat3X3 &, const Mat3X3 &) test failed");
-
+        UTILS_ASSERT(e == r,
+                     "operator-(const Mat3X3 &, const Mat3X3 &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("operator-(const Mat3X3 &, const Mat3X3 &) test passed");
-    } 
+#endif
+    }
 
     {
         const auto m1 = Mat3X3::RotY(ToRadians(45));
         const auto m2 = Mat3X3::RotY(ToRadians(45));
         const auto e = Vec3D(1, 0, 0);
         const auto r = Mat3X3::Mult(m1 * m2, Vec3D(0, 0, 1));
-        UTILS_ASSERT(e == r, "operator*(const Mat3X3 &, const Mat3X3 &) test failed");
-
+        UTILS_ASSERT(e == r,
+                     "operator*(const Mat3X3 &, const Mat3X3 &) test failed");
+#if NENGINE_VERBOSE_MATH_TEST
         UTILS_PRINTLN("operator*(const Mat3X3 &, const Mat3X3 &) test passed");
-
+#endif
     }
 }
 
 void
 MathTest()
 {
+#if NENGINE_USE_DIRECTXMATH
+    static_assert(sizeof Vec2D == sizeof XMFLOAT2,
+                  "Sizes of Vec2D and XMFLOAT2 does not match!");
+    static_assert(sizeof Vec3D == sizeof XMFLOAT3,
+                  "Sizes of Vec3D and XMFLOAT3 does not match!");
+    static_assert(sizeof Vec4D == sizeof XMFLOAT4,
+                  "Sizes of Vec4D and XMFLOAT4 does not match!");
+    static_assert(sizeof Mat3X3 == sizeof XMFLOAT3X3,
+                  "Sizes of Mat3X3 and XMFLOAT3X3 does not match!");
+    static_assert(sizeof Mat4X4 == sizeof XMFLOAT4X4,
+                  "Sizes of Mat4X4 and XMFLOAT4X4 does not match!");
+#endif
     TestVec3D();
     TestMat3X3();
 }

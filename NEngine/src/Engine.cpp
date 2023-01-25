@@ -10,6 +10,10 @@
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
 
+#if NENGINE_TEST_MATH
+#include "NEngine/Math/MathTest.h"
+#endif
+
 extern "C"
 {
     __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
@@ -271,6 +275,9 @@ Engine *GEngine = nullptr;
 
 Engine::Engine(int argc, const char *argv[])
 {
+#if NENGINE_TEST_MATH
+    Math::MathTest();
+#endif
     UtilsDebugPrint("Engine init with args:\n");
     for (int i = 0; i < argc; ++i) {
         UtilsDebugPrint("[%d]: %s\n", i, argv[i]);

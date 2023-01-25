@@ -7,6 +7,11 @@
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
 
+#if NENGINE_USE_DIRECTXMATH
+#include <DirectXMath.h>
+using namespace DirectX;
+#endif
+
 namespace NEngine::Math {
 
 Mat3X3::Mat3X3()
@@ -46,6 +51,15 @@ Mat3X3::operator()(size_t i, size_t j) const
 Mat3X3
 Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
 {
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat =
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) +
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
+    auto ret = Mat3X3();
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret.mData),
+                    XMMatrixTranspose(mat));
+    return ret;
+#else
     auto ret = Mat3X3();
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
@@ -53,6 +67,7 @@ Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
         }
     }
     return ret;
+#endif
 }
 
 Mat3X3
@@ -191,23 +206,6 @@ Mat3X3::Inverse() const
     return (1 / det) * ret;
 }
 
-std::string
-Mat3X3::ToString() const
-{
-    std::ostringstream out;
-    const auto &self = *this;
-
-    out << std::fixed << std::setprecision(4) << "\n"
-        << std::setw(4) << self(0, 0) << ' ' << std::setw(4) << self(0, 1)
-        << ' ' << std::setw(4) << self(0, 2) << "\n"
-        << std::setw(4) << self(1, 0) << ' ' << std::setw(4) << self(1, 1)
-        << ' ' << std::setw(4) << self(1, 2) << "\n"
-        << std::setw(4) << self(2, 0) << ' ' << std::setw(4) << self(2, 1)
-        << ' ' << std::setw(4) << self(2, 2);
-
-    return out.str();
-}
-
 Mat3X3
 Mat3X3::RotX(float phi)
 {
@@ -293,4 +291,22 @@ operator*(const Mat3X3 &lhs, const Vec3D &rhs)
 {
     return Mat3X3::Mult(lhs, rhs);
 }
+
+std::string
+Mat3X3::ToString() const
+{
+    std::ostringstream out;
+    const auto &self = *this;
+
+    out << std::fixed << std::setprecision(4) << "\n"
+        << std::setw(4) << self(0, 0) << ' ' << std::setw(4) << self(0, 1)
+        << ' ' << std::setw(4) << self(0, 2) << "\n"
+        << std::setw(4) << self(1, 0) << ' ' << std::setw(4) << self(1, 1)
+        << ' ' << std::setw(4) << self(1, 2) << "\n"
+        << std::setw(4) << self(2, 0) << ' ' << std::setw(4) << self(2, 1)
+        << ' ' << std::setw(4) << self(2, 2);
+
+    return out.str();
+}
+
 }  // namespace NEngine::Math
