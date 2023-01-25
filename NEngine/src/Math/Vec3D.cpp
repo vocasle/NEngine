@@ -5,6 +5,11 @@
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
 
+#if NENGINE_USE_DIRECTXMATH
+#include <DirectXMath.h>
+using namespace DirectX;
+#endif
+
 namespace NEngine::Math {
 std::string
 Vec3D::ToString() const
@@ -35,26 +40,52 @@ Vec3D::Length() const
 Vec3D
 Vec3D::Cross(const Vec3D &lhs, const Vec3D &rhs)
 {
+#if NENGINE_USE_DIRECTXMATH
+    const auto vec =
+        XMVector3Cross(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)),
+                       XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)));
+    auto ret = Vec3D();
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+    return ret;
+#else
     return {lhs.Y * rhs.Z - lhs.Z * rhs.Y,
             lhs.Z * rhs.X - lhs.X * rhs.Z,
             lhs.X * rhs.Y - lhs.Y * rhs.X};
+#endif
 }
 
 float
 Vec3D::Dot(const Vec3D &lhs, const Vec3D &rhs)
 {
+#if NENGINE_USE_DIRECTXMATH
+    const auto vec =
+        XMVector3Dot(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)),
+                     XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)));
+    auto ret = 0.0f;
+    XMStoreFloat(&ret, vec);
+    return ret;
+#else
     return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z;
+#endif
 }
 
 Vec3D
 Vec3D::Normalize() const
 {
+#if NENGINE_USE_DIRECTXMATH
+    const auto vec = XMVector3Normalize(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(this)));
+    auto ret = Vec3D();
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+    return ret;
+#else
     auto ret = *this;
     const auto length = Length();
     if (length != 0) {
         ret = ret / length;
     }
     return ret;
+#endif
 }
 
 bool
@@ -73,19 +104,45 @@ Vec3D::operator!=(const Vec3D &rhs) const
 Vec3D
 operator+(const Vec3D &lhs, const Vec3D &rhs)
 {
+#if NENGINE_USE_DIRECTXMATH
+    auto ret = Vec3D();
+    const auto vec =
+        XMVectorAdd(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)),
+                    XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)));
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+    return ret;
+#else
     return {lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z};
+#endif
 }
 
 Vec3D
 operator-(const Vec3D &lhs, const Vec3D &rhs)
 {
+#if NENGINE_USE_DIRECTXMATH
+    auto ret = Vec3D();
+    const auto vec = XMVectorSubtract(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)),
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)));
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+    return ret;
+#else
     return {lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z};
+#endif
 }
 
 Vec3D
 operator*(const Vec3D &lhs, const float s)
 {
+#if NENGINE_USE_DIRECTXMATH
+    auto ret = Vec3D();
+    const auto vec = XMVectorScale(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)), s);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+    return ret;
+#else
     return {lhs.X * s, lhs.Y * s, lhs.Z * s};
+#endif
 }
 
 Vec3D
@@ -103,24 +160,22 @@ operator/(const Vec3D &lhs, const float s)
 float
 Vec3D::operator[](size_t i) const
 {
-    UTILS_ASSERT(i < 3, "Invalid index");
-    if (i == 0)
-        return X;
-    else if (i == 1)
-        return Y;
-    else
-        return Z;
+    return operator[](i);
 }
+
 float &
 Vec3D::operator[](size_t i)
 {
-    UTILS_ASSERT(i < 3, "Invalid index");
-    if (i == 0)
-        return X;
-    else if (i == 1)
-        return Y;
-    else
-        return Z;
+    switch (i) {
+        case 0:
+            return X;
+        case 1:
+            return Y;
+        case 2:
+            return Z;
+        default:
+            throw std::invalid_argument("Invalid subscript");
+    }
 }
 
 }  // namespace NEngine::Math
