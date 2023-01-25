@@ -36,9 +36,8 @@ using namespace NEngine::ECS::Systems;
 using namespace NEngine;
 
 #if WITH_IMGUI
-
 void
-PrintComponents(const GameObject &go)
+MyGame::PrintComponents(const GameObject &go) const
 {
     if ((go.ComponentMask & ComponentType_CAMERA) == ComponentType_CAMERA) {
         ImGui::Text("\tCAMERA");
@@ -56,6 +55,28 @@ PrintComponents(const GameObject &go)
         ComponentType_COLLISION) {
         ImGui::Text("\tCOLLISION");
     }
+    if ((go.ComponentMask & ComponentType_AUDIO) ==
+        ComponentType_AUDIO) {
+        ImGui::Text("\tAUDIO");
+    }
+
+    UTILS_ASSERT(
+        mEntityManager.Bitmask<CameraComponent> == ComponentType_CAMERA,
+        "Bitmask does not match");
+    UTILS_ASSERT(
+        mEntityManager.Bitmask<PositionComponent> == ComponentType_POSITION,
+        "Bitmask does not match");
+    UTILS_ASSERT(
+        mEntityManager.Bitmask<RenderComponent> == ComponentType_RENDER,
+        "Bitmask does not match");
+    UTILS_ASSERT(mEntityManager.Bitmask<InputComponent> == ComponentType_INPUT,
+                 "Bitmask does not match");
+    UTILS_ASSERT(
+        mEntityManager.Bitmask<CollisionComponent> == ComponentType_COLLISION,
+        "Bitmask does not match");
+    UTILS_ASSERT(
+        mEntityManager.Bitmask<AudioComponent> == ComponentType_AUDIO,
+        "Bitmask does not match");
 }
 
 void
@@ -126,7 +147,7 @@ MyGame::UpdateImgui()
     if (ImGui::Begin("Scene")) {
         if (ImGui::CollapsingHeader("Graph")) {
             mScene.Visit(
-                [](const GameObject &go) -> void
+                [this](const GameObject &go) -> void
                 {
                     ImGui::Text("%s", go.Name.c_str());
                     PrintComponents(go);
@@ -217,33 +238,40 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
 
     CreatePlayer();
 
-    auto plane = mEntityManager.CreateEntity();
-    auto &planeMesh = mEntityManager.CreateComponent<RenderComponent>(plane);
-    planeMesh.Mesh = mEngine->LoadMesh(
-        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\plane.glb"));
-    auto &planePos = mEntityManager.CreateComponent<PositionComponent>(plane);
-    planePos.Movable = false;
-    mScene.AddToScene({plane, "Ground", mEntityManager.GetBitmask(plane)});
+    {
+        auto plane = mEntityManager.CreateEntity();
+        auto &planeMesh =
+            mEntityManager.CreateComponent<RenderComponent>(plane);
+        planeMesh.Mesh = mEngine->LoadMesh(
+            UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\plane.glb"));
+        auto &planePos =
+            mEntityManager.CreateComponent<PositionComponent>(plane);
+        planePos.Movable = false;
+        mScene.AddToScene({plane, "Ground", mEntityManager.GetBitmask(plane)});
+    }
 
-    auto obj = mEntityManager.CreateEntity();
-    auto &objMesh = mEntityManager.CreateComponent<RenderComponent>(obj);
-    objMesh.Mesh = mEngine->LoadMesh(
-        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\cube.glb"));
-    auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
-    objPos.Position = {5, 2, 5};
-    objPos.Movable = false;
+    {
+        auto obj = mEntityManager.CreateEntity();
+        auto &objMesh = mEntityManager.CreateComponent<RenderComponent>(obj);
+        objMesh.Mesh = mEngine->LoadMesh(
+            UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\cube.glb"));
+        auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
+        objPos.Position = {5, 2, 5};
+        objPos.Movable = false;
 
-    auto &ac = mEntityManager.CreateComponent<AudioComponent>(obj);
-    ac.IsPlaying = false;
-    ac.Path = UtilsFormatStr("%s/audio/GenericMale_VoicePack/Frustraion_3.wav",
-                             GAME_RES_DIR);
+        auto &ac = mEntityManager.CreateComponent<AudioComponent>(obj);
+        ac.IsPlaying = false;
+        ac.Path = UtilsFormatStr(
+            "%s/audio/GenericMale_VoicePack/Frustraion_3.wav", GAME_RES_DIR);
 
-    auto &dbgCubeCol = mEntityManager.CreateComponent<CollisionComponent>(obj);
-    dbgCubeCol.BoxMin = vec3(-0.5f, -0.5f, -0.5f);
-    dbgCubeCol.BoxMax = vec3(0.5f, 0.5f, 0.5f);
-    dbgCubeCol.OnCollision = [&ac](Entity lhs, Entity rhs)
-    { ac.IsPlaying = true; };
-    mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
+        auto &dbgCubeCol =
+            mEntityManager.CreateComponent<CollisionComponent>(obj);
+        dbgCubeCol.BoxMin = vec3(-0.5f, -0.5f, -0.5f);
+        dbgCubeCol.BoxMax = vec3(0.5f, 0.5f, 0.5f);
+        dbgCubeCol.OnCollision = [&ac](Entity lhs, Entity rhs)
+        { ac.IsPlaying = true; };
+        mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
+    }
 }
 
 auto

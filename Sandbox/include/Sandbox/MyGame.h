@@ -26,6 +26,7 @@ public:
     virtual auto InitWithEngine(NEngine::Engine &engine) -> void override;
 
 private:
+    void PrintComponents(const NEngine::ECS::GameObject &go) const;
     void Update();
     void Render();
 
