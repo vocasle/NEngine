@@ -42,7 +42,15 @@ Vec3D::Vec3D()
 float
 Vec3D::Length() const
 {
+#if NENGINE_USE_DIRECTXMATH
+    auto len = 0.0f;
+    const auto vec =
+        XMVector3Length(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(this)));
+    XMStoreFloat(&len, vec);
+    return len;
+#else
     return sqrtf(X * X + Y * Y + Z * Z);
+#endif
 }
 
 Vec3D
@@ -182,7 +190,8 @@ Vec3D::operator[](size_t i)
         case 2:
             return Z;
         default:
-            throw std::invalid_argument("Invalid subscript");
+            throw std::invalid_argument(
+                Utils::UtilsFormatStr("%llu is out of bounds", i));
     }
 }
 

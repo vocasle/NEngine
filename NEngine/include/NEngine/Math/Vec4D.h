@@ -15,8 +15,13 @@ struct Vec4D
     Vec4D &operator=(const Vec4D &rhs) = default;
     Vec4D &operator=(Vec4D &&rhs) noexcept = default;
     bool operator==(const Vec4D &rhs) const;
+    float operator[](size_t i) const;
+    float &operator[](size_t i);
+    Vec3D ToVec3D() const;
+    Vec4D Normalize() const;
 
     std::string ToString() const;
+    float Length() const;
 
     float X;
     float Y;
@@ -29,5 +34,4 @@ Vec4D operator-(const Vec4D &lhs, const Vec4D &rhs);
 Vec4D operator*(const Vec4D &lhs, const float s);
 Vec4D operator*(const float s, const Vec4D &rhs);
 Vec4D operator/(const Vec4D &lhs, const float s);
-Vec4D operator/(const float s, const Vec4D &rhs);
 }  // namespace NEngine::Math
