@@ -1,100 +1,61 @@
 #pragma once
 
 #include <string>
+
 #include "Vec4D.h"
 
 namespace NEngine::Math {
-struct Mat4X4
+class Mat4X4
 {
-    Mat4X4()
-        : Mat4X4(0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f)
-    {
-    }
+public:
+    Mat4X4();
+    explicit Mat4X4(float n);
+    Mat4X4(float v0x,
+           float v0y,
+           float v0z,
+           float v0w,
+           float v1x,
+           float v1y,
+           float v1z,
+           float v1w,
+           float v2x,
+           float v2y,
+           float v2z,
+           float v2w,
+           float v3x,
+           float v3y,
+           float v3z,
+           float v3w);
 
-    Mat4X4(float a00,
-           float a01,
-           float a02,
-           float a03,
-           float a10,
-           float a11,
-           float a12,
-           float a13,
-           float a20,
-           float a21,
-           float a22,
-           float a23,
-           float a30,
-           float a31,
-           float a32,
-           float a33)
-        : A00{a00},
-          A01{a01},
-          A02{a02},
-          A03{a03},
-          A10{a10},
-          A11{a11},
-          A12{a12},
-          A13{a13},
-          A20{a20},
-          A21{a21},
-          A22{a22},
-          A23{a23},
-          A30{a30},
-          A31{a31},
-          A32{a32},
-          A33{a33}
-    {
-    }
+    float &operator()(size_t i, size_t j);
+    float operator()(size_t i, size_t j) const;
+    Vec4D operator[](size_t i) const;
 
-    Mat4X4(const float *data)
-        : Mat4X4(data[0],
-                 data[1],
-                 data[2],
-                 data[3],
-                 data[4],
-                 data[5],
-                 data[6],
-                 data[7],
-                 data[8],
-                 data[9],
-                 data[10],
-                 data[11],
-                 data[12],
-                 data[13],
-                 data[14],
-                 data[15])
-    {
-    }
+    static Mat4X4 Add(const Mat4X4 &lhs, const Mat4X4 &rhs);
+    static Mat4X4 Subtract(const Mat4X4 &lhs, const Mat4X4 &rhs);
+    static Mat4X4 Mult(const Mat4X4 &lhs, const Mat4X4 &rhs);
+    static Mat4X4 Mult(const Mat4X4 &lhs, float s);
+    static Vec4D Mult(const Mat4X4 &lhs, const Vec4D &rhs);
+    float Determinant() const;
+    Mat4X4 Inverse() const;
+    Mat4X4 Transpose() const;
 
-    union
-    {
-        struct
-        {
-            float A00, A01, A02, A03;
-            float A10, A11, A12, A13;
-            float A20, A21, A22, A23;
-            float A30, A31, A32, A33;
-        };
+    static Mat4X4 RotX(float phi);
+    static Mat4X4 RotY(float phi);
+    static Mat4X4 RotZ(float phi);
 
-        Vec4D V[4];
-        float A[4][4];
-    };
     std::string ToString() const;
-    bool operator==(const Mat4X4 &rhs) const;
+
+private:
+    float mData[4][4];
 };
+
+Mat4X4 operator+(const Mat4X4 &lhs, const Mat4X4 &rhs);
+Mat4X4 operator-(const Mat4X4 &lhs, const Mat4X4 &rhs);
+Mat4X4 operator*(const Mat4X4 &lhs, const Mat4X4 &rhs);
+Mat4X4 operator*(const Mat4X4 &lhs, float s);
+Mat4X4 operator*(float s, const Mat4X4 &rhs);
+Mat4X4 operator/(const Mat4X4 &lhs, float s);
+Vec4D operator*(const Mat4X4 &lhs, const Vec4D &rhs);
+bool operator==(const Mat4X4 &lhs, const Mat4X4 &rhs);
 }  // namespace NEngine::Math

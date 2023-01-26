@@ -40,11 +40,13 @@ Mat3X3::Mat3X3(float v0x,
 float &
 Mat3X3::operator()(size_t i, size_t j)
 {
+    UTILS_ASSERT(i < 3 && j < 3, "i and j must be in range [0, 3)");
     return mData[i][j];
 }
 float
 Mat3X3::operator()(size_t i, size_t j) const
 {
+    UTILS_ASSERT(i < 3 && j < 3, "i and j must be in range [0, 3)");
     return mData[i][j];
 }
 
@@ -58,7 +60,6 @@ Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
     XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
                     XMMatrixTranspose(mat));
-    return ret;
 #else
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
@@ -303,6 +304,7 @@ Mat3X3::RotY(float phi)
 Vec3D
 Mat3X3::operator[](size_t i) const
 {
+    UTILS_ASSERT(i < 3, "i must be in range [0, 3)");
     return {
         this->operator()(0, i), this->operator()(1, i), this->operator()(2, i)};
 }
@@ -348,11 +350,6 @@ Mat3X3
 operator/(const Mat3X3 &lhs, float s)
 {
     return lhs * (1 / s);
-}
-Mat3X3
-operator/(float s, const Mat3X3 &rhs)
-{
-    return rhs / s;
 }
 Vec3D
 operator*(const Mat3X3 &lhs, const Vec3D &rhs)

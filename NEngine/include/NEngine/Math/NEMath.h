@@ -180,8 +180,6 @@ float MathRandom(float min, float max);
 
 Mat4X4 MathQuaternionToRotationMat(const Vec4D &quat);
 
-Mat4X4 operator*(const Mat4X4 &lhs, const Mat4X4 &rhs);
-
 Vec3D MathVec3DSubtraction(const Vec3D &vec1, const Vec3D &vec2);
 
 Vec4D MathVec4DAddition(const Vec4D &vec1, const Vec4D &vec2);

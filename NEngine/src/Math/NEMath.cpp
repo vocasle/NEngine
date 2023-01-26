@@ -968,11 +968,6 @@ MathTest(void)
 #endif
 
 #ifdef __cplusplus
-Mat4X4
-operator*(const Mat4X4 &lhs, const Mat4X4 &rhs)
-{
-    return MathMat4X4MultMat4X4ByMat4X4(&lhs, &rhs);
-}
 
 Vec3D
 MathVec3DSubtraction(const Vec3D &vec1, const Vec3D &vec2)

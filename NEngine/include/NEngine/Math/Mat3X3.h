@@ -48,7 +48,6 @@ Mat3X3 operator*(const Mat3X3 &lhs, const Mat3X3 &rhs);
 Mat3X3 operator*(const Mat3X3 &lhs, float s);
 Mat3X3 operator*(float s, const Mat3X3 &rhs);
 Mat3X3 operator/(const Mat3X3 &lhs, float s);
-Mat3X3 operator/(float s, const Mat3X3 &rhs);
 Vec3D operator*(const Mat3X3 &lhs, const Vec3D &rhs);
 bool operator==(const Mat3X3 &lhs, const Mat3X3 &rhs);
 }  // namespace NEngine::Math
