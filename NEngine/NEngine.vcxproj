@@ -163,9 +163,9 @@
     <ClCompile Include="src\Input\Mouse.cpp" />
     <ClCompile Include="src\Math\Mat3X3.cpp" />
     <ClCompile Include="src\Math\Mat4X4.cpp" />
-    <ClCompile Include="src\Math\NEMath.cpp" />
     <ClCompile Include="src\Math\MathTest.cpp" />
     <ClCompile Include="src\Math\MathUtils.cpp" />
+    <ClCompile Include="src\Math\NEMath.cpp" />
     <ClCompile Include="src\Math\Vec2D.cpp" />
     <ClCompile Include="src\Math\Vec3D.cpp" />
     <ClCompile Include="src\Math\Vec4D.cpp" />

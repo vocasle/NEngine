@@ -57,11 +57,11 @@ RenderSystem::Update(float dt) -> void
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
         for (auto &mesh : rc.Mesh) {
             // TODO: world matrix should be precomputed somewhere else.
-            auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
+            auto translate = Mat4X4::Translate(pc.Position);
             auto axis = vec3(0, 1, 0);
-            auto rotate = XM::RotateAxis(ToRadians(pc.Yaw), axis);
+            auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
             auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
-            auto scale = MathMat4X4ScaleFromVec3D(&scales);
+            auto scale = Mat4X4::Scale(scales);
             mesh->GetTransform().SetWorld(scale * rotate * translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
@@ -74,8 +74,8 @@ RenderSystem::Update(float dt) -> void
             for (auto &mesh : COLLISION_MESH) {
                 auto &t = mesh->GetTransform();
                 // t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
-                t.SetWorld(MathMat4X4ScaleFromVec3D(&scale) *
-                           MathMat4X4TranslateFromVec3D(&position));
+                t.SetWorld(Mat4X4::Scale(scale) *
+                           Mat4X4::Translate(position));
             }
             mPasses[0]->Draw(*mDeviceResources, COLLISION_MESH);
         }

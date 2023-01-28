@@ -33,11 +33,11 @@ GetNodeTransform(const tinygltf::Node &node)
     }
     else {
         if (!node.rotation.empty()) {
-            const auto rot = MathQuaternionToRotationMat(
-                Vec4D(static_cast<float>(node.rotation[0]),
-                      static_cast<float>(node.rotation[1]),
-                      static_cast<float>(node.rotation[2]),
-                      static_cast<float>(node.rotation[3])));
+            const auto rot =
+                QuatToMat(Vec4D(static_cast<float>(node.rotation[0]),
+                                static_cast<float>(node.rotation[1]),
+                                static_cast<float>(node.rotation[2]),
+                                static_cast<float>(node.rotation[3])));
 
             t.SetRotation(rot);
         }
@@ -45,13 +45,13 @@ GetNodeTransform(const tinygltf::Node &node)
             const Vec3D offset(static_cast<float>(node.translation[0]),
                                static_cast<float>(node.translation[1]),
                                static_cast<float>(node.translation[2]));
-            t.SetTranslation(MathMat4X4TranslateFromVec3D(&offset));
+            t.SetTranslation(Mat4X4::Translate(offset));
         }
         if (!node.scale.empty()) {
             const Vec3D scale(static_cast<float>(node.scale[0]),
                               static_cast<float>(node.scale[1]),
                               static_cast<float>(node.scale[2]));
-            t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
+            t.SetScale(Mat4X4::Scale(scale));
         }
     }
 
@@ -427,7 +427,8 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                          material.occlusionTexture.index,
                                          TextureBindTarget::ShaderResourceView,
                                          3);
-            tmpMaterial.OcclusionStrength = static_cast<float>(material.occlusionTexture.strength);
+            tmpMaterial.OcclusionStrength =
+                static_cast<float>(material.occlusionTexture.strength);
         }
 
         if (material.emissiveTexture.index >= 0) {
@@ -435,9 +436,10 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                         material.emissiveTexture.index,
                                         TextureBindTarget::ShaderResourceView,
                                         4);
-            tmpMaterial.EmissiveFactor = Vec3D(static_cast<float>(material.emissiveFactor[0]),
-                                               static_cast<float>(material.emissiveFactor[1]),
-                                               static_cast<float>(material.emissiveFactor[2]));
+            tmpMaterial.EmissiveFactor =
+                Vec3D(static_cast<float>(material.emissiveFactor[0]),
+                      static_cast<float>(material.emissiveFactor[1]),
+                      static_cast<float>(material.emissiveFactor[2]));
         }
     }
 

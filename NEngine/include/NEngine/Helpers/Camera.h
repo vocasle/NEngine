@@ -69,7 +69,7 @@ public:
     Input::Mouse::MouseEventListener mMouseListener;
     Math::Vec2D mPrevMousePos;
     Math::Vec2D mCurMousePos;
-    Math::Mat4X4 mViewMat = Math::MathMat4X4Identity();
+    Math::Mat4X4 mViewMat;
 };
 }  // namespace Helpers
 }  // namespace NEngine

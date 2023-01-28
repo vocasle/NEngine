@@ -26,13 +26,6 @@ Transform::GetTransform() const
     return mScale * mRotation * mTranslation;
 }
 
-Transform::Transform()
-    : mTranslation(MathMat4X4Identity()),
-      mRotation(MathMat4X4Identity()),
-      mScale(MathMat4X4Identity())
-{
-}
-
 void
 Transform::SetTranslation(const Math::Mat4X4 &translation)
 {
@@ -57,7 +50,7 @@ Transform::Translate(float x, float y, float z)
 void
 Transform::Translate(const Math::Vec3D &offset)
 {
-    mTranslation = MathMat4X4TranslateFromVec3D(&offset);
+    mTranslation = Mat4X4::Translate(offset);
 }
 
 void
@@ -69,14 +62,14 @@ Transform::Rotate(float pitch, float roll, float yaw)
 void
 Transform::Rotate(const Math::Vec3D &angles)
 {
-    mRotation = MathMat4X4RotateFromVec3D(&angles);
+    mRotation = Mat4X4::Rotate(angles);
 }
 
 void
 Transform::Scale(float factor)
 {
     const Vec3D scale(factor, factor, factor);
-    mScale = MathMat4X4ScaleFromVec3D(&scale);
+    mScale = Mat4X4::Scale(scale);
 }
 void
 Transform::SetWorld(const Math::Mat4X4 &world)

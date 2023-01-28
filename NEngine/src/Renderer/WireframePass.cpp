@@ -42,8 +42,7 @@ WireframePass::Draw(
     for (auto &mesh : meshes) {
         const auto world = mesh->GetTransform().GetWorld();
         mPerObjectBuffer->SetValue("world", world);
-        auto invWorld = MathMat4X4Inverse(world);
-        MathMat4X4Transpose(&invWorld);
+        const auto invWorld = world.Inverse().Transpose();
         mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
         for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {

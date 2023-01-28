@@ -6,8 +6,6 @@ namespace NEngine::Helpers {
 class Transform
 {
 public:
-    Transform();
-
     const Math::Mat4X4 &GetTranslation() const;
     const Math::Mat4X4 &GetRotation() const;
     const Math::Mat4X4 &GetScale() const;

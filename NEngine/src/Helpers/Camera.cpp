@@ -40,7 +40,7 @@ Camera::SetupMouseListener()
     {
         auto fov = ToDegrees(m_fov);
         fov = fov - 5 * mouseOffset;
-        fov = MathClamp(30, 120, fov);
+        fov = Clamp(30.0f, 120.0f, fov);
         m_fov = ToRadians(fov);
     };
     Mouse::Get().SetMouseEventListener(mMouseListener);
@@ -48,14 +48,14 @@ Camera::SetupMouseListener()
 
 Camera::Camera(const Vec3D &cameraPos)
     : m_Pitch(0),
-      m_Yaw(MathToRadians(0)),
+      m_Yaw(ToRadians(0)),
       m_Pos(cameraPos),
       m_Speed(1),
       m_backBufferWidth(0),
       m_backBufferHeight(0),
       m_zNear(1),
       m_zFar(100),
-      m_fov(MathToRadians(45)),
+      m_fov(ToRadians(45)),
       mOriginalPos(cameraPos)
 {
     UpdateVectors();
@@ -92,35 +92,13 @@ Camera::~Camera()
 Mat4X4
 Camera::GetViewMat() const
 {
-    // auto dir = vec3();
-    // dir.X = cos(ToRadians(-m_Yaw)) * cos(ToRadians(0));
-    // dir.Y = sin(ToRadians(0));
-    // dir.Z = sin(ToRadians(-m_Yaw)) * cos(ToRadians(0));
-
-    // auto at = dir.Normalize();
-    // auto at = -1 * (m_Pos - m_At);
-
-    // MathMat4X4TranslateFromVec3D(&m_Pos);
-
-    // return MathMat4X4TranslateFromVec3D(&at)
-    //      /** RotateAxis(m_Yaw, vec3(0, 1, 0))*/;
-
-    auto ret = MathMat4X4Identity();
-
-    auto eyePos = XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&m_Pos));
-    auto focusPos = XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&m_At));
-    auto up = XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&m_Up));
-
-    auto tmp = XMMatrixLookAtRH(XMVectorAdd(eyePos, focusPos), focusPos, up);
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret.A00), tmp);
-
-    return ret;
+    return Math::LookAt(m_Pos + m_At, m_At, m_Up);
 }
 
 Mat4X4
 Camera::GetProjMat() const
 {
-    return MathMat4X4PerspectiveFov(
+    return PerspectiveFov(
         m_fov, m_backBufferWidth / m_backBufferHeight, m_zNear, m_zFar);
 }
 
@@ -134,7 +112,7 @@ Camera::UpdateSpeed()
         m_Speed -= 0.5f;
     }
 
-    m_Speed = MathClamp(0.1f, 100.0f, m_Speed);
+    m_Speed = Clamp(0.1f, 100.0f, m_Speed);
 }
 
 void
@@ -208,16 +186,12 @@ Camera::UpdateVectors()
     const float z = d * sinf(m_Yaw);
     const float y = sinf(m_Pitch);
 
-    Vec3D direction = {x, y, z};
-    MathVec3DNormalize(&direction);
+    const Vec3D direction = vec3(x, y, z).Normalize();
 
     m_At = direction;
-    MathVec3DNormalize(&m_At);
     const Vec3D worldUp = {0.0f, 1.0f, 0.0f};
-    m_Right = MathVec3DCross(&worldUp, &m_At);
-    MathVec3DNormalize(&m_Right);
-    m_Up = MathVec3DCross(&m_At, &m_Right);
-    MathVec3DNormalize(&m_Up);
+    m_Right = Vec3D::Cross(worldUp, m_At).Normalize();
+    m_Up = Vec3D::Cross(m_At, m_Right).Normalize();
 }
 
 void
@@ -234,7 +208,7 @@ Camera::ProcessMouse(double deltaMillis)
     static const float MAX_PITCH = (float)(M_PI_2 - 0.1);
     m_Yaw += mouseDelta.X * MOUSE_SENSITIVITY * (float)deltaMillis;
     m_Pitch += mouseDelta.Y * MOUSE_SENSITIVITY * (float)deltaMillis;
-    m_Pitch = MathClamp(-MAX_PITCH, MAX_PITCH, m_Pitch);
+    m_Pitch = Clamp(-MAX_PITCH, MAX_PITCH, m_Pitch);
 
     // static float xLastPos = 0;
     // static float yLastPos = 0;
@@ -292,7 +266,7 @@ Camera::LookAt(const Vec3D &pos, const Vec3D &target, const Vec3D &up)
 void
 Camera::SetFov(float fov)
 {
-    m_fov = MathToRadians(fov);
+    m_fov = ToRadians(fov);
 }
 
 void
@@ -322,10 +296,10 @@ void
 Camera::ResetCamera()
 {
     m_Pitch = 0;
-    m_Yaw = MathToRadians(-90);
+    m_Yaw = ToRadians(-90);
     m_Pos = mOriginalPos;
     m_Speed = 1;
-    m_fov = MathToRadians(45);
+    m_fov = ToRadians(45);
 }
 
 void

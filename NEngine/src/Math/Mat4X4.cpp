@@ -1,5 +1,9 @@
 #include "NEngine/Math/Mat4X4.h"
 
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Utils/Utils.h"
 
@@ -188,6 +192,72 @@ Mat4X4::RotZ(float phi)
                     XMMatrixTranspose(XMMatrixRotationZ(phi)));
 #endif
     return ret;
+}
+
+Mat4X4
+Mat4X4::Translate(const Vec3D &v)
+{
+    auto ret = Mat4X4();
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat = XMMatrixTranslationFromVector(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&v)));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
+                    XMMatrixTranspose(mat));
+#endif
+    return ret;
+}
+
+Mat4X4
+Mat4X4::Scale(const Vec3D &v)
+{
+    auto ret = Mat4X4();
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat = XMMatrixScalingFromVector(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&v)));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
+                    XMMatrixTranspose(mat));
+#endif
+    return ret;
+}
+
+Mat4X4
+Mat4X4::Rotate(const Vec3D &eulerAngles)
+{
+    auto ret = Mat4X4();
+#if NENGINE_USE_DIRECTXMATH
+    const auto mat = XMMatrixRotationRollPitchYawFromVector(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&eulerAngles)));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
+                    XMMatrixTranspose(mat));
+#endif
+    return ret;
+}
+
+std::string
+Mat4X4::ToString() const
+{
+    std::ostringstream out;
+    const auto &self = *this;
+
+    out << std::fixed << std::setprecision(4) << "\n"
+
+        << std::setw(4) << self(0, 0) << ' ' << std::setw(4) << self(0, 1)
+        << ' ' << std::setw(4) << self(0, 2) << ' ' << std::setw(4)
+        << self(0, 3) << "\n"
+
+        << std::setw(4) << self(1, 0) << ' ' << std::setw(4) << self(1, 1)
+        << ' ' << std::setw(4) << self(1, 2) << ' ' << std::setw(4)
+        << self(1, 3) << "\n"
+
+        << std::setw(4) << self(2, 0) << ' ' << std::setw(4) << self(2, 1)
+        << ' ' << std::setw(4) << self(2, 2) << ' ' << std::setw(4)
+        << self(2, 3) << "\n"
+
+        << std::setw(4) << self(3, 0) << ' ' << std::setw(4) << self(3, 1)
+        << ' ' << std::setw(4) << self(3, 2) << ' ' << std::setw(4)
+        << self(3, 3) << "\n";
+
+    return out.str();
 }
 
 Mat4X4

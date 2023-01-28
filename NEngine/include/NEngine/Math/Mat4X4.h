@@ -44,6 +44,10 @@ public:
     static Mat4X4 RotY(float phi);
     static Mat4X4 RotZ(float phi);
 
+    static Mat4X4 Translate(const Vec3D &v);
+    static Mat4X4 Scale(const Vec3D &v);
+    static Mat4X4 Rotate(const Vec3D &eulerAngles);
+
     std::string ToString() const;
 
 private:
