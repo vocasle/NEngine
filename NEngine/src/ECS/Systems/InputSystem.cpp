@@ -59,11 +59,11 @@ InputSystem::Update(float dt) -> void
 
         mAngles.Pitch += yoffset;
         mAngles.Yaw += xoffset;
-        UTILS_PRINTLN("prev_pos=%s, pos=%s",
-                      mPrevMousePos.ToString().c_str(),
-                      mMousePos.ToString().c_str());
-        UTILS_PRINTLN("xoffset=%f", xoffset);
-        UTILS_PRINTLN("yaw=%f", mAngles.Yaw);
+        //UTILS_PRINTLN("prev_pos=%s, pos=%s",
+        //              mPrevMousePos.ToString().c_str(),
+        //              mMousePos.ToString().c_str());
+        //UTILS_PRINTLN("xoffset=%f", xoffset);
+        //UTILS_PRINTLN("yaw=%f", mAngles.Yaw);
 
         if (mAngles.Pitch > 89.0f)
             mAngles.Pitch = 89.0f;
