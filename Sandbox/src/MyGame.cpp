@@ -55,8 +55,7 @@ MyGame::PrintComponents(const GameObject &go) const
         ComponentType_COLLISION) {
         ImGui::Text("\tCOLLISION");
     }
-    if ((go.ComponentMask & ComponentType_AUDIO) ==
-        ComponentType_AUDIO) {
+    if ((go.ComponentMask & ComponentType_AUDIO) == ComponentType_AUDIO) {
         ImGui::Text("\tAUDIO");
     }
 
@@ -71,7 +70,7 @@ MyGame::PrintComponents(const GameObject &go) const
         "Bitmask does not match");
     UTILS_ASSERT(
         mEntityManager.Bitmask<InputComponent>() == ComponentType_INPUT,
-                 "Bitmask does not match");
+        "Bitmask does not match");
     UTILS_ASSERT(
         mEntityManager.Bitmask<CollisionComponent>() == ComponentType_COLLISION,
         "Bitmask does not match");
@@ -260,17 +259,11 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
         objPos.Position = {5, 2, 5};
         objPos.Movable = false;
 
-        auto &ac = mEntityManager.CreateComponent<AudioComponent>(obj);
-        ac.IsPlaying = false;
-        ac.Path = UtilsFormatStr(
-            "%s/audio/GenericMale_VoicePack/Frustraion_3.wav", GAME_RES_DIR);
-
         auto &dbgCubeCol =
             mEntityManager.CreateComponent<CollisionComponent>(obj);
-        dbgCubeCol.BoxMin = vec3(-0.5f, -0.5f, -0.5f);
-        dbgCubeCol.BoxMax = vec3(0.5f, 0.5f, 0.5f);
-        dbgCubeCol.OnCollision = [&ac](Entity lhs, Entity rhs)
-        { ac.IsPlaying = true; };
+        dbgCubeCol.Center = objPos.Position;
+        dbgCubeCol.Size = vec3(3);
+
         mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
     }
 }
@@ -307,8 +300,8 @@ MyGame::CreatePlayer() -> void
     camComp.Camera.SetViewDimensions(winSize.X, winSize.Y);
     pos.Movable = true;
     auto &cc = mEntityManager.CreateComponent<CollisionComponent>(player);
-    cc.BoxMin = vec3(-1, -1, -1);
-    cc.BoxMax = vec3(1, 1, 1);
+    cc.Center = pos.Position;
+    cc.Size = vec3(1);
     cc.OnCollision = [this](Entity e1, Entity e2)
     {
         auto &go1 = *mScene.FindEntityById(e1);
