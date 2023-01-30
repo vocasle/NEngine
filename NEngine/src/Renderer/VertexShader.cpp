@@ -10,13 +10,13 @@ using namespace NEngine::Utils;
 
 void
 NEngine::Renderer::VertexShader::Bind(
-    NEngine::Helpers::DeviceResources &deviceResources)
+    NEngine::Helpers::DeviceResources &deviceResources) const
 {
 	deviceResources.GetDeviceContext()->VSSetShader(mVertexShader.Get(), nullptr, 0);
 }
 void
 NEngine::Renderer::VertexShader::Unbind(
-    NEngine::Helpers::DeviceResources &deviceResources)
+    NEngine::Helpers::DeviceResources &deviceResources) const
 {
 }
 

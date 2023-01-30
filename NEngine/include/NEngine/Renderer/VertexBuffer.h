@@ -19,8 +19,8 @@ public:
                  const std::vector<Vertex> &vertexData);
     ~VertexBuffer() override = default;
 
-    void Bind(Helpers::DeviceResources &deviceResources) override;
-    void Unbind(Helpers::DeviceResources &deviceResources) override;
+    void Bind(Helpers::DeviceResources &deviceResources) const override;
+    void Unbind(Helpers::DeviceResources &deviceResources) const override;
 
 private:
     std::vector<Vertex> mVertexData;
@@ -51,7 +51,7 @@ VertexBuffer<Vertex>::VertexBuffer(Helpers::DeviceResources &deviceResources,
 
 template <typename Vertex>
 void
-VertexBuffer<Vertex>::Bind(Helpers::DeviceResources &deviceResources)
+VertexBuffer<Vertex>::Bind(Helpers::DeviceResources &deviceResources) const
 {
     const unsigned int strides = sizeof(Vertex);
     constexpr unsigned int offsets = 0;
@@ -61,7 +61,7 @@ VertexBuffer<Vertex>::Bind(Helpers::DeviceResources &deviceResources)
 
 template <typename Vertex>
 void
-VertexBuffer<Vertex>::Unbind(Helpers::DeviceResources &deviceResources)
+VertexBuffer<Vertex>::Unbind(Helpers::DeviceResources &deviceResources) const
 {
 }
 }  // namespace Renderer

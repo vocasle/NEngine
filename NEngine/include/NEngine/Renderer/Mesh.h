@@ -23,6 +23,9 @@ public:
     const Helpers::Transform &GetTransform() const;
     Helpers::Transform &GetTransform();
 
+    bool Save() const;
+    static Mesh FromFile(const std::string &file_name, Helpers::DeviceResources &device_resources);
+
 private:
     std::vector<MeshPrimitive> mMeshPrimitives;
     Helpers::Transform mTransform;

@@ -147,7 +147,7 @@ Texture::Texture(Helpers::DeviceResources &deviceResources,
 }
 
 void
-Texture::Bind(Helpers::DeviceResources &deviceResources)
+Texture::Bind(Helpers::DeviceResources &deviceResources) const
 {
     if (mBindTarget == TextureBindTarget::ShaderResourceView) {
         deviceResources.GetDeviceContext()->VSSetShaderResources(
@@ -160,7 +160,7 @@ Texture::Bind(Helpers::DeviceResources &deviceResources)
 }
 
 void
-Texture::Unbind(Helpers::DeviceResources &deviceResources)
+Texture::Unbind(Helpers::DeviceResources &deviceResources) const
 {
 }
 

@@ -20,7 +20,8 @@ NEngine::Renderer::IndexBuffer::IndexBuffer(
 }
 
 void
-NEngine::Renderer::IndexBuffer::Bind(Helpers::DeviceResources &deviceResources)
+NEngine::Renderer::IndexBuffer::Bind(
+    Helpers::DeviceResources &deviceResources) const
 {
     deviceResources.GetDeviceContext()->IASetIndexBuffer(
         mIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -28,7 +29,7 @@ NEngine::Renderer::IndexBuffer::Bind(Helpers::DeviceResources &deviceResources)
 
 void
 NEngine::Renderer::IndexBuffer::Unbind(
-    Helpers::DeviceResources &deviceResources)
+    Helpers::DeviceResources &deviceResources) const
 {
 }
 

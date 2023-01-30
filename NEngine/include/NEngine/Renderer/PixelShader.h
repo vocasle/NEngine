@@ -19,8 +19,8 @@ class PixelShader : public Bindable
 public:
     PixelShader(Helpers::DeviceResources &deviceResources,
                 const std::string &path);
-    void Bind(Helpers::DeviceResources &deviceResources) override;
-    void Unbind(Helpers::DeviceResources &deviceResources) override;
+    void Bind(Helpers::DeviceResources &deviceResources) const override;
+    void Unbind(Helpers::DeviceResources &deviceResources) const override;
 
 private:
     Microsoft::WRL::ComPtr<ID3D11PixelShader> mPixelShader;

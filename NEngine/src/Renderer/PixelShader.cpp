@@ -16,7 +16,8 @@ NEngine::Renderer::PixelShader::PixelShader(
 }
 
 void
-NEngine::Renderer::PixelShader::Bind(Helpers::DeviceResources &deviceResources)
+NEngine::Renderer::PixelShader::Bind(
+    Helpers::DeviceResources &deviceResources) const
 {
     deviceResources.GetDeviceContext()->PSSetShader(
         mPixelShader.Get(), nullptr, 0);
@@ -24,6 +25,6 @@ NEngine::Renderer::PixelShader::Bind(Helpers::DeviceResources &deviceResources)
 
 void
 NEngine::Renderer::PixelShader::Unbind(
-    Helpers::DeviceResources &deviceResources)
+    Helpers::DeviceResources &deviceResources) const
 {
 }

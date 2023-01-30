@@ -33,7 +33,7 @@ NodeTypeToString(NodeType inType)
 }
 
 void
-DynamicConstBuffer::UpdateConstantBuffer()
+DynamicConstBuffer::UpdateConstantBuffer() const
 {
     D3D11_MAPPED_SUBRESOURCE mapped = {};
 
@@ -119,7 +119,7 @@ DynamicConstBuffer::DynamicConstBuffer(const DynamicConstBufferDesc &desc,
 }
 
 void
-DynamicConstBuffer::Bind(Helpers::DeviceResources &deviceResources)
+DynamicConstBuffer::Bind(Helpers::DeviceResources &deviceResources) const
 {
     UpdateConstantBuffer();
     deviceResources.GetDeviceContext()->VSSetConstantBuffers(
@@ -129,7 +129,7 @@ DynamicConstBuffer::Bind(Helpers::DeviceResources &deviceResources)
 }
 
 void
-DynamicConstBuffer::Unbind(Helpers::DeviceResources &deviceResources)
+DynamicConstBuffer::Unbind(Helpers::DeviceResources &deviceResources) const
 {
 }
 

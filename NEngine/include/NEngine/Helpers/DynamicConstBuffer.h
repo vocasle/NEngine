@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "DeviceResources.h"
-#include "NEngine/Utils/Utils.h"
 #include "NEngine/Renderer/Bindable.h"
+#include "NEngine/Utils/Utils.h"
 
 namespace NEngine {
 namespace Helpers {
@@ -156,8 +156,9 @@ public:
     DynamicConstBuffer(const DynamicConstBufferDesc &desc,
                        DeviceResources &deviceResources);
 
-    virtual void Bind(Helpers::DeviceResources &deviceResources) override;
-    virtual void Unbind(Helpers::DeviceResources &deviceResources) override;
+    virtual void Bind(Helpers::DeviceResources &deviceResources) const override;
+    virtual void Unbind(
+        Helpers::DeviceResources &deviceResources) const override;
 
     [[nodiscard]] ID3D11Buffer *Get() const;
 
@@ -204,7 +205,7 @@ public:
         }
     }
 
-    void UpdateConstantBuffer();
+    void UpdateConstantBuffer() const;
     void CreateConstantBuffer();
     [[nodiscard]] const std::vector<uint8_t> &GetBytes() const;
 

@@ -39,8 +39,9 @@ class RasterizerState : public Bindable
 public:
     RasterizerState(Helpers::DeviceResources &deviceResources,
                     const RasterizerDescription &desc);
-    virtual void Bind(Helpers::DeviceResources &deviceResources) override;
-    virtual void Unbind(Helpers::DeviceResources &deviceResources) override;
+    virtual void Bind(Helpers::DeviceResources &deviceResources) const override;
+    virtual void Unbind(
+        Helpers::DeviceResources &deviceResources) const override;
 
     void SetFillMode(FillMode fillMode);
     void SetCullMode(CullMode cullMode);

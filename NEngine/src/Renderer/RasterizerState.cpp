@@ -32,13 +32,13 @@ RasterizerState::RasterizerState(Helpers::DeviceResources &deviceResources,
 }
 
 void
-RasterizerState::Bind(Helpers::DeviceResources &deviceResources)
+RasterizerState::Bind(Helpers::DeviceResources &deviceResources) const
 {
     deviceResources.GetDeviceContext()->RSSetState(mRasterizerState.Get());
 }
 
 void
-RasterizerState::Unbind(Helpers::DeviceResources &deviceResources)
+RasterizerState::Unbind(Helpers::DeviceResources &deviceResources) const
 {
 }
 

@@ -38,8 +38,8 @@ public:
 
     ~InputLayout() override = default;
 
-    void Bind(Helpers::DeviceResources &deviceResources) override;
-    void Unbind(Helpers::DeviceResources &deviceResources) override;
+    void Bind(Helpers::DeviceResources &deviceResources) const override;
+    void Unbind(Helpers::DeviceResources &deviceResources) const override;
 
 private:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> mInputLayout;

@@ -17,8 +17,8 @@ public:
                 const std::vector<unsigned int> &indexData);
     ~IndexBuffer() override = default;
 
-    void Bind(Helpers::DeviceResources &deviceResources) override;
-    void Unbind(Helpers::DeviceResources &deviceResources) override;
+    void Bind(Helpers::DeviceResources &deviceResources) const override;
+    void Unbind(Helpers::DeviceResources &deviceResources) const override;
 
     [[nodiscard]] size_t GetIndexCount() const;
 

@@ -20,7 +20,6 @@ enum class AlphaMode {
     Blend
 };
 
-
 struct KHRMaterial
 {
     Math::Vec4D DiffuseFactor;
@@ -61,16 +60,14 @@ public:
                   std::vector<PosNormTangTex> vertices,
                   std::vector<unsigned int> indices);
 
-    MeshPrimitive(const MeshPrimitive &rhs);
-
     void SetMaterial(Material material);
     void Bind(Helpers::DeviceResources &deviceResources) const;
     size_t GetIndexNum() const;
     const Material &GetMaterial() const;
 
 private:
-    std::unique_ptr<IndexBuffer> mIndexBuffer;
-    std::unique_ptr<VertexBuffer<PosNormTangTex>> mVertexBuffer;
+    IndexBuffer mIndexBuffer;
+    VertexBuffer<PosNormTangTex> mVertexBuffer;
 
     std::vector<PosNormTangTex> mVertices;
     std::vector<unsigned int> mIndices;

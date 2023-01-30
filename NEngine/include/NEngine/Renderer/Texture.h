@@ -37,8 +37,8 @@ public:
             const std::string &name,
             const SamplerDescription &samplerDesc = SamplerDescription());
 
-    virtual void Bind(Helpers::DeviceResources &deviceResources) override;
-    virtual void Unbind(Helpers::DeviceResources &deviceResources) override;
+    virtual void Bind(Helpers::DeviceResources &deviceResources) const override;
+    virtual void Unbind(Helpers::DeviceResources &deviceResources) const override;
     ID3D11ShaderResourceView *GetShaderResourceView() const;
     ID3D11RenderTargetView *GetRenderTargetView() const;
     ID3D11DepthStencilView *GetDepthStencilView() const;

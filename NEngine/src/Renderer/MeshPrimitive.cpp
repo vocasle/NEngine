@@ -11,12 +11,12 @@ NEngine::Renderer::MeshPrimitive::MeshPrimitive(
     Helpers::DeviceResources &deviceResources,
     std::vector<PosNormTangTex> vertices,
     std::vector<unsigned int> indices)
-    : mVertices(std::move(vertices)),
+    : mIndexBuffer(deviceResources, indices),
+      mVertexBuffer(deviceResources, vertices),
+      mVertices(std::move(vertices)),
       mIndices(std::move(indices))
+
 {
-    mIndexBuffer = std::make_unique<IndexBuffer>(deviceResources, mIndices);
-    mVertexBuffer = std::make_unique<VertexBuffer<PosNormTangTex>>(
-        deviceResources, mVertices);
 }
 
 void
@@ -29,8 +29,8 @@ void
 NEngine::Renderer::MeshPrimitive::Bind(
     Helpers::DeviceResources &deviceResources) const
 {
-    mVertexBuffer->Bind(deviceResources);
-    mIndexBuffer->Bind(deviceResources);
+    mVertexBuffer.Bind(deviceResources);
+    mIndexBuffer.Bind(deviceResources);
 
     if (mMaterial.BaseColorTexture)
         mMaterial.BaseColorTexture->Bind(deviceResources);
@@ -55,16 +55,6 @@ const NEngine::Renderer::Material &
 NEngine::Renderer::MeshPrimitive::GetMaterial() const
 {
     return mMaterial;
-}
-
-NEngine::Renderer::MeshPrimitive::MeshPrimitive(const MeshPrimitive &rhs)
-    : mVertices(rhs.mVertices),
-      mIndices(rhs.mIndices),
-      mMaterial(rhs.mMaterial)
-{
-    mIndexBuffer = std::make_unique<IndexBuffer>(*rhs.mIndexBuffer);
-    mVertexBuffer = std::make_unique<VertexBuffer<PosNormTangTex>>(
-        *rhs.mVertexBuffer);
 }
 
 NEngine::Renderer::Material::Material(const Material &rhs)

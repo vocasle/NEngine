@@ -7,8 +7,8 @@ namespace Renderer {
 class Bindable
 {
 public:
-    virtual void Bind(Helpers::DeviceResources &deviceResources) = 0;
-    virtual void Unbind(Helpers::DeviceResources &deviceResources) = 0;
+    virtual void Bind(Helpers::DeviceResources &deviceResources) const = 0;
+    virtual void Unbind(Helpers::DeviceResources &deviceResources) const = 0;
     virtual ~Bindable() = default;
 };
 }

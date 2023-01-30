@@ -10,7 +10,7 @@ using namespace NEngine::Utils;
 
 namespace NEngine::Renderer {
 void
-Sampler::Bind(Helpers::DeviceResources &deviceResources)
+Sampler::Bind(Helpers::DeviceResources &deviceResources) const
 {
     deviceResources.GetDeviceContext()->VSSetSamplers(
         mBindSlot, 1, mSamplerState.GetAddressOf());
@@ -18,7 +18,7 @@ Sampler::Bind(Helpers::DeviceResources &deviceResources)
         mBindSlot, 1, mSamplerState.GetAddressOf());
 }
 void
-Sampler::Unbind(Helpers::DeviceResources &deviceResources)
+Sampler::Unbind(Helpers::DeviceResources &deviceResources) const
 {
 }
 
@@ -58,7 +58,8 @@ SamplerDescription::SamplerDescription()
 {
 }
 
-SamplerDescription SamplerDescription::CreateGLTFDefaultSamplerDesc()
+SamplerDescription
+SamplerDescription::CreateGLTFDefaultSamplerDesc()
 {
     SamplerDescription desc;
     desc.AddressU = TextureAddressMode::Wrap;

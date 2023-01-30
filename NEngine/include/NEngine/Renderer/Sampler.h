@@ -87,8 +87,8 @@ struct SamplerDescription
 class Sampler : public Bindable
 {
 public:
-    virtual void Bind(Helpers::DeviceResources &deviceResources) override;
-    virtual void Unbind(Helpers::DeviceResources &deviceResources) override;
+    virtual void Bind(Helpers::DeviceResources &deviceResources) const override;
+    virtual void Unbind(Helpers::DeviceResources &deviceResources) const override;
 
     Sampler(Helpers::DeviceResources &deviceResources,
             const SamplerDescription &desc,
