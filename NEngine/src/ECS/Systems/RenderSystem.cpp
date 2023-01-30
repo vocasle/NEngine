@@ -73,8 +73,8 @@ RenderSystem::Update(float dt) -> void
             auto scale = vec3(len, len, len);
             for (auto &mesh : COLLISION_MESH) {
                 auto &t = mesh->GetTransform();
-                // t.SetScale(MathMat4X4ScaleFromVec3D(&scale));
-                t.SetWorld(Mat4X4::Scale(scale) *
+                const auto rot = Mat4X4::RotY(ToRadians(pc.Yaw));
+                t.SetWorld(rot * Mat4X4::Scale(scale) *
                            Mat4X4::Translate(position));
             }
             mPasses[0]->Draw(*mDeviceResources, COLLISION_MESH);
