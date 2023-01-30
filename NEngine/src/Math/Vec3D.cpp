@@ -34,6 +34,11 @@ Vec3D::Vec3D(const Vec4D &rhs)
 {
 }
 
+Vec3D::Vec3D(float x)
+    : Vec3D(x, x, x)
+{
+}
+
 Vec3D::Vec3D()
     : Vec3D(0, 0, 0)
 {

@@ -11,6 +11,7 @@ struct Vec3D
     Vec3D(const Vec3D &rhs) = default;
     Vec3D(Vec3D &&rhs) noexcept = default;
     Vec3D(const Vec4D &rhs);
+    Vec3D(float x);
     Vec3D &operator=(const Vec3D &rhs) = default;
     Vec3D &operator=(Vec3D &&rhs) noexcept = default;
     bool operator==(const Vec3D &rhs) const;
