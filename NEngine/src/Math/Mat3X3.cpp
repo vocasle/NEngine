@@ -33,7 +33,7 @@ Mat3X3::Mat3X3(float v0x,
                float v2x,
                float v2y,
                float v2z)
-    : mData{{v0x, v1x, v2x}, {v0y, v1y, v2y}, {v0z, v1z, v2z}}
+    : mData{{v0x, v0y, v0z}, {v1x, v1y, v1z}, {v2x, v2y, v2z}}
 {
 }
 
@@ -58,8 +58,7 @@ Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
     const auto mat =
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) +
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
-    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
 #else
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
@@ -75,11 +74,10 @@ Mat3X3::Mult(const Mat3X3 &lhs, const Mat3X3 &rhs)
 {
     auto ret = Mat3X3();
 #if NENGINE_USE_DIRECTXMATH
-    const auto mat =
-        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) *
-        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
-    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    (XMMatrixTranspose(mat)));
+    const auto m1 = XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs));
+    const auto m2 = XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
+    const auto mat = m1 * m2;
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
 #else
     const auto col0 = rhs[0];
     const auto col1 = rhs[1];
@@ -127,9 +125,8 @@ Mat3X3::Mult(const Mat3X3 &lhs, float s)
     auto ret = Mat3X3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat =
-        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&ret)) * s;
-    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    XMMatrixTranspose(mat));
+        XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) * s;
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
 #else
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
@@ -168,8 +165,7 @@ Mat3X3::Subtract(const Mat3X3 &lhs, const Mat3X3 &rhs)
     const auto mat =
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) +
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
-    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
 #else
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
@@ -186,8 +182,7 @@ Mat3X3::RotZ(float phi)
     auto ret = Mat3X3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixRotationZ(phi);
-    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
 #else
     const auto cos = std::cos(phi);
     const auto sin = std::sin(phi);
@@ -225,8 +220,7 @@ Mat3X3::Inverse() const
     const auto mat = XMMatrixInverse(
         &det, XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(this)));
     auto ret = Mat3X3();
-    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
     return ret;
 #else
     const auto det = Determinant();
@@ -271,7 +265,7 @@ Mat3X3::RotX(float phi)
     auto ret = Mat3X3();
 #if NENGINE_USE_DIRECTXMATH
     XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    XMMatrixTranspose(XMMatrixRotationX(phi)));
+                    XMMatrixRotationX(phi));
 #else
     const auto cos = std::cos(phi);
     const auto sin = std::sin(phi);
@@ -289,7 +283,7 @@ Mat3X3::RotY(float phi)
     auto ret = Mat3X3();
 #if NENGINE_USE_DIRECTXMATH
     XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
-                    XMMatrixTranspose(XMMatrixRotationY(phi)));
+                    XMMatrixRotationY(phi));
 #else
     const auto cos = std::cos(phi);
     const auto sin = std::sin(phi);
@@ -306,7 +300,7 @@ Mat3X3::operator[](size_t i) const
 {
     UTILS_ASSERT(i < 3, "i must be in range [0, 3)");
     return {
-        this->operator()(0, i), this->operator()(1, i), this->operator()(2, i)};
+        this->operator()(i, 0), this->operator()(i, 1), this->operator()(i, 2)};
 }
 
 bool

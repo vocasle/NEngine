@@ -277,9 +277,9 @@ TestMat3X3()
     {
         auto mat = Mat3X3(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        UTILS_ASSERT(mat(0, 0) == 1 && mat(1, 0) == 2 && mat(2, 0) == 3 &&
-                         mat(0, 1) == 4 && mat(1, 1) == 5 && mat(2, 1) == 6 &&
-                         mat(0, 2) == 7 && mat(1, 2) == 8 && mat(2, 2) == 9,
+        UTILS_ASSERT(mat(0, 0) == 1 && mat(1, 0) == 4 && mat(2, 0) == 7 &&
+                         mat(0, 1) == 2 && mat(1, 1) == 5 && mat(2, 1) == 8 &&
+                         mat(0, 2) == 3 && mat(1, 2) == 6 && mat(2, 2) == 9,
                      "Mat3X3(float, float, float,\n"
                      "\tfloat, float, float,\n"
                      "\tfloat, float, float) test failed");
@@ -294,9 +294,9 @@ TestMat3X3()
     {
         auto mat = Mat3X3(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        UTILS_ASSERT(mat(0, 0) == 1 && mat(1, 0) == 2 && mat(2, 0) == 3 &&
-                         mat(0, 1) == 4 && mat(1, 1) == 5 && mat(2, 1) == 6 &&
-                         mat(0, 2) == 7 && mat(1, 2) == 8 && mat(2, 2) == 9,
+        UTILS_ASSERT(mat(0, 0) == 1 && mat(1, 0) == 4 && mat(2, 0) == 7 &&
+                         mat(0, 1) == 2 && mat(1, 1) == 5 && mat(2, 1) == 8 &&
+                         mat(0, 2) == 3 && mat(1, 2) == 6 && mat(2, 2) == 9,
                      "operator()(size_t, size_t) test failed");
 #if NENGINE_VERBOSE_MATH_TEST
         UtilsDebugPrint("operator()(size_t, size_t) test passed\n");

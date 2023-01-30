@@ -39,10 +39,10 @@ Mat4X4::Mat4X4(float v0x,
                float v3y,
                float v3z,
                float v3w)
-    : mData{{v0x, v1x, v2x, v3x},
-            {v0y, v1y, v2y, v3y},
-            {v0z, v1z, v2z, v3z},
-            {v0w, v1w, v2w, v3w}}
+    : mData{{v0x, v0y, v0z, v0w},
+            {v1x, v1y, v1z, v1w},
+            {v2x, v2y, v2z, v2w},
+            {v3x, v3y, v3z, v3w}}
 {
 }
 float &
@@ -60,10 +60,10 @@ Mat4X4::operator()(size_t i, size_t j) const
 Vec4D
 Mat4X4::operator[](size_t i) const
 {
-    return {this->operator()(0, i),
-            this->operator()(1, i),
-            this->operator()(2, i),
-            this->operator()(3, i)};
+    return {this->operator()(i, 0),
+            this->operator()(i, 1),
+            this->operator()(i, 2),
+            this->operator()(i, 3)};
 }
 Mat4X4
 Mat4X4::Add(const Mat4X4 &lhs, const Mat4X4 &rhs)
@@ -73,8 +73,7 @@ Mat4X4::Add(const Mat4X4 &lhs, const Mat4X4 &rhs)
     const auto mat =
         XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&lhs)) +
         XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&rhs));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -86,8 +85,7 @@ Mat4X4::Subtract(const Mat4X4 &lhs, const Mat4X4 &rhs)
     const auto mat =
         XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&lhs)) +
         XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&rhs));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -99,8 +97,7 @@ Mat4X4::Mult(const Mat4X4 &lhs, const Mat4X4 &rhs)
     const auto mat =
         XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&lhs)) *
         XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&rhs));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    (XMMatrixTranspose(mat)));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), (mat));
 #endif
     return ret;
 }
@@ -111,8 +108,7 @@ Mat4X4::Mult(const Mat4X4 &lhs, float s)
 #if NENGINE_USE_DIRECTXMATH
     const auto mat =
         XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&ret)) * s;
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -147,8 +143,7 @@ Mat4X4::Inverse() const
     const auto mat = XMMatrixInverse(
         &det, XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(this)));
     auto ret = Mat4X4();
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
     return ret;
 #endif
 }
@@ -169,7 +164,7 @@ Mat4X4::RotX(float phi)
     auto ret = Mat4X4();
 #if NENGINE_USE_DIRECTXMATH
     XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(XMMatrixRotationX(phi)));
+                    XMMatrixRotationX(phi));
 #endif
     return ret;
 }
@@ -179,7 +174,7 @@ Mat4X4::RotY(float phi)
     auto ret = Mat4X4();
 #if NENGINE_USE_DIRECTXMATH
     XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(XMMatrixRotationY(phi)));
+                    XMMatrixRotationY(phi));
 #endif
     return ret;
 }
@@ -189,7 +184,7 @@ Mat4X4::RotZ(float phi)
     auto ret = Mat4X4();
 #if NENGINE_USE_DIRECTXMATH
     XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(XMMatrixRotationZ(phi)));
+                    XMMatrixRotationZ(phi));
 #endif
     return ret;
 }
@@ -201,8 +196,7 @@ Mat4X4::Translate(const Vec3D &v)
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixTranslationFromVector(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&v)));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -214,8 +208,7 @@ Mat4X4::Scale(const Vec3D &v)
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixScalingFromVector(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&v)));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -227,8 +220,7 @@ Mat4X4::Rotate(const Vec3D &eulerAngles)
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixRotationRollPitchYawFromVector(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&eulerAngles)));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }

@@ -61,21 +61,22 @@ MyGame::PrintComponents(const GameObject &go) const
     }
 
     UTILS_ASSERT(
-        mEntityManager.Bitmask<CameraComponent> == ComponentType_CAMERA,
+        mEntityManager.Bitmask<CameraComponent>() == ComponentType_CAMERA,
         "Bitmask does not match");
     UTILS_ASSERT(
-        mEntityManager.Bitmask<PositionComponent> == ComponentType_POSITION,
+        mEntityManager.Bitmask<PositionComponent>() == ComponentType_POSITION,
         "Bitmask does not match");
     UTILS_ASSERT(
-        mEntityManager.Bitmask<RenderComponent> == ComponentType_RENDER,
+        mEntityManager.Bitmask<RenderComponent>() == ComponentType_RENDER,
         "Bitmask does not match");
-    UTILS_ASSERT(mEntityManager.Bitmask<InputComponent> == ComponentType_INPUT,
+    UTILS_ASSERT(
+        mEntityManager.Bitmask<InputComponent>() == ComponentType_INPUT,
                  "Bitmask does not match");
     UTILS_ASSERT(
-        mEntityManager.Bitmask<CollisionComponent> == ComponentType_COLLISION,
+        mEntityManager.Bitmask<CollisionComponent>() == ComponentType_COLLISION,
         "Bitmask does not match");
     UTILS_ASSERT(
-        mEntityManager.Bitmask<AudioComponent> == ComponentType_AUDIO,
+        mEntityManager.Bitmask<AudioComponent>() == ComponentType_AUDIO,
         "Bitmask does not match");
 }
 
@@ -89,8 +90,8 @@ MyGame::UpdateImgui()
     }
 
     if (ImGui::CollapsingHeader("Camera settings")) {
-        static float zFar = 100;
-        static float zNear = 0.1;
+        static float zFar = 100.0f;
+        static float zNear = 0.1f;
 
         ImGui::InputFloat("z far", &zFar);
         ImGui::InputFloat("z near", &zNear);
@@ -129,11 +130,11 @@ MyGame::UpdateImgui()
 
         auto &pc = *mEntityManager.GetComponent<PositionComponent>(
             mScene.FindEntityByName("Player")->ID);
-        auto translate = MathMat4X4TranslateFromVec3D(&pc.Position);
+        auto translate = Mat4X4::Translate(pc.Position);
         auto axis = Vec3D(0, 1, 0);
-        auto rotate = XM::RotateAxis(ToRadians(pc.Yaw), axis);
+        auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
         const auto scales = vec3(scale, scale, scale);
-        auto scaleMat = MathMat4X4ScaleFromVec3D(&scales);
+        auto scaleMat = Mat4X4::Scale(scales);
 
         ImGui::InputFloat("Player scale", &scale);
 

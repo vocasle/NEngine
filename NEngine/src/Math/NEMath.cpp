@@ -13,8 +13,7 @@ RotateAxis(float radians, const vec3 &axis)
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixRotationAxis(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&axis)), radians);
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -27,8 +26,7 @@ LookTo(const vec3 &camPos, const vec3 &target, const vec3 &up)
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&camPos)),
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&target)),
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&up)));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -41,8 +39,7 @@ LookAt(const vec3 &camPos, const vec3 &target, const vec3 &up)
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&camPos)),
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&target)),
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&up)));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -52,8 +49,7 @@ PerspectiveFov(float fov, float aspectRatio, float zNear, float zFar)
     auto ret = mat4();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixPerspectiveFovRH(fov, aspectRatio, zNear, zFar);
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
@@ -64,8 +60,7 @@ QuatToMat(const vec4 &quat)
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixRotationQuaternion(
         XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&quat)));
-    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret),
-                    XMMatrixTranspose(mat));
+    XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4 *>(&ret), mat);
 #endif
     return ret;
 }
