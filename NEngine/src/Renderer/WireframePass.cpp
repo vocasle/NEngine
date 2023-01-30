@@ -22,9 +22,8 @@ WireframePass::WireframePass(Helpers::DeviceResources &deviceResources)
     mRasterizerState->SetFillMode(FillMode::WireFrame);
 }
 void
-WireframePass::Draw(
-    Helpers::DeviceResources &deviceResources,
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes)
+WireframePass::Draw(Helpers::DeviceResources &deviceResources,
+                    std::vector<NEngine::Renderer::Mesh> &meshes)
 {
     deviceResources.PIXBeginEvent(L"WireframePass");
     mRasterizerState->Bind(deviceResources);
@@ -40,13 +39,13 @@ WireframePass::Draw(
     mPerFrameBuffer->Bind(deviceResources);
 
     for (auto &mesh : meshes) {
-        const auto world = mesh->GetTransform().GetWorld();
+        const auto world = mesh.GetTransform().GetWorld();
         mPerObjectBuffer->SetValue("world", world);
         const auto invWorld = world.Inverse().Transpose();
         mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
-        for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {
-            DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
+        for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
+            DrawMeshPrimitive(meshPrimitive, deviceResources);
         }
     }
     deviceResources.PIXEndEvent();

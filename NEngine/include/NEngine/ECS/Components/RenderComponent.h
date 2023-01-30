@@ -8,6 +8,6 @@
 namespace NEngine::ECS::Components {
 struct RenderComponent
 {
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> Mesh;
+    std::vector<NEngine::Renderer::Mesh> Mesh;
 };
 }  // namespace NEngine::ECS::Components

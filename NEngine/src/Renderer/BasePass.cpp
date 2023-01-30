@@ -16,9 +16,8 @@ using namespace NEngine::Math;
 using namespace Microsoft::WRL;
 
 void
-NEngine::Renderer::BasePass::Draw(
-    Helpers::DeviceResources &deviceResources,
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes)
+NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
+                                  std::vector<NEngine::Renderer::Mesh> &meshes)
 {
     deviceResources.PIXBeginEvent(L"BasePass");
 
@@ -44,13 +43,13 @@ NEngine::Renderer::BasePass::Draw(
     mPerFrameBuffer->Bind(deviceResources);
 
     for (auto &mesh : meshes) {
-        const auto world = mesh->GetTransform().GetWorld();
+        const auto world = mesh.GetTransform().GetWorld();
         mPerObjectBuffer->SetValue("world", world);
         const auto invWorld = world.Inverse().Transpose();
         mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
-        for (auto &meshPrimitive : mesh->GetMeshPrimitives()) {
-            DrawMeshPrimitive(meshPrimitive.get(), deviceResources);
+        for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
+            DrawMeshPrimitive(meshPrimitive, deviceResources);
         }
     }
 
@@ -59,12 +58,12 @@ NEngine::Renderer::BasePass::Draw(
 
 void
 NEngine::Renderer::BasePass::DrawMeshPrimitive(
-    const Renderer::MeshPrimitive *meshPrimitive,
+    const Renderer::MeshPrimitive &meshPrimitive,
     Helpers::DeviceResources &deviceResources)
 {
     // Get transform (world matrix), textures and samplers and set it to per
     // object const buffer
-    const Material &mat = meshPrimitive->GetMaterial();
+    const Material &mat = meshPrimitive.GetMaterial();
     mPerObjectBuffer->SetValue("material.BaseColor", mat.BaseColor);
     mPerObjectBuffer->SetValue("material.Metalness", mat.Metalness);
     mPerObjectBuffer->SetValue("material.Roughness", mat.Roughness);
@@ -89,9 +88,9 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
         static_cast<int>(mat.BaseColorTexture != nullptr));
 
     mPerObjectBuffer->Bind(deviceResources);
-    meshPrimitive->Bind(deviceResources);
+    meshPrimitive.Bind(deviceResources);
     deviceResources.GetDeviceContext()->DrawIndexed(
-        static_cast<unsigned int>(meshPrimitive->GetIndexNum()), 0, 0);
+        static_cast<unsigned int>(meshPrimitive.GetIndexNum()), 0, 0);
 }
 
 void

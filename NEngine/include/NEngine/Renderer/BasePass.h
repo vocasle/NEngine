@@ -26,9 +26,8 @@ class BasePass
 {
 public:
     explicit BasePass(Helpers::DeviceResources &deviceResources);
-    virtual void Draw(
-        Helpers::DeviceResources &deviceResources,
-        std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &meshes);
+    virtual void Draw(Helpers::DeviceResources &deviceResources,
+                      std::vector<NEngine::Renderer::Mesh> &meshes);
 
     virtual ~BasePass() = default;
     void SetCamera(const Helpers::Camera &camera);
@@ -83,7 +82,7 @@ protected:
     Texture *mDepthTarget = nullptr;
     D3D11_VIEWPORT *mViewport = nullptr;
 
-    void DrawMeshPrimitive(const Renderer::MeshPrimitive *meshPrimitive,
+    void DrawMeshPrimitive(const Renderer::MeshPrimitive &meshPrimitive,
                            Helpers::DeviceResources &deviceResources);
 
     void UpdatePerFrameBuffer();

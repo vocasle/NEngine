@@ -59,15 +59,14 @@ GetNodeTransform(const tinygltf::Node &node)
 }
 
 void
-GLTFLoader::ProcessNode(
-    const tinygltf::Node &node,
-    const tinygltf::Model &model,
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &outMeshes)
+GLTFLoader::ProcessNode(const tinygltf::Node &node,
+                        const tinygltf::Model &model,
+                        std::vector<NEngine::Renderer::Mesh> &outMeshes)
 {
     if (node.mesh >= 0) {
         const auto transform = GetNodeTransform(node);
         auto mesh = ProcessMesh(model.meshes[node.mesh], model);
-        mesh->SetTransform(transform);
+        mesh.SetTransform(transform);
         outMeshes.push_back(std::move(mesh));
     }
 
@@ -147,17 +146,17 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
     return nullptr;
 }
 
-std::unique_ptr<NEngine::Renderer::Mesh>
+NEngine::Renderer::Mesh
 GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
                         const tinygltf::Model &model)
 {
-    std::vector<std::unique_ptr<MeshPrimitive>> meshPrimitives;
+    std::vector<MeshPrimitive> meshPrimitives;
     meshPrimitives.reserve(mesh.primitives.size());
     for (const auto &primitive : mesh.primitives) {
         meshPrimitives.push_back(ProcessMeshPrimitive(primitive, model));
     }
 
-    return std::make_unique<Mesh>(m_deviceResources, std::move(meshPrimitives));
+    return Mesh(m_deviceResources, std::move(meshPrimitives));
 }
 
 static std::vector<NEngine::Math::Vec4D>
@@ -299,7 +298,7 @@ GetPropAsVec(const tinygltf::Value &ext, const std::string &propName)
     return numbers;
 }
 
-std::unique_ptr<NEngine::Renderer::MeshPrimitive>
+NEngine::Renderer::MeshPrimitive
 GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
                                  const tinygltf::Model &model)
 {
@@ -481,17 +480,16 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
     assert(!vertices.empty() && "Vertices is empty! gLTF import failed!");
     assert(!indices.empty() && "Indices is empty! gLTF import failed!");
 
-    auto meshPrim =
-        std::make_unique<MeshPrimitive>(m_deviceResources, vertices, indices);
+    auto meshPrim = MeshPrimitive(m_deviceResources, vertices, indices);
     tmpMaterial.BaseColorTexture = std::move(baseColorTex);
     tmpMaterial.MetallicRoughnessTexture = std::move(metallicRoughnessTex);
     tmpMaterial.NormalTexture = std::move(normalTex);
     tmpMaterial.OcclusionTexture = std::move(occlusionTex);
     tmpMaterial.EmissiveTexture = std::move(emissiveTex);
     tmpMaterial.KHRMaterial = std::move(khrMaterial);
-    meshPrim->SetMaterial(std::move(tmpMaterial));
+    meshPrim.SetMaterial(std::move(tmpMaterial));
 
-    return std::move(meshPrim);
+    return meshPrim;
 }
 
 GLTFLoader::GLTFLoader(DeviceResources &deviceResources)
@@ -499,7 +497,7 @@ GLTFLoader::GLTFLoader(DeviceResources &deviceResources)
 {
 }
 
-std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>
+std::vector<NEngine::Renderer::Mesh>
 GLTFLoader::Load(const std::string &path)
 {
     tinygltf::Model model;
@@ -532,9 +530,7 @@ GLTFLoader::Load(const std::string &path)
 
     const auto &scene = model.scenes[model.defaultScene];
 
-    std::vector<std::unique_ptr<MeshPrimitive>> meshPrimitives;
-
-    std::vector<std::unique_ptr<Mesh>> meshes;
+    std::vector<Mesh> meshes;
     for (const auto nodeIdx : scene.nodes) {
         ProcessNode(model.nodes[nodeIdx], model, meshes);
     }

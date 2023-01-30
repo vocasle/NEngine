@@ -34,7 +34,7 @@ public:
     auto GetDeviceResources() -> NEngine::Helpers::DeviceResources &;
 
     auto LoadMesh(const std::string &path)
-        -> std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>;
+        -> std::vector<NEngine::Renderer::Mesh>;
     auto Deinit() -> void;
 
 private:

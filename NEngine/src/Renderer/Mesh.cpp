@@ -4,45 +4,42 @@
 
 using namespace NEngine::Helpers;
 using namespace NEngine::Utils;
+using namespace NEngine::Renderer;
 
-const std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>> &
-NEngine::Renderer::Mesh::GetMeshPrimitives() const
+namespace NEngine::Renderer {
+const std::vector<MeshPrimitive> &
+Mesh::GetMeshPrimitives() const
 {
     return mMeshPrimitives;
 }
 
-NEngine::Renderer::Mesh::Mesh(
-    DeviceResources &deviceResources,
-    std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshes)
+Mesh::Mesh(DeviceResources &deviceResources, std::vector<MeshPrimitive> meshes)
     : mMeshPrimitives(std::move(meshes))
 {
 }
 
 const Transform &
-NEngine::Renderer::Mesh::GetTransform() const
+Mesh::GetTransform() const
 {
     return mTransform;
 }
 
 Transform &
-NEngine::Renderer::Mesh::GetTransform()
+Mesh::GetTransform()
 {
     return mTransform;
 }
 
 void
-NEngine::Renderer::Mesh::SetTransform(const Helpers::Transform &t)
+Mesh::SetTransform(const Helpers::Transform &t)
 {
     mTransform = t;
 }
 
-
-NEngine::Renderer::Mesh::Mesh(const Mesh &rhs)
-    : mTransform(rhs.mTransform)
+Mesh::Mesh(const Mesh &rhs)
+    : mTransform(rhs.mTransform),
+      mMeshPrimitives(std::move(rhs.mMeshPrimitives))
 {
-    mMeshPrimitives.reserve(rhs.mMeshPrimitives.size());
-    for (auto &mp : rhs.mMeshPrimitives) {
-        auto meshPrim = std::make_unique<MeshPrimitive>(*mp);
-        mMeshPrimitives.push_back(std::move(meshPrim));
-    }
 }
+
+}  // namespace NEngine::Renderer

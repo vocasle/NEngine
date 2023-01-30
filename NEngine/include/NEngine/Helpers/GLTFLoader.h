@@ -1,5 +1,4 @@
 #pragma once
-#include <span>
 #include <string>
 
 #include "NEngine/Renderer/Mesh.h"
@@ -10,19 +9,17 @@ class GLTFLoader
 {
 public:
     explicit GLTFLoader(DeviceResources &deviceResources);
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> Load(
-        const std::string &path);
+    std::vector<NEngine::Renderer::Mesh> Load(const std::string &path);
 
 private:
-    void ProcessNode(
-        const tinygltf::Node &node,
-        const tinygltf::Model &model,
-        std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> &outMeshes);
+    void ProcessNode(const tinygltf::Node &node,
+                     const tinygltf::Model &model,
+                     std::vector<NEngine::Renderer::Mesh> &outMeshes);
 
-    std::unique_ptr<NEngine::Renderer::Mesh> ProcessMesh(
-        const tinygltf::Mesh &mesh, const tinygltf::Model &model);
+    NEngine::Renderer::Mesh ProcessMesh(const tinygltf::Mesh &mesh,
+                                        const tinygltf::Model &model);
 
-    std::unique_ptr<NEngine::Renderer::MeshPrimitive> ProcessMeshPrimitive(
+    NEngine::Renderer::MeshPrimitive ProcessMeshPrimitive(
         const tinygltf::Primitive &primitive, const tinygltf::Model &model);
 
     std::vector<unsigned int> ExtractMeshIndices(

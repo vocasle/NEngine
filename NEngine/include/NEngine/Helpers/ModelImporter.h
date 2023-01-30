@@ -12,8 +12,7 @@ class ModelImporter
 {
 public:
     explicit ModelImporter(Helpers::DeviceResources &deviceResources);
-    std::vector<std::unique_ptr<NEngine::Renderer::Mesh>> Load(
-        const std::string &str);
+    std::vector<NEngine::Renderer::Mesh> Load(const std::string &str);
 
 private:
     Helpers::DeviceResources *mDeviceResources;

@@ -17,7 +17,7 @@ using namespace NEngine::Helpers;
 
 static const std::string COLLISION_MESH_PATH =
     UtilsFormatStr("%s/gLTF/cube.glb", NENGINE_RES_DIR);
-static std::vector<std::unique_ptr<Mesh>> COLLISION_MESH;
+static std::vector<Mesh> COLLISION_MESH;
 
 RenderSystem::RenderSystem(NEngine::Helpers::DeviceResources &deviceResources,
                            ECS::DefaultEntityManager &entityManager)
@@ -62,7 +62,7 @@ RenderSystem::Update(float dt) -> void
             auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
             auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
             auto scale = Mat4X4::Scale(scales);
-            mesh->GetTransform().SetWorld(scale * rotate * translate);
+            mesh.GetTransform().SetWorld(scale * rotate * translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
 
@@ -71,7 +71,7 @@ RenderSystem::Update(float dt) -> void
                 *mEntityManager->GetComponent<CollisionComponent>(entity);
             const auto scale = cc.Size;
             for (auto &mesh : COLLISION_MESH) {
-                auto &t = mesh->GetTransform();
+                auto &t = mesh.GetTransform();
                 const auto rot = Mat4X4::RotY(ToRadians(pc.Yaw));
                 t.SetWorld(rot * Mat4X4::Scale(scale) *
                            Mat4X4::Translate(position));

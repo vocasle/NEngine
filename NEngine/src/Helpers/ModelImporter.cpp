@@ -9,7 +9,7 @@ namespace NEngine::Helpers {
 
 using namespace Utils;
 
-std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>
+std::vector<NEngine::Renderer::Mesh>
 ModelImporter::Load(const std::string &str)
 {
     using namespace Utils;

@@ -426,7 +426,7 @@ Engine::~Engine()
 
 auto
 Engine::LoadMesh(const std::string &path)
-    -> std::vector<std::unique_ptr<NEngine::Renderer::Mesh>>
+    -> std::vector<NEngine::Renderer::Mesh>
 {
     ModelImporter importer(mDeviceResources);
     auto model = importer.Load(path);

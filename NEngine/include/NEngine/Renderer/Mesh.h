@@ -13,11 +13,10 @@ class Mesh
 {
 public:
     Mesh(Helpers::DeviceResources &deviceResources,
-         std::vector<std::unique_ptr<Renderer::MeshPrimitive>> meshes);
+         std::vector<MeshPrimitive> meshes);
     Mesh(const Mesh &rhs);
 
-    const std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
-        &GetMeshPrimitives() const;
+    const std::vector<MeshPrimitive> &GetMeshPrimitives() const;
 
     void SetTransform(const Helpers::Transform &t);
 
@@ -25,8 +24,7 @@ public:
     Helpers::Transform &GetTransform();
 
 private:
-    std::vector<std::unique_ptr<NEngine::Renderer::MeshPrimitive>>
-        mMeshPrimitives;
+    std::vector<MeshPrimitive> mMeshPrimitives;
     Helpers::Transform mTransform;
 };
 }  // namespace Renderer
