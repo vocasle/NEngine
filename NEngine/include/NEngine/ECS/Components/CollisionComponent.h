@@ -9,8 +9,8 @@ namespace NEngine::ECS::Components {
 
 struct CollisionComponent
 {
-    NEngine::Math::Vec3D BoxMin;
-    NEngine::Math::Vec3D BoxMax;
+    NEngine::Math::Vec3D Center;
+    NEngine::Math::Vec3D Size;
     std::function<void(ECS::Entity e1, ECS::Entity e2)> OnCollision;
 };
 

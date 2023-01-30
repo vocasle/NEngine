@@ -1,5 +1,14 @@
 #include "NEngine/ECS/Systems/CollisionSystem.h"
 
+#include "NEngine/Math/MathUtils.h"
+
+#if NENGINE_USE_DIRECTXMATH
+#include <DirectXCollision.h>
+using namespace DirectX;
+#endif
+
+using namespace NEngine::Math;
+
 namespace NEngine::ECS::Systems {
 CollisionSystem::CollisionSystem(ECS::DefaultEntityManager &em)
     : mEntityManager(&em)
@@ -72,9 +81,13 @@ CollisionSystem::IsOverlaping(const Math::vec3 &point,
 {
     bool isOverlaping = false;
 
-    isOverlaping = (box.BoxMin.X <= point.X && point.X <= box.BoxMax.X) &&
-                   (box.BoxMin.Y <= point.Y && point.Y <= box.BoxMax.Y) &&
-                   (box.BoxMin.Z <= point.Z && point.Z <= box.BoxMax.Z);
+#if NENGINE_USE_DIRECTXMATH
+    const auto bb = BoundingBox(reinterpret_cast<const XMFLOAT3 &>(box.Center),
+                                reinterpret_cast<const XMFLOAT3 &>(box.Size));
+    const auto containmentType =
+        bb.Contains(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&point)));
+    isOverlaping = containmentType == ContainmentType::CONTAINS;
+#endif
 
     return isOverlaping;
 }
@@ -83,21 +96,25 @@ CollisionSystem::IsOverlaping(const Components::CollisionComponent &lhs,
                               const Components::CollisionComponent &rhs) const
 {
     bool isOverlaping = false;
-
-    isOverlaping =
-        (lhs.BoxMin.X <= rhs.BoxMax.X && lhs.BoxMax.X >= rhs.BoxMin.X) &&
-        (lhs.BoxMin.Y <= rhs.BoxMax.Y && lhs.BoxMax.Y >= rhs.BoxMin.Y) &&
-        (lhs.BoxMin.Z <= rhs.BoxMax.Z && lhs.BoxMax.Z >= rhs.BoxMin.Z);
-
+#if NENGINE_USE_DIRECTXMATH
+    const auto lhsBb =
+        BoundingBox(reinterpret_cast<const XMFLOAT3 &>(lhs.Center),
+                    reinterpret_cast<const XMFLOAT3 &>(lhs.Size));
+    const auto rhsBb =
+        BoundingBox(reinterpret_cast<const XMFLOAT3 &>(rhs.Center),
+                    reinterpret_cast<const XMFLOAT3 &>(lhs.Size));
+    isOverlaping = lhsBb.Intersects(rhsBb);
+#endif
     return isOverlaping;
 }
+
 Components::CollisionComponent
 CollisionSystem::MoveBox(const Math::vec3 &offset,
                          const Components::CollisionComponent &box) const
 {
     auto movedBox = Components::CollisionComponent();
-    movedBox.BoxMin = box.BoxMin + offset;
-    movedBox.BoxMax = box.BoxMax + offset;
+    movedBox.Center = offset;
+    movedBox.Size = box.Size;
     return movedBox;
 }
 }  // namespace NEngine::ECS::Systems

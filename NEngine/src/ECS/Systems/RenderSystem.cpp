@@ -69,8 +69,7 @@ RenderSystem::Update(float dt) -> void
         if (mEntityManager->HasComponent<CollisionComponent>(entity)) {
             const auto &cc =
                 *mEntityManager->GetComponent<CollisionComponent>(entity);
-            const auto len = (cc.BoxMax - cc.BoxMin).Length();
-            auto scale = vec3(len, len, len);
+            const auto scale = cc.Size;
             for (auto &mesh : COLLISION_MESH) {
                 auto &t = mesh->GetTransform();
                 const auto rot = Mat4X4::RotY(ToRadians(pc.Yaw));
