@@ -149,6 +149,7 @@
     <ClCompile Include="src\Helpers\DeviceResources.cpp" />
     <ClCompile Include="src\Helpers\DynamicConstBuffer.cpp" />
     <ClCompile Include="src\Helpers\DynamicCubeMap.cpp" />
+    <ClCompile Include="src\Helpers\FileWriter.cpp" />
     <ClCompile Include="src\Helpers\GLTFLoader.cpp" />
     <ClCompile Include="src\Helpers\InputLayoutOld.cpp" />
     <ClCompile Include="src\Helpers\MeshGenerator.cpp" />
@@ -214,6 +215,7 @@
     <ClInclude Include="include\NEngine\Engine.h" />
     <ClInclude Include="include\NEngine\Game.h" />
     <ClInclude Include="include\NEngine\Globals.h" />
+    <ClInclude Include="include\NEngine\Helpers\FileWriter.h" />
     <ClInclude Include="include\NEngine\Helpers\Buffer.h" />
     <ClInclude Include="include\NEngine\Helpers\Camera.h" />
     <ClInclude Include="include\NEngine\Helpers\DeviceResources.h" />
