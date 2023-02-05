@@ -9,6 +9,7 @@
 
 namespace NEngine {
 namespace Renderer {
+
 class Mesh
 {
 public:
@@ -24,11 +25,14 @@ public:
     Helpers::Transform &GetTransform();
 
     bool Save() const;
-    static Mesh FromFile(const std::string &file_name, Helpers::DeviceResources &device_resources);
+    static Mesh FromFile(const std::string &file_name,
+                         Helpers::DeviceResources &device_resources);
 
 private:
     std::vector<MeshPrimitive> mMeshPrimitives;
     Helpers::Transform mTransform;
+
+    friend class FileWriter;
 };
 }  // namespace Renderer
 }  // namespace NEngine

@@ -73,6 +73,8 @@ private:
     std::vector<unsigned int> mIndices;
 
     Material mMaterial;
+
+    friend class FileWriter;
 };
 }  // namespace Renderer
 }  // namespace NEngine
