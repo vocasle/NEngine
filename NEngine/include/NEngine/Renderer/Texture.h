@@ -18,12 +18,13 @@ enum class TextureBindTarget {
     ShaderResourceView,
     DepthStencilView,
     RenderTargetView,
-    RenderTargetAndDepthStencilView
+    None
 };
 
 class Texture : public Bindable
 {
 public:
+    Texture();
     Texture(Helpers::DeviceResources &deviceResources,
             float width,
             float height,
@@ -37,13 +38,17 @@ public:
             const std::string &name,
             const SamplerDescription &samplerDesc = SamplerDescription());
 
-    virtual void Bind(Helpers::DeviceResources &deviceResources) const override;
-    virtual void Unbind(Helpers::DeviceResources &deviceResources) const override;
+    void Bind(Helpers::DeviceResources &deviceResources) const override;
+    void Unbind(
+        Helpers::DeviceResources &deviceResources) const override;
     ID3D11ShaderResourceView *GetShaderResourceView() const;
     ID3D11RenderTargetView *GetRenderTargetView() const;
     ID3D11DepthStencilView *GetDepthStencilView() const;
     void Resize(Helpers::DeviceResources &deviceResources,
                 const Math::Vec2D &size);
+    bool IsValid() const;
+
+    static constexpr const char *INVALID_NAME = "INVALID_TEXTURE";
 
 private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mSRV;

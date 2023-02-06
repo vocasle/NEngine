@@ -89,7 +89,7 @@ class Sampler : public Bindable
 public:
     virtual void Bind(Helpers::DeviceResources &deviceResources) const override;
     virtual void Unbind(Helpers::DeviceResources &deviceResources) const override;
-
+    Sampler();
     Sampler(Helpers::DeviceResources &deviceResources,
             const SamplerDescription &desc,
             unsigned int bindSlot);

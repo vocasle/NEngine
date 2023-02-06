@@ -10,6 +10,13 @@ namespace NEngine::Renderer {
 using namespace Microsoft::WRL;
 using namespace NEngine::Utils;
 
+Texture::Texture()
+    : mBindTarget(TextureBindTarget::None),
+      mBindSlot(INVALID_BIND_SLOT),
+      mName(INVALID_NAME)
+{
+}
+
 Texture::Texture(Helpers::DeviceResources &deviceResources,
                  float width,
                  float height,
@@ -186,6 +193,12 @@ Texture::Resize(Helpers::DeviceResources &deviceResources,
 {
     auto tmp = Texture(deviceResources, size.X, size.Y, mBindTarget, mName);
     *this = std::move(tmp);
+}
+
+bool
+Texture::IsValid() const
+{
+    return mName != INVALID_NAME && mBindSlot != INVALID_BIND_SLOT;
 }
 
 }  // namespace NEngine::Renderer

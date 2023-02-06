@@ -118,7 +118,7 @@ ReadData(const std::vector<unsigned char> &data, size_t count, size_t offset)
     return vec;
 }
 
-std::unique_ptr<Texture>
+Texture
 GLTFLoader::CreateTexture(const tinygltf::Model &model,
                           size_t idx,
                           TextureBindTarget bindTarget,
@@ -136,14 +136,14 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
     if (!img.image.empty()) {
         const auto tmpImage =
             Image(img.image, img.width, img.height, img.component, img.bits);
-        return std::make_unique<Texture>(m_deviceResources,
-                                         bindSlot,
-                                         TextureBindTarget::ShaderResourceView,
-                                         tmpImage,
-                                         img.name,
-                                         samDesc);
+        return Texture(m_deviceResources,
+                       bindSlot,
+                       TextureBindTarget::ShaderResourceView,
+                       tmpImage,
+                       img.name,
+                       samDesc);
     }
-    return nullptr;
+    return {};
 }
 
 NEngine::Renderer::Mesh
@@ -309,11 +309,11 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
     std::vector<Math::Vec2D> texCoords;
     Material tmpMaterial;
     KHRMaterial khrMaterial;
-    std::unique_ptr<Texture> baseColorTex;
-    std::unique_ptr<Texture> metallicRoughnessTex;
-    std::unique_ptr<Texture> normalTex;
-    std::unique_ptr<Texture> occlusionTex;
-    std::unique_ptr<Texture> emissiveTex;
+    Texture baseColorTex;
+    Texture metallicRoughnessTex;
+    Texture normalTex;
+    Texture occlusionTex;
+    Texture emissiveTex;
 
     const auto &indexAccessor = model.accessors[primitive.indices];
 

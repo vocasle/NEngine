@@ -3,8 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include "Bindable.h"
-#include "Drawable.h"
 #include "IndexBuffer.h"
 #include "InputLayout.h"
 #include "NEngine/Helpers/DeviceResources.h"
@@ -22,35 +20,30 @@ enum class AlphaMode {
 
 struct KHRMaterial
 {
+    Texture DiffuseTexture;
+    Texture SpecularTexture;
+    Texture SpecularGlossinessTexture;
     Math::Vec4D DiffuseFactor;
-    std::unique_ptr<Texture> DiffuseTexture;
     Math::Vec3D SpecularFactor;
-    std::unique_ptr<Texture> SpecularTexture;
     float GlossinessFactor = 0;
-    std::unique_ptr<Texture> SpecularGlossinessTexture;
 };
 
 struct Material
 {
-    Material() = default;
-    Material(const Material &rhs);
-    Material(Material &&rhs) = default;
-    Material &operator=(Material &&rhs) = default;
-    Material &operator=(const Material &rhs);
+    Texture BaseColorTexture;
+    // green is roughness, blue contains metalness
+    Texture MetallicRoughnessTexture;
+    Texture NormalTexture;
+    Texture OcclusionTexture;
+    Texture EmissiveTexture;
+    KHRMaterial KHRMaterial;
     Math::Vec4D BaseColor;
+    Math::Vec3D EmissiveFactor;
     float Metalness = 0;
     float Roughness = 0;
     float NormalScale = 0;
-    std::unique_ptr<Texture> BaseColorTexture;
-    // green is roughness, blue contains metalness
-    std::unique_ptr<Texture> MetallicRoughnessTexture;
-    std::unique_ptr<Texture> NormalTexture;
-    std::unique_ptr<Texture> OcclusionTexture;
-    std::unique_ptr<Texture> EmissiveTexture;
-    AlphaMode AlphaMode = AlphaMode::Blend;
-    KHRMaterial KHRMaterial;
     float OcclusionStrength = 0;
-    Math::Vec3D EmissiveFactor;
+    AlphaMode AlphaMode = AlphaMode::Blend;
 };
 
 class MeshPrimitive

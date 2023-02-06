@@ -73,19 +73,17 @@ NEngine::Renderer::BasePass::DrawMeshPrimitive(
     mPerObjectBuffer->SetValue("material.EmissiveFactor", mat.EmissiveFactor);
     mPerObjectBuffer->SetValue(
         "material.HasBaseColorTex",
-        static_cast<int>(mat.BaseColorTexture != nullptr));
+        static_cast<int>(mat.BaseColorTexture.IsValid()));
     mPerObjectBuffer->SetValue(
         "material.HasMetallicRoughnessTex",
-        static_cast<int>(mat.BaseColorTexture != nullptr));
+        static_cast<int>(mat.MetallicRoughnessTexture.IsValid()));
     mPerObjectBuffer->SetValue(
         "material.HasOcclusionTex",
-        static_cast<int>(mat.BaseColorTexture != nullptr));
-    mPerObjectBuffer->SetValue(
-        "material.HasEmissiveTex",
-        static_cast<int>(mat.BaseColorTexture != nullptr));
-    mPerObjectBuffer->SetValue(
-        "material.HasNormalTex",
-        static_cast<int>(mat.BaseColorTexture != nullptr));
+        static_cast<int>(mat.OcclusionTexture.IsValid()));
+    mPerObjectBuffer->SetValue("material.HasEmissiveTex",
+                               static_cast<int>(mat.EmissiveTexture.IsValid()));
+    mPerObjectBuffer->SetValue("material.HasNormalTex",
+                               static_cast<int>(mat.NormalTexture.IsValid()));
 
     mPerObjectBuffer->Bind(deviceResources);
     meshPrimitive.Bind(deviceResources);

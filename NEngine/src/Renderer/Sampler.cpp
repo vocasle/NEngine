@@ -22,6 +22,11 @@ Sampler::Unbind(Helpers::DeviceResources &deviceResources) const
 {
 }
 
+Sampler::Sampler()
+    : mBindSlot(INVALID_BIND_SLOT)
+{
+}
+
 Sampler::Sampler(Helpers::DeviceResources &deviceResources,
                  const SamplerDescription &desc,
                  unsigned int bindSlot)
