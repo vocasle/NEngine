@@ -453,18 +453,18 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
         normals.resize(positions.size(), {0, 0, 0});
     }
 
-    if (!tangents.empty()) {
-        assert(tangents.size() > *max);
-    }
-    else {
-        tangents = GenerateTangents(indices, normals, texCoords, positions);
-    }
-
     if (!texCoords.empty()) {
         assert(texCoords.size() > *max);
     }
     else {
         texCoords.resize(positions.size(), {0, 0});
+    }
+
+    if (!tangents.empty()) {
+        assert(tangents.size() > *max);
+    }
+    else {
+        tangents = GenerateTangents(indices, normals, texCoords, positions);
     }
 
     assert(positions.size() == normals.size() &&
