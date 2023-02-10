@@ -23,14 +23,9 @@ public:
 
     void Scale(float factor);
 
-    void SetWorld(const Math::Mat4X4 &world);
-    Math::Mat4X4 GetWorld() const;
-
 private:
     Math::Mat4X4 mTranslation;
     Math::Mat4X4 mRotation;
     Math::Mat4X4 mScale;
-
-    Math::Mat4X4 mWorld;
 };
 }  // namespace NEngine::Helpers

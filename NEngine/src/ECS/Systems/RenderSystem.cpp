@@ -62,7 +62,9 @@ RenderSystem::Update(float dt) -> void
             auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
             auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
             auto scale = Mat4X4::Scale(scales);
-            mesh.GetTransform().SetWorld(scale * rotate * translate);
+            mesh.GetTransform().SetScale(scale);
+            mesh.GetTransform().SetRotation(rotate);
+            mesh.GetTransform().SetTranslation(translate);
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
 
@@ -73,8 +75,9 @@ RenderSystem::Update(float dt) -> void
             for (auto &mesh : COLLISION_MESH) {
                 auto &t = mesh.GetTransform();
                 const auto rot = Mat4X4::RotY(ToRadians(pc.Yaw));
-                t.SetWorld(rot * Mat4X4::Scale(scale) *
-                           Mat4X4::Translate(position));
+                t.SetRotation(rot);
+                t.SetScale(Mat4X4::Scale(scale));
+                t.SetTranslation(Mat4X4::Translate(position));
             }
             mPasses[0]->Draw(*mDeviceResources, COLLISION_MESH);
         }

@@ -71,14 +71,5 @@ Transform::Scale(float factor)
     const Vec3D scale(factor, factor, factor);
     mScale = Mat4X4::Scale(scale);
 }
-void
-Transform::SetWorld(const Math::Mat4X4 &world)
-{
-    mWorld = world;
-}
-Math::Mat4X4
-Transform::GetWorld() const
-{
-    return mWorld;
-}
+
 }  // namespace NEngine::Helpers

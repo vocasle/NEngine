@@ -39,7 +39,7 @@ WireframePass::Draw(Helpers::DeviceResources &deviceResources,
     mPerFrameBuffer->Bind(deviceResources);
 
     for (auto &mesh : meshes) {
-        const auto world = mesh.GetTransform().GetWorld();
+        const auto world = mesh.GetTransform().GetTransform();
         mPerObjectBuffer->SetValue("world", world);
         const auto invWorld = world.Inverse().Transpose();
         mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
