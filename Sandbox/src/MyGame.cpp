@@ -289,7 +289,7 @@ MyGame::CreatePlayer() -> void
 
     auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(player);
     renderComp.Mesh = mEngine->LoadMesh(
-        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\player.glb"));
+        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\animated-cube\\AnimatedCube.gltf"));
     auto &ic = mEntityManager.CreateComponent<InputComponent>(player);
 
     auto &camComp = mEntityManager.CreateComponent<CameraComponent>(player);
