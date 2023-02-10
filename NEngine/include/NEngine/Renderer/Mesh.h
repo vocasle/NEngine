@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 
+#include "Animation.h"
 #include "Drawable.h"
 #include "Mesh.h"
 #include "NEngine/Helpers/Transform.h"
@@ -14,7 +15,8 @@ class Mesh
 {
 public:
     Mesh(Helpers::DeviceResources &deviceResources,
-         std::vector<MeshPrimitive> meshes);
+         std::vector<MeshPrimitive> meshes,
+         std::vector<Animation> animations);
     Mesh(const Mesh &rhs);
 
     const std::vector<MeshPrimitive> &GetMeshPrimitives() const;
@@ -24,13 +26,10 @@ public:
     const Helpers::Transform &GetTransform() const;
     Helpers::Transform &GetTransform();
 
-    bool Save() const;
-    static Mesh FromFile(const std::string &file_name,
-                         Helpers::DeviceResources &device_resources);
-
 private:
     std::vector<MeshPrimitive> mMeshPrimitives;
     Helpers::Transform mTransform;
+    std::vector<Animation> m_animations;
 
     friend class FileWriter;
 };

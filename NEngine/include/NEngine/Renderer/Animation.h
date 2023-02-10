@@ -7,8 +7,8 @@ struct AnimSampler
 {
     std::vector<unsigned char> inputs;
     std::vector<unsigned char> outputs;
-    int input_type;
-    int output_type;
+    int input_stride;
+    int output_stride;
 };
 
 struct Channel

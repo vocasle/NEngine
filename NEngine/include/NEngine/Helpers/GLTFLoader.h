@@ -35,7 +35,8 @@ private:
     NEngine::Renderer::Animation parse_animation(
         const tinygltf::Model &model, const tinygltf::Animation &animation);
 
-    void parse_animations(const tinygltf::Model &model);
+    std::vector<NEngine::Renderer::Animation> parse_animations(
+        const tinygltf::Model &model);
 
     DeviceResources &m_deviceResources;
 };

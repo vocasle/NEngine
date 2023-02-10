@@ -102,14 +102,14 @@ GLTFLoader::parse_animation(const tinygltf::Model &model,
                 memcpy(&anim_sam.inputs[0],
                        buffer.data.data() + byteOffset,
                        accessor.count * byteStride);
-                anim_sam.input_type = accessor.type;
+                anim_sam.input_stride = byteStride;
             }
             else {
                 anim_sam.outputs.resize(accessor.count * byteStride);
                 memcpy(&anim_sam.outputs[0],
                        buffer.data.data() + byteOffset,
                        accessor.count * byteStride);
-                anim_sam.output_type = accessor.type;
+                anim_sam.output_stride = byteStride;
             }
         }
         anim.channels.push_back(std::move(ch));
@@ -117,7 +117,7 @@ GLTFLoader::parse_animation(const tinygltf::Model &model,
     return anim;
 }
 
-void
+std::vector<Animation>
 GLTFLoader::parse_animations(const tinygltf::Model &model)
 {
     std::vector<Animation> anims;
@@ -125,6 +125,7 @@ GLTFLoader::parse_animations(const tinygltf::Model &model)
         auto anim = parse_animation(model, animation);
         anims.push_back(std::move(anim));
     }
+    return anims;
 }
 
 void
@@ -212,8 +213,9 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
     for (const auto &primitive : mesh.primitives) {
         meshPrimitives.push_back(ProcessMeshPrimitive(primitive, model));
     }
+    std::vector<Animation> anims = parse_animations(model);
 
-    return Mesh(m_deviceResources, std::move(meshPrimitives));
+    return Mesh(m_deviceResources, std::move(meshPrimitives), std::move(anims));
 }
 
 static std::vector<NEngine::Math::Vec4D>
@@ -590,7 +592,6 @@ GLTFLoader::Load(const std::string &path)
     std::vector<Mesh> meshes;
     for (const auto nodeIdx : scene.nodes) {
         ProcessNode(model.nodes[nodeIdx], model, meshes);
-        parse_animations(model);
     }
 
     return meshes;
