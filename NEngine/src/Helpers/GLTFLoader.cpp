@@ -23,6 +23,18 @@ using namespace NEngine::Helpers;
 using namespace NEngine::Math;
 using namespace NEngine::Renderer;
 
+template <typename T>
+std::vector<T>
+ReadData(const std::vector<unsigned char> &data, size_t count, size_t offset)
+{
+    std::vector<T> vec;
+    vec.reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        vec.push_back(*(reinterpret_cast<const T *>(&data[0] + offset) + i));
+    }
+    return vec;
+}
+
 Transform
 GetNodeTransform(const tinygltf::Node &node)
 {
@@ -56,6 +68,63 @@ GetNodeTransform(const tinygltf::Node &node)
     }
 
     return t;
+}
+
+Animation
+GLTFLoader::parse_animation(const tinygltf::Model &model,
+                            const tinygltf::Animation &animation)
+{
+    auto anim = Animation();
+    anim.name = animation.name;
+    for (auto &channel : animation.channels) {
+        auto ch = Channel();
+        ch.path = channel.target_path;
+
+        const auto &sam = animation.samplers[channel.sampler];
+
+        const auto input = sam.input;
+        const auto output = sam.output;
+        const auto interpolation = sam.interpolation;
+
+        const int accessor_idx[2] = {input, output};
+        auto &anim_sam = ch.sampler;
+
+        for (const int i : accessor_idx) {
+            const auto &accessor = model.accessors[i];
+            const auto &bufferView = model.bufferViews[accessor.bufferView];
+            const auto &buffer = model.buffers[bufferView.buffer];
+            const size_t byteStride = accessor.ByteStride(bufferView);
+            const size_t byteOffset =
+                accessor.byteOffset + bufferView.byteOffset;
+
+            if (i == input) {
+                anim_sam.inputs.resize(accessor.count * byteStride);
+                memcpy(&anim_sam.inputs[0],
+                       buffer.data.data() + byteOffset,
+                       accessor.count * byteStride);
+                anim_sam.input_type = accessor.type;
+            }
+            else {
+                anim_sam.outputs.resize(accessor.count * byteStride);
+                memcpy(&anim_sam.outputs[0],
+                       buffer.data.data() + byteOffset,
+                       accessor.count * byteStride);
+                anim_sam.output_type = accessor.type;
+            }
+        }
+        anim.channels.push_back(std::move(ch));
+    }
+    return anim;
+}
+
+void
+GLTFLoader::parse_animations(const tinygltf::Model &model)
+{
+    std::vector<Animation> anims;
+    for (const auto &animation : model.animations) {
+        auto anim = parse_animation(model, animation);
+        anims.push_back(std::move(anim));
+    }
 }
 
 void
@@ -104,18 +173,6 @@ GLTFLoader::ExtractMeshIndices(const tinygltf::Accessor &indexAccessor,
     }
 
     return indices;
-}
-
-template <typename T>
-std::vector<T>
-ReadData(const std::vector<unsigned char> &data, size_t count, size_t offset)
-{
-    std::vector<T> vec;
-    vec.reserve(count);
-    for (size_t i = 0; i < count; ++i) {
-        vec.push_back(*(reinterpret_cast<const T *>(&data[0] + offset) + i));
-    }
-    return vec;
 }
 
 Texture
@@ -533,6 +590,7 @@ GLTFLoader::Load(const std::string &path)
     std::vector<Mesh> meshes;
     for (const auto nodeIdx : scene.nodes) {
         ProcessNode(model.nodes[nodeIdx], model, meshes);
+        parse_animations(model);
     }
 
     return meshes;

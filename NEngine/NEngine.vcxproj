@@ -241,6 +241,7 @@
     <ClInclude Include="include\NEngine\Math\Vec2D.h" />
     <ClInclude Include="include\NEngine\Math\Vec3D.h" />
     <ClInclude Include="include\NEngine\Math\Vec4D.h" />
+    <ClInclude Include="include\NEngine\Renderer\Animation.h" />
     <ClInclude Include="include\NEngine\Renderer\BasePass.h" />
     <ClInclude Include="include\NEngine\Renderer\Bindable.h" />
     <ClInclude Include="include\NEngine\Renderer\Drawable.h" />

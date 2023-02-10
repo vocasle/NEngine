@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+#include "NEngine/Renderer/Animation.h"
 #include "NEngine/Renderer/Mesh.h"
 #include "tinygltf/tiny_gltf.h"
 
@@ -30,6 +31,11 @@ private:
         size_t idx,
         NEngine::Renderer::TextureBindTarget bindTarget,
         unsigned int bindSlot);
+
+    NEngine::Renderer::Animation parse_animation(
+        const tinygltf::Model &model, const tinygltf::Animation &animation);
+
+    void parse_animations(const tinygltf::Model &model);
 
     DeviceResources &m_deviceResources;
 };
