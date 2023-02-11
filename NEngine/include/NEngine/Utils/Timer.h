@@ -21,13 +21,13 @@ struct Timer
     {
     }
 
-    inline auto
+    auto
     Initialize() -> void
     {
         QueryPerformanceFrequency(&Frequency);
     }
 
-    inline auto
+    auto
     Update() -> void
     {
         if (!QueryPerformanceCounter(&EndTime)) {
@@ -35,7 +35,14 @@ struct Timer
             ExitProcess(EXIT_FAILURE);
         }
 
+        if (StartTime.QuadPart == 0) {
+            LARGE_INTEGER tmp;
+            tmp.QuadPart = 16 * 1000 * Frequency.QuadPart / 1000000.0;
+            StartTime.QuadPart = EndTime.QuadPart - tmp.QuadPart;
+        }
+
         uint64_t timeDelta = EndTime.QuadPart - StartTime.QuadPart;
+        StartTime = EndTime;
 
         timeDelta *= 1000000;
         timeDelta /= Frequency.QuadPart;
@@ -44,10 +51,9 @@ struct Timer
         if (DeltaMillis > MAX_DELTA_TIME) {
             DeltaMillis = MAX_DELTA_TIME;
         }
-        StartTime = EndTime;
     }
 
-    inline auto
+    auto
     GetDelta() -> float
     {
         return static_cast<float>(DeltaMillis);
@@ -59,33 +65,6 @@ struct Timer
     LARGE_INTEGER Frequency;
     LARGE_INTEGER ElapsedMicroseconds;
 };
-
-inline void
-TimerInitialize(Timer *timer)
-{
-    timer->DeltaMillis = 0.0;
-    memset(timer, 0, sizeof(Timer));
-    QueryPerformanceFrequency(&timer->Frequency);
-}
-
-inline void
-TimerTick(Timer *timer)
-{
-    if (!QueryPerformanceCounter(&timer->EndTime)) {
-        OutputDebugStringA("ERROR: Failed to query performance counter\n");
-        ExitProcess(EXIT_FAILURE);
-    }
-
-    uint64_t timeDelta = timer->EndTime.QuadPart - timer->StartTime.QuadPart;
-
-    timeDelta *= 1000000;
-    timeDelta /= timer->Frequency.QuadPart;
-
-    timer->DeltaMillis = (double)timeDelta / 1000.0;  // convert to ms
-    if (timer->DeltaMillis > MAX_DELTA_TIME)
-        timer->DeltaMillis = MAX_DELTA_TIME;
-    timer->StartTime = timer->EndTime;
-}
 
 }  // namespace Utils
 }  // namespace NEngine
