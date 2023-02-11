@@ -262,7 +262,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
         auto &dbgCubeCol =
             mEntityManager.CreateComponent<CollisionComponent>(obj);
         dbgCubeCol.Center = objPos.Position;
-        dbgCubeCol.Size = vec3(3);
+        dbgCubeCol.Size = vec3(1);
 
         mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
     }
