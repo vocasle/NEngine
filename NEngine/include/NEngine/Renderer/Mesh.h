@@ -17,9 +17,9 @@ public:
     Mesh(Helpers::DeviceResources &deviceResources,
          std::vector<MeshPrimitive> meshes,
          std::vector<Animation> animations);
-    Mesh(const Mesh &rhs);
 
     const std::vector<MeshPrimitive> &GetMeshPrimitives() const;
+    const std::vector<Animation> &GetAnimations() const;
 
     void SetTransform(const Helpers::Transform &t);
 

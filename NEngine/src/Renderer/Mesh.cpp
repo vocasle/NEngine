@@ -15,6 +15,12 @@ Mesh::GetMeshPrimitives() const
     return mMeshPrimitives;
 }
 
+const std::vector<Animation> &
+Mesh::GetAnimations() const
+{
+    return m_animations;
+}
+
 Mesh::Mesh(DeviceResources &deviceResources,
            std::vector<MeshPrimitive> meshes,
            std::vector<Animation> animations)
@@ -39,12 +45,6 @@ void
 Mesh::SetTransform(const Helpers::Transform &t)
 {
     mTransform = t;
-}
-
-Mesh::Mesh(const Mesh &rhs)
-    : mTransform(rhs.mTransform),
-      mMeshPrimitives(std::move(rhs.mMeshPrimitives))
-{
 }
 
 }  // namespace NEngine::Renderer
