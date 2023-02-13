@@ -64,4 +64,17 @@ QuatToMat(const vec4 &quat)
 #endif
     return ret;
 }
+
+vec4
+QuatSlerp(const vec4 &q1, const vec4 &q2, float t)
+{
+    auto ret = vec4();
+#if NENGINE_USE_DIRECTXMATH
+    const auto quat1 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&q1));
+    const auto quat2 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&q2));
+    const auto res = XMQuaternionSlerp(quat1, quat2, t);
+    XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), res);
+#endif
+    return ret;
+}
 }  // namespace NEngine::Math
