@@ -110,7 +110,6 @@ Vec4D::Normalize() const
 Vec4D
 operator+(const Vec4D &lhs, const Vec4D &rhs)
 {
-    UTILS_ASSERT(lhs.W == rhs.W, "Cannot mix vector and point");
 #if NENGINE_USE_DIRECTXMATH
     auto ret = Vec4D();
     const auto vec =
@@ -119,14 +118,13 @@ operator+(const Vec4D &lhs, const Vec4D &rhs)
     XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), vec);
     return ret;
 #else
-    return {lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z, lhs.W};
+    return {lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z, lhs.W + rhs.W};
 #endif
 }
 
 Vec4D
 operator-(const Vec4D &lhs, const Vec4D &rhs)
 {
-    UTILS_ASSERT(lhs.W == rhs.W, "Cannot mix vector and point");
 #if NENGINE_USE_DIRECTXMATH
     auto ret = Vec4D();
     const auto vec = XMVectorSubtract(
@@ -135,7 +133,7 @@ operator-(const Vec4D &lhs, const Vec4D &rhs)
     XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), vec);
     return ret;
 #else
-    return {lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z, lhs.W};
+    return {lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z, lhs.W - rhs.W};
 #endif
 }
 
