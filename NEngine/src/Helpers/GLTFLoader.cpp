@@ -98,7 +98,7 @@ GLTFLoader::parse_animation(const tinygltf::Model &model,
                 accessor.byteOffset + bufferView.byteOffset;
 
             if (i == input) {
-                anim_sam.inputs.resize(accessor.count * byteStride);
+                anim_sam.inputs.resize(accessor.count);
                 memcpy(&anim_sam.inputs[0],
                        buffer.data.data() + byteOffset,
                        accessor.count * byteStride);
