@@ -20,6 +20,7 @@ public:
 
     const std::vector<MeshPrimitive> &GetMeshPrimitives() const;
     const std::vector<Animation> &GetAnimations() const;
+    std::vector<Animation> &GetAnimations();
 
     void SetTransform(const Helpers::Transform &t);
 

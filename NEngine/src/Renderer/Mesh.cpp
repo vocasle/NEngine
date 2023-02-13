@@ -21,6 +21,12 @@ Mesh::GetAnimations() const
     return m_animations;
 }
 
+std::vector<Animation> &
+Mesh::GetAnimations()
+{
+    return m_animations;
+}
+
 Mesh::Mesh(DeviceResources &deviceResources,
            std::vector<MeshPrimitive> meshes,
            std::vector<Animation> animations)
