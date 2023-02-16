@@ -170,6 +170,7 @@
     <ClCompile Include="src\Math\Vec2D.cpp" />
     <ClCompile Include="src\Math\Vec3D.cpp" />
     <ClCompile Include="src\Math\Vec4D.cpp" />
+    <ClCompile Include="src\Renderer\Animation.cpp" />
     <ClCompile Include="src\Renderer\BasePass.cpp" />
     <ClCompile Include="src\Renderer\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer\InputLayout.cpp" />
@@ -249,6 +250,8 @@
     <ClInclude Include="include\NEngine\Renderer\InputLayout.h" />
     <ClInclude Include="include\NEngine\Renderer\Mesh.h" />
     <ClInclude Include="include\NEngine\Renderer\MeshPrimitive.h" />
+    <ClInclude Include="include\NEngine\Renderer\RenderModel.h" />
+    <ClInclude Include="include\NEngine\Renderer\RenderNode.h" />
     <ClInclude Include="include\NEngine\Renderer\PixelShader.h" />
     <ClInclude Include="include\NEngine\Renderer\RasterizerState.h" />
     <ClInclude Include="include\NEngine\Renderer\Sampler.h" />

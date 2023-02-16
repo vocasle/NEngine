@@ -10,7 +10,7 @@ namespace NEngine::Helpers {
 using namespace Utils;
 
 std::vector<NEngine::Renderer::Mesh>
-ModelImporter::Load(const std::string &str)
+ModelImporter::Load(const std::string &str) const
 {
     using namespace Utils;
 
@@ -23,6 +23,12 @@ ModelImporter::Load(const std::string &str)
         return {};
     }
     return GLTFLoader(*mDeviceResources).Load(str);
+}
+
+Renderer::RenderModel
+ModelImporter::load(const std::string &path) const
+{
+    return GLTFLoader(*mDeviceResources).load(path);
 }
 
 ModelImporter::ModelImporter(Helpers::DeviceResources &deviceResources)

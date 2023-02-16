@@ -1,8 +1,5 @@
 #include "NEngine/Helpers/GLTFLoader.h"
 
-#include <stdlib.h>
-#include <winscard.h>
-
 #include <algorithm>
 #include <memory>
 
@@ -78,7 +75,19 @@ GLTFLoader::parse_animation(const tinygltf::Model &model,
     anim.name = animation.name;
     for (auto &channel : animation.channels) {
         auto ch = Channel();
-        ch.path = channel.target_path;
+        if (channel.target_path == "rotation") {
+            ch.target_path = Channel::Path::Rotation;
+        }
+        else if (channel.target_path == "translation") {
+            ch.target_path = Channel::Path::Translation;
+        }
+        else if (channel.target_path == "scale") {
+            ch.target_path = Channel::Path::Scale;
+        }
+        else {
+            ch.target_path = Channel::Path::Weights;
+        }
+        ch.target_node = channel.target_node;
 
         const auto &sam = animation.samplers[channel.sampler];
 
@@ -98,15 +107,16 @@ GLTFLoader::parse_animation(const tinygltf::Model &model,
                 accessor.byteOffset + bufferView.byteOffset;
 
             if (i == input) {
-                anim_sam.inputs.resize(accessor.count);
-                memcpy(&anim_sam.inputs[0],
+                anim_sam.input.resize(accessor.count);
+                memcpy(&anim_sam.input[0],
                        buffer.data.data() + byteOffset,
                        accessor.count * byteStride);
-                anim_sam.input_stride = byteStride;
+                UTILS_ASSERT(byteStride == sizeof(float),
+                             "Unexpected input size");
             }
             else {
-                anim_sam.outputs.resize(accessor.count * byteStride);
-                memcpy(&anim_sam.outputs[0],
+                anim_sam.output.resize(accessor.count * byteStride);
+                memcpy(&anim_sam.output[0],
                        buffer.data.data() + byteOffset,
                        accessor.count * byteStride);
                 anim_sam.output_stride = byteStride;
@@ -114,6 +124,7 @@ GLTFLoader::parse_animation(const tinygltf::Model &model,
         }
         anim.channels.push_back(std::move(ch));
     }
+    anim.interpolators.resize(anim.channels.size());
     return anim;
 }
 
@@ -128,6 +139,50 @@ GLTFLoader::parse_animations(const tinygltf::Model &model)
     return anims;
 }
 
+NEngine::Renderer::RenderModel
+GLTFLoader::load(const std::string &path)
+{
+    tinygltf::Model model;
+
+    std::string err;
+    std::string warn;
+
+    tinygltf::TinyGLTF loader;
+
+    bool isLoadSuccessful = false;
+    if (path.find(".gltf") != std::string::npos) {
+        isLoadSuccessful = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+    }
+    else {
+        isLoadSuccessful = loader.LoadBinaryFromFile(&model, &err, &warn, path);
+    }
+
+    if (!err.empty()) {
+        UtilsDebugPrint("ERROR: Failed to load model: %s\n", err.c_str());
+        return {};
+    }
+    if (!warn.empty()) {
+        UtilsDebugPrint("WARN: %s\n", warn.c_str());
+        return {};
+    }
+    if (!isLoadSuccessful) {
+        UtilsDebugPrint("ERROR: Failed to parse gLTF\n");
+        return {};
+    }
+
+    const auto &scene = model.scenes[model.defaultScene];
+
+    auto render_nodes = std::vector<RenderNode>();
+    for (const auto nodeIdx : scene.nodes) {
+        auto render_node = process_node(model.nodes[nodeIdx], model, nodeIdx);
+        render_nodes.push_back(std::move(render_node));
+    }
+
+    std::vector<Animation> anims = parse_animations(model);
+
+    return {std::move(render_nodes), std::move(anims)};
+}
+
 void
 GLTFLoader::ProcessNode(const tinygltf::Node &node,
                         const tinygltf::Model &model,
@@ -135,7 +190,7 @@ GLTFLoader::ProcessNode(const tinygltf::Node &node,
 {
     if (node.mesh >= 0) {
         const auto transform = GetNodeTransform(node);
-        auto mesh = ProcessMesh(model.meshes[node.mesh], model);
+        auto mesh = ProcessMesh(node, model.meshes[node.mesh], model);
         mesh.SetTransform(transform);
         outMeshes.push_back(std::move(mesh));
     }
@@ -143,6 +198,29 @@ GLTFLoader::ProcessNode(const tinygltf::Node &node,
     for (const auto childIdx : node.children) {
         ProcessNode(model.nodes[childIdx], model, outMeshes);
     }
+}
+
+NEngine::Renderer::RenderNode
+GLTFLoader::process_node(const tinygltf::Node &node,
+                         const tinygltf::Model &model,
+                         size_t node_idx)
+{
+    auto render_node = RenderNode();
+    const auto transform = GetNodeTransform(node);
+    render_node.name = node.name;
+    render_node.id = node_idx;
+
+    if (node.mesh >= 0) {
+        auto mesh = ProcessMesh(node, model.meshes[node.mesh], model);
+        mesh.SetTransform(transform);
+        render_node.mesh = mesh;
+    }
+
+    for (const auto childIdx : node.children) {
+        auto child_node = process_node(model.nodes[childIdx], model, childIdx);
+        render_node.children.push_back(std::move(child_node));
+    }
+    return render_node;
 }
 
 std::vector<unsigned int>
@@ -205,7 +283,8 @@ GLTFLoader::CreateTexture(const tinygltf::Model &model,
 }
 
 NEngine::Renderer::Mesh
-GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
+GLTFLoader::ProcessMesh(const tinygltf::Node &node,
+                        const tinygltf::Mesh &mesh,
                         const tinygltf::Model &model)
 {
     std::vector<MeshPrimitive> meshPrimitives;
@@ -213,9 +292,8 @@ GLTFLoader::ProcessMesh(const tinygltf::Mesh &mesh,
     for (const auto &primitive : mesh.primitives) {
         meshPrimitives.push_back(ProcessMeshPrimitive(primitive, model));
     }
-    std::vector<Animation> anims = parse_animations(model);
 
-    return Mesh(m_deviceResources, std::move(meshPrimitives), std::move(anims));
+    return Mesh(m_deviceResources, std::move(meshPrimitives), {});
 }
 
 static std::vector<NEngine::Math::Vec4D>

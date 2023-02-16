@@ -14,6 +14,7 @@ namespace Renderer {
 class Mesh
 {
 public:
+    Mesh() = default;
     Mesh(Helpers::DeviceResources &deviceResources,
          std::vector<MeshPrimitive> meshes,
          std::vector<Animation> animations);

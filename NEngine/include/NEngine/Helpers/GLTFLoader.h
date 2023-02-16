@@ -3,6 +3,8 @@
 
 #include "NEngine/Renderer/Animation.h"
 #include "NEngine/Renderer/Mesh.h"
+#include "NEngine/Renderer/RenderModel.h"
+#include "NEngine/Renderer/RenderNode.h"
 #include "tinygltf/tiny_gltf.h"
 
 namespace NEngine::Helpers {
@@ -11,13 +13,19 @@ class GLTFLoader
 public:
     explicit GLTFLoader(DeviceResources &deviceResources);
     std::vector<NEngine::Renderer::Mesh> Load(const std::string &path);
+    NEngine::Renderer::RenderModel load(const std::string &path);
 
 private:
     void ProcessNode(const tinygltf::Node &node,
                      const tinygltf::Model &model,
                      std::vector<NEngine::Renderer::Mesh> &outMeshes);
 
-    NEngine::Renderer::Mesh ProcessMesh(const tinygltf::Mesh &mesh,
+    NEngine::Renderer::RenderNode process_node(const tinygltf::Node &node,
+                                               const tinygltf::Model &model,
+                                               size_t node_idx);
+
+    NEngine::Renderer::Mesh ProcessMesh(const tinygltf::Node &node,
+                                        const tinygltf::Mesh &mesh,
                                         const tinygltf::Model &model);
 
     NEngine::Renderer::MeshPrimitive ProcessMeshPrimitive(

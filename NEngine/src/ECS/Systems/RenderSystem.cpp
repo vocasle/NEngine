@@ -66,29 +66,8 @@ RenderSystem::Update(float dt) -> void
             mesh.GetTransform().SetRotation(rotate);
             mesh.GetTransform().SetTranslation(translate);
 
-            auto &anims = mesh.GetAnimations();
-            UTILS_ASSERT(anims.size() <= 1,
-                         "Cannot work with more than 1 anim per mesh");
-            if (!anims.empty()) {
-                auto &anim = anims[0];
-                for (auto &ch : anim.channels) {
-                    if (ch.path == "rotation") {
-                        const auto rotation =
-                            anim.interpolator.InterpolateRotation(ch, dt);
-                        mesh.GetTransform().SetRotation(QuatToMat(rotation));
-                    }
-                    else if (ch.path == "scale") {
-                        const auto scale =
-                            anim.interpolator.InterpolateScale(ch, dt);
-                        mesh.GetTransform().SetScale(Mat4X4::Scale(scale));
-                    }
-                    else {
-                        const auto translation =
-                            anim.interpolator.InterpolateTranslation(ch, dt);
-                        mesh.GetTransform().SetTranslation(
-                            Mat4X4::Translate(translation));
-                    }
-                }
+            for (auto &anim : mesh.GetAnimations()) {
+                anim.Advance(dt, mesh.GetTransform());
             }
         }
         mBasePass->Draw(*mDeviceResources, rc.Mesh);
