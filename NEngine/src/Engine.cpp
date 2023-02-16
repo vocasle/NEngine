@@ -434,6 +434,13 @@ Engine::LoadMesh(const std::string &path)
 }
 
 auto
+Engine::LoadModel(const std::string &path) -> NEngine::Renderer::RenderModel
+{
+    const auto importer = ModelImporter(mDeviceResources);
+    return importer.load(path);
+}
+
+auto
 Engine::OnWindowMoved(float x, float y) -> void
 {
     UtilsDebugPrint("Window moved: %f %f\n", x, y);

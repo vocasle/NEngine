@@ -7,6 +7,7 @@
 #include "NEngine/Math/NEMath.h"
 #include "NEngine/Renderer/Mesh.h"
 #include "NEngine/Utils/Timer.h"
+#include "Renderer/RenderModel.h"
 
 namespace NEngine {
 
@@ -35,6 +36,7 @@ public:
 
     auto LoadMesh(const std::string &path)
         -> std::vector<NEngine::Renderer::Mesh>;
+    auto LoadModel(const std::string &path) -> NEngine::Renderer::RenderModel;
     auto Deinit() -> void;
 
 private:
