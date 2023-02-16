@@ -21,39 +21,15 @@ MoveSystem::Update(float dt) -> void
             }
 
             pc.Transform.SetTranslation(Mat4X4::Translate(pc.Position));
-
-            // for (auto &node : rc.Model.nodes) {
-            //// TODO: world matrix should be precomputed somewhere else.
-            // auto translate = Mat4X4::Translate(pc.Position);
-            // auto axis = vec3(0, 1, 0);
-            // auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
-            // auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
-            // auto scale = Mat4X4::Scale(scales);
-            // node.mesh.GetTransform().SetScale(scale);
-            // node.mesh.GetTransform().SetRotation(rotate);
-            // node.mesh.GetTransform().SetTranslation(translate);
-
-            // mBasePass->Draw(*mDeviceResources, node.mesh);
-            //}
-
-            // for (auto &mesh : rc.Mesh) {
-            //     // TODO: world matrix should be precomputed somewhere else.
-            //     auto translate = Mat4X4::Translate(pc.Position);
-            //     auto axis = vec3(0, 1, 0);
-            //     auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
-            //     auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
-            //     auto scale = Mat4X4::Scale(scales);
-            //     mesh.GetTransform().SetScale(scale);
-            //     mesh.GetTransform().SetRotation(rotate);
-            //     mesh.GetTransform().SetTranslation(translate);
-
-            //    for (auto &anim : mesh.GetAnimations()) {
-            //        anim.Advance(dt, mesh.GetTransform());
-            //    }
-            //}
+            pc.Transform.SetRotation(
+                RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
+            pc.Transform.SetScale(Mat4X4::Scale(vec3(pc.Scale)));
         }
         else if (!pc.IsTransformSet) {
             pc.Transform.SetTranslation(Mat4X4::Translate(pc.Position));
+            pc.Transform.SetRotation(
+                RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
+            pc.Transform.SetScale(Mat4X4::Scale(vec3(pc.Scale)));
             pc.IsTransformSet = true;
         }
     }
