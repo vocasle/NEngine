@@ -37,3 +37,4 @@ BraceWrapping:
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
+#BreakAfterAttributes: ABS_Always
