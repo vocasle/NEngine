@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
-#include "NEngine/Renderer/Mesh.h"
+#include "NEngine/Renderer/RenderModel.h"
 
 namespace NEngine::ECS::Components {
 struct RenderComponent
 {
-    std::vector<NEngine::Renderer::Mesh> Mesh;
+    NEngine::Renderer::RenderModel Model;
 };
 }  // namespace NEngine::ECS::Components

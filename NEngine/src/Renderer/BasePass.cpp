@@ -57,6 +57,47 @@ NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
 }
 
 void
+BasePass::draw(Helpers::DeviceResources &device_resources,
+               const NEngine::Renderer::RenderModel &model)
+{
+    device_resources.PIXBeginEvent(L"BasePass");
+
+    auto rtv = mRenderTarget ? mRenderTarget->GetRenderTargetView()
+                             : device_resources.GetRenderTargetView();
+    auto dsv = mDepthTarget ? mDepthTarget->GetDepthStencilView()
+                            : device_resources.GetDepthStencilView();
+
+    auto ctx = device_resources.GetDeviceContext();
+    auto viewport = mViewport ? *mViewport : device_resources.GetViewport();
+    ctx->RSSetViewports(1, &viewport);
+    ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    mRasterizerState->Bind(device_resources);
+
+    mVertexShader->Bind(device_resources);
+    mPixelShader->Bind(device_resources);
+    mInputLayout->Bind(device_resources);
+
+    UpdatePerFrameBuffer();
+
+    mPerSceneBuffer->Bind(device_resources);
+    mPerFrameBuffer->Bind(device_resources);
+
+    for (auto &node : model.nodes) {
+        const auto world = node.transform.GetTransform();
+        mPerObjectBuffer->SetValue("world", world);
+        const auto invWorld = world.Inverse().Transpose();
+        mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
+
+        for (auto &meshPrimitive : node.mesh.GetMeshPrimitives()) {
+            DrawMeshPrimitive(meshPrimitive, device_resources);
+        }
+    }
+
+    device_resources.PIXEndEvent();
+}
+
+void
 NEngine::Renderer::BasePass::DrawMeshPrimitive(
     const Renderer::MeshPrimitive &meshPrimitive,
     Helpers::DeviceResources &deviceResources)

@@ -12,6 +12,7 @@
 #include "NEngine/Renderer/RasterizerState.h"
 #include "PixelShader.h"
 #include "RasterizerState.h"
+#include "RenderModel.h"
 #include "VertexShader.h"
 
 namespace NEngine::Renderer {
@@ -28,6 +29,8 @@ public:
     explicit BasePass(Helpers::DeviceResources &deviceResources);
     virtual void Draw(Helpers::DeviceResources &deviceResources,
                       std::vector<NEngine::Renderer::Mesh> &meshes);
+    virtual void draw(Helpers::DeviceResources &device_resources,
+                      const NEngine::Renderer::RenderModel &model);
 
     virtual ~BasePass() = default;
     void SetCamera(const Helpers::Camera &camera);

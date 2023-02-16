@@ -120,7 +120,7 @@ MyGame::UpdateImgui()
         if (GetOpenFileName(&ofn)) {
             auto &renderComp = *mEntityManager.GetComponent<RenderComponent>(
                 mScene.FindEntityByName("Player")->ID);
-            renderComp.Mesh = mEngine->LoadMesh(UtilsWstrToStr(szPath));
+            renderComp.Model = mEngine->LoadModel(UtilsWstrToStr(szPath));
         }
     }
 
@@ -242,7 +242,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
         auto plane = mEntityManager.CreateEntity();
         auto &planeMesh =
             mEntityManager.CreateComponent<RenderComponent>(plane);
-        planeMesh.Mesh = mEngine->LoadMesh(
+        planeMesh.Model = mEngine->LoadModel(
             UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\plane.glb"));
         auto &planePos =
             mEntityManager.CreateComponent<PositionComponent>(plane);
@@ -253,7 +253,7 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
     {
         auto obj = mEntityManager.CreateEntity();
         auto &objMesh = mEntityManager.CreateComponent<RenderComponent>(obj);
-        objMesh.Mesh = mEngine->LoadMesh(
+        objMesh.Model = mEngine->LoadModel(
             UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\cube.glb"));
         auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
         objPos.Position = {5, 2, 5};
@@ -288,8 +288,8 @@ MyGame::CreatePlayer() -> void
     pos.Position.Y = 2;
 
     auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(player);
-    renderComp.Mesh = mEngine->LoadMesh(
-        UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\animated-cube\\AnimatedCube.gltf"));
+    renderComp.Model = mEngine->LoadModel(UtilsFormatStr(
+        "%s/%s", GAME_RES_DIR, "\\gLTF\\BoxAnimated\\BoxAnimated.glb"));
     auto &ic = mEntityManager.CreateComponent<InputComponent>(player);
 
     auto &camComp = mEntityManager.CreateComponent<CameraComponent>(player);
