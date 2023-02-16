@@ -30,7 +30,11 @@ public:
     virtual void Draw(Helpers::DeviceResources &deviceResources,
                       std::vector<NEngine::Renderer::Mesh> &meshes);
     virtual void draw(Helpers::DeviceResources &device_resources,
-                      const NEngine::Renderer::RenderModel &model);
+                      const NEngine::Renderer::RenderModel &model,
+                      Helpers::Transform &transform);
+    virtual void draw_node(Helpers::DeviceResources &device_resources,
+                           const NEngine::Renderer::RenderNode &node,
+                           const Mat4X4 &parent_world);
 
     virtual ~BasePass() = default;
     void SetCamera(const Helpers::Camera &camera);

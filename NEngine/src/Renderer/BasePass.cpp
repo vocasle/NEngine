@@ -58,7 +58,8 @@ NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
 
 void
 BasePass::draw(Helpers::DeviceResources &device_resources,
-               const NEngine::Renderer::RenderModel &model)
+               const NEngine::Renderer::RenderModel &model,
+               Helpers::Transform &transform)
 {
     device_resources.PIXBeginEvent(L"BasePass");
 
@@ -84,17 +85,29 @@ BasePass::draw(Helpers::DeviceResources &device_resources,
     mPerFrameBuffer->Bind(device_resources);
 
     for (auto &node : model.nodes) {
-        const auto world = node.transform.GetTransform();
-        mPerObjectBuffer->SetValue("world", world);
-        const auto invWorld = world.Inverse().Transpose();
-        mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
-
-        for (auto &meshPrimitive : node.mesh.GetMeshPrimitives()) {
-            DrawMeshPrimitive(meshPrimitive, device_resources);
-        }
+        draw_node(device_resources, node, transform.GetTransform());
     }
 
     device_resources.PIXEndEvent();
+}
+
+void
+BasePass::draw_node(Helpers::DeviceResources &device_resources,
+                    const NEngine::Renderer::RenderNode &node,
+                    const Mat4X4 &parent_world)
+{
+    const auto world = parent_world * node.transform.GetTransform();
+    mPerObjectBuffer->SetValue("world", world);
+    const auto invWorld = world.Inverse().Transpose();
+    mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
+
+    for (auto &meshPrimitive : node.mesh.GetMeshPrimitives()) {
+        DrawMeshPrimitive(meshPrimitive, device_resources);
+    }
+
+    for (const auto &child : node.children) {
+        draw_node(device_resources, child, world);
+    }
 }
 
 void

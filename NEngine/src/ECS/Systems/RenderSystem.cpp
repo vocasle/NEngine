@@ -56,51 +56,21 @@ RenderSystem::Update(float dt) -> void
         const auto position = pc.Position;
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
 
-        mBasePass->draw(*mDeviceResources, rc.Model);
+        mBasePass->draw(*mDeviceResources, rc.Model, pc.Transform);
 
-        // for (auto &node : rc.Model.nodes) {
-        //// TODO: world matrix should be precomputed somewhere else.
-        // auto translate = Mat4X4::Translate(pc.Position);
-        // auto axis = vec3(0, 1, 0);
-        // auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
-        // auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
-        // auto scale = Mat4X4::Scale(scales);
-        // node.mesh.GetTransform().SetScale(scale);
-        // node.mesh.GetTransform().SetRotation(rotate);
-        // node.mesh.GetTransform().SetTranslation(translate);
-
-        // mBasePass->Draw(*mDeviceResources, node.mesh);
-        //}
-
-        // for (auto &mesh : rc.Mesh) {
-        //     // TODO: world matrix should be precomputed somewhere else.
-        //     auto translate = Mat4X4::Translate(pc.Position);
-        //     auto axis = vec3(0, 1, 0);
-        //     auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
-        //     auto scales = vec3(pc.Scale, pc.Scale, pc.Scale);
-        //     auto scale = Mat4X4::Scale(scales);
-        //     mesh.GetTransform().SetScale(scale);
-        //     mesh.GetTransform().SetRotation(rotate);
-        //     mesh.GetTransform().SetTranslation(translate);
-
-        //    for (auto &anim : mesh.GetAnimations()) {
-        //        anim.Advance(dt, mesh.GetTransform());
+        //if (mEntityManager->HasComponent<CollisionComponent>(entity)) {
+        //    const auto &cc =
+        //        *mEntityManager->GetComponent<CollisionComponent>(entity);
+        //    const auto scale = cc.Size;
+        //    for (auto &mesh : COLLISION_MESH) {
+        //        auto &t = mesh.GetTransform();
+        //        const auto rot = Mat4X4::RotY(ToRadians(pc.Yaw));
+        //        t.SetRotation(rot);
+        //        t.SetScale(Mat4X4::Scale(scale));
+        //        t.SetTranslation(Mat4X4::Translate(position));
         //    }
+        //    mPasses[0]->Draw(*mDeviceResources, COLLISION_MESH);
         //}
-
-        if (mEntityManager->HasComponent<CollisionComponent>(entity)) {
-            const auto &cc =
-                *mEntityManager->GetComponent<CollisionComponent>(entity);
-            const auto scale = cc.Size;
-            for (auto &mesh : COLLISION_MESH) {
-                auto &t = mesh.GetTransform();
-                const auto rot = Mat4X4::RotY(ToRadians(pc.Yaw));
-                t.SetRotation(rot);
-                t.SetScale(Mat4X4::Scale(scale));
-                t.SetTranslation(Mat4X4::Translate(position));
-            }
-            mPasses[0]->Draw(*mDeviceResources, COLLISION_MESH);
-        }
     }
 }
 
