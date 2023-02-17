@@ -16,20 +16,20 @@ MoveSystem::Update(float dt) -> void
         if (pc.Movable) {
             pc.Position = pc.Position + pc.Velocity;
 
-            if (mEntityManager->HasComponent<CameraComponent>(entity)) {
-                UpdateCamera(dt, entity, pc);
-            }
+            //if (mEntityManager->HasComponent<CameraComponent>(entity)) {
+            //    UpdateCamera(dt, entity, pc);
+            //}
 
-            pc.Transform.SetTranslation(Mat4X4::Translate(pc.Position));
-            pc.Transform.SetRotation(
-                RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
-            pc.Transform.SetScale(Mat4X4::Scale(vec3(pc.Scale)));
+            pc.Transform.translation = pc.Position;
+            // pc.Transform.SetRotation(
+            //     RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
+            pc.Transform.scale = vec3(pc.Scale);
         }
         else if (!pc.IsTransformSet) {
-            pc.Transform.SetTranslation(Mat4X4::Translate(pc.Position));
-            pc.Transform.SetRotation(
-                RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
-            pc.Transform.SetScale(Mat4X4::Scale(vec3(pc.Scale)));
+            pc.Transform.translation = pc.Position;
+            // pc.Transform.SetRotation(
+            //     RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
+            pc.Transform.scale = vec3(pc.Scale);
             pc.IsTransformSet = true;
         }
     }

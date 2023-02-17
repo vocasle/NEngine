@@ -42,16 +42,16 @@ NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
     mPerSceneBuffer->Bind(deviceResources);
     mPerFrameBuffer->Bind(deviceResources);
 
-    for (auto &mesh : meshes) {
-        const auto world = mesh.GetTransform().GetTransform();
-        mPerObjectBuffer->SetValue("world", world);
-        const auto invWorld = world.Inverse().Transpose();
-        mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
+    //for (auto &mesh : meshes) {
+    //    const auto world = mesh.GetTransform().get_transform();
+    //    mPerObjectBuffer->SetValue("world", world);
+    //    const auto invWorld = world.Inverse().Transpose();
+    //    mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
-        for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
-            DrawMeshPrimitive(meshPrimitive, deviceResources);
-        }
-    }
+    //    for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
+    //        DrawMeshPrimitive(meshPrimitive, deviceResources);
+    //    }
+    //}
 
     deviceResources.PIXEndEvent();
 }
@@ -85,7 +85,7 @@ BasePass::draw(Helpers::DeviceResources &device_resources,
     mPerFrameBuffer->Bind(device_resources);
 
     for (auto &node : model.nodes) {
-        draw_node(device_resources, node, transform.GetTransform());
+        draw_node(device_resources, node, transform.get_transform());
     }
 
     device_resources.PIXEndEvent();
@@ -96,7 +96,7 @@ BasePass::draw_node(Helpers::DeviceResources &device_resources,
                     const NEngine::Renderer::RenderNode &node,
                     const Mat4X4 &parent_world)
 {
-    const auto world = parent_world * node.transform.GetTransform();
+    const auto world = node.transform.get_transform() * parent_world;
     mPerObjectBuffer->SetValue("world", world);
     const auto invWorld = world.Inverse().Transpose();
     mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
@@ -104,7 +104,6 @@ BasePass::draw_node(Helpers::DeviceResources &device_resources,
     for (auto &meshPrimitive : node.mesh.GetMeshPrimitives()) {
         DrawMeshPrimitive(meshPrimitive, device_resources);
     }
-
     for (const auto &child : node.children) {
         draw_node(device_resources, child, world);
     }

@@ -80,19 +80,19 @@ struct Animation
                 {
                     const auto t =
                         interpolator.InterpolateVec3(ch, cur_time, max_time);
-                    transform.SetTranslation(Mat4X4::Translate(t));
+                    transform.translation = t;
                 } break;
                 case Channel::Path::Rotation:
                 {
                     const auto r =
                         interpolator.InterpolateVec4(ch, cur_time, max_time);
-                    transform.SetRotation(QuatToMat(r));
+                    transform.rotation = r;
                 } break;
                 case Channel::Path::Scale:
                 {
                     const auto s =
                         interpolator.InterpolateVec3(ch, cur_time, max_time);
-                    transform.SetScale(Mat4X4::Scale(s));
+                    transform.scale = s;
                 } break;
                 case Channel::Path::Weights:
                     break;

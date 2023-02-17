@@ -38,16 +38,16 @@ WireframePass::Draw(Helpers::DeviceResources &deviceResources,
     mPerSceneBuffer->Bind(deviceResources);
     mPerFrameBuffer->Bind(deviceResources);
 
-    for (auto &mesh : meshes) {
-        const auto world = mesh.GetTransform().GetTransform();
-        mPerObjectBuffer->SetValue("world", world);
-        const auto invWorld = world.Inverse().Transpose();
-        mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
+    //for (auto &mesh : meshes) {
+    //    const auto world = mesh.GetTransform().get_transform();
+    //    mPerObjectBuffer->SetValue("world", world);
+    //    const auto invWorld = world.Inverse().Transpose();
+    //    mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
-        for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
-            DrawMeshPrimitive(meshPrimitive, deviceResources);
-        }
-    }
+    //    for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
+    //        DrawMeshPrimitive(meshPrimitive, deviceResources);
+    //    }
+    //}
     deviceResources.PIXEndEvent();
 }
 }  // namespace NEngine::Renderer

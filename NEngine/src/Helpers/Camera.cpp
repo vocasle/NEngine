@@ -315,7 +315,7 @@ Camera::Arcball(double deltaMillis)
     // m_Pitch = std::clamp(m_Pitch, -maxPitch, maxPitch);
     // m_Yaw += MathToRadians(yawDelta * 0.4);
 
-    float camRadius = 10.0f;
+    float camRadius = 100.0f;
     // calculate camera position depending on pitch
     const auto h = camRadius * cos(m_Pitch);
     const auto z = -h * cos(m_Yaw);

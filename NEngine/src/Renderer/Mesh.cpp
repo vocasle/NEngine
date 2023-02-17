@@ -35,22 +35,4 @@ Mesh::Mesh(DeviceResources &deviceResources,
 {
 }
 
-const Transform &
-Mesh::GetTransform() const
-{
-    return mTransform;
-}
-
-Transform &
-Mesh::GetTransform()
-{
-    return mTransform;
-}
-
-void
-Mesh::SetTransform(const Helpers::Transform &t)
-{
-    mTransform = t;
-}
-
 }  // namespace NEngine::Renderer

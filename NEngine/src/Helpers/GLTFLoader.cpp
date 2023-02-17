@@ -36,31 +36,52 @@ Transform
 GetNodeTransform(const tinygltf::Node &node)
 {
     auto t = Transform();
-
     if (!node.matrix.empty()) {
-        assert("Setting matrix transform from gLTF is not yet implemented");
+        t.transform = mat4(node.matrix[0],
+                           node.matrix[1],
+                           node.matrix[2],
+                           node.matrix[3],
+                           node.matrix[4],
+                           node.matrix[5],
+                           node.matrix[6],
+                           node.matrix[7],
+                           node.matrix[8],
+                           node.matrix[9],
+                           node.matrix[10],
+                           node.matrix[11],
+                           node.matrix[12],
+                           node.matrix[13],
+                           node.matrix[14],
+                           node.matrix[15]);
     }
     else {
+        // in case there is no matrix use identity matrix as default
+        // because it could be that scale, translation and rotation
+        // are not defined as well
+        t.transform = mat4();
         if (!node.rotation.empty()) {
-            const auto rot =
-                QuatToMat(Vec4D(static_cast<float>(node.rotation[0]),
-                                static_cast<float>(node.rotation[1]),
-                                static_cast<float>(node.rotation[2]),
-                                static_cast<float>(node.rotation[3])));
+            const auto rot = Vec4D(static_cast<float>(node.rotation[0]),
+                                   static_cast<float>(node.rotation[1]),
+                                   static_cast<float>(node.rotation[2]),
+                                   static_cast<float>(node.rotation[3]));
 
-            t.SetRotation(rot);
+            t.rotation = rot;
+            t.use_matrix = false;
         }
         if (!node.translation.empty()) {
             const Vec3D offset(static_cast<float>(node.translation[0]),
                                static_cast<float>(node.translation[1]),
                                static_cast<float>(node.translation[2]));
-            t.SetTranslation(Mat4X4::Translate(offset));
+            t.translation = offset;
+            t.use_matrix = false;
         }
         if (!node.scale.empty()) {
             const Vec3D scale(static_cast<float>(node.scale[0]),
                               static_cast<float>(node.scale[1]),
                               static_cast<float>(node.scale[2]));
-            t.SetScale(Mat4X4::Scale(scale));
+
+            t.scale = scale;
+            t.use_matrix = false;
         }
     }
 
@@ -191,7 +212,7 @@ GLTFLoader::ProcessNode(const tinygltf::Node &node,
     if (node.mesh >= 0) {
         const auto transform = GetNodeTransform(node);
         auto mesh = ProcessMesh(node, model.meshes[node.mesh], model);
-        mesh.SetTransform(transform);
+        // mesh.SetTransform(transform);
         outMeshes.push_back(std::move(mesh));
     }
 
@@ -209,10 +230,10 @@ GLTFLoader::process_node(const tinygltf::Node &node,
     const auto transform = GetNodeTransform(node);
     render_node.name = node.name;
     render_node.id = node_idx;
+    render_node.transform = transform;
 
     if (node.mesh >= 0) {
         auto mesh = ProcessMesh(node, model.meshes[node.mesh], model);
-        mesh.SetTransform(transform);
         render_node.mesh = mesh;
     }
 
