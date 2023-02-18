@@ -156,7 +156,7 @@ NEngine::Renderer::BasePass::UpdatePerFrameBuffer()
     assert(mCamera != nullptr && "Camera is not set to BasePass!");
     const auto viewMat = mCamera->GetViewMat();
     const auto projMat = mCamera->GetProjMat();
-    const auto camPos = mCamera->GetPos();
+    const auto camPos = mCamera->pos;
     mPerFrameBuffer->SetValue("view", viewMat);
     mPerFrameBuffer->SetValue("proj", projMat);
     mPerFrameBuffer->SetValue("cameraPosW", camPos);

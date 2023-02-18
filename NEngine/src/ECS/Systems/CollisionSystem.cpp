@@ -24,7 +24,7 @@ CollisionSystem::Update(float dt) -> void
         const auto &col1 =
             *mEntityManager->GetComponent<Components::CollisionComponent>(e1);
 
-        const auto lhs = MoveBox(pos1.Position, col1);
+        const auto lhs = MoveBox(pos1.Transform.translation, col1);
 
         for (auto e2 : mEntities) {
             if (e1 == e2 || (collidedEntities.contains(e2) &&
@@ -39,7 +39,7 @@ CollisionSystem::Update(float dt) -> void
                 *mEntityManager->GetComponent<Components::CollisionComponent>(
                     e2);
 
-            const auto rhs = MoveBox(pos2.Position, col2);
+            const auto rhs = MoveBox(pos2.Transform.translation, col2);
 
             if (IsOverlaping(lhs, rhs)) {
                 collidedEntities.insert(e1);

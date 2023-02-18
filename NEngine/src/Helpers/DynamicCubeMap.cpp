@@ -51,12 +51,12 @@ DynamicCubeMap::BuildCubeFaceCamera(const Vec3D &origin) {
         Vec3D(0.0f, 1.0f, 0.0f)   // -Z
     };
     for (int i = 0; i < 6; ++i) {
-        m_cubeMapCamera[i].LookAt(origin, targets[i], ups[i]);
-        m_cubeMapCamera[i].SetZFar(1000.0f);
-        m_cubeMapCamera[i].SetZNear(0.1f);
-        m_cubeMapCamera[i].SetFov(90.0f);
-        m_cubeMapCamera[i].SetViewDimensions(CUBEMAP_SIZE,
-                                             CUBEMAP_SIZE);
+        //m_cubeMapCamera[i].LookAt(origin, targets[i], ups[i]);
+        //m_cubeMapCamera[i].SetZFar(1000.0f);
+        //m_cubeMapCamera[i].SetZNear(0.1f);
+        //m_cubeMapCamera[i].SetFov(90.0f);
+        //m_cubeMapCamera[i].SetViewDimensions(CUBEMAP_SIZE,
+        //                                     CUBEMAP_SIZE);
         // m_cubeMapCamera[i].SetLens(0.5f * XM_PI, 1.0f, 0.1f, 1000.0f);
         // m_cubeMapCamera[i].UpdateViewMatrix();
     }

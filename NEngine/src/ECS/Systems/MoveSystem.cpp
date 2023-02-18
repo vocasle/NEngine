@@ -1,6 +1,5 @@
 #include "NEngine/ECS/Systems/MoveSystem.h"
 
-#include "NEngine/Math/MathUtils.h"
 #include "NEngine/Math/Vec3D.h"
 
 namespace NEngine::ECS::Systems {
@@ -14,22 +13,12 @@ MoveSystem::Update(float dt) -> void
     for (auto entity : mEntities) {
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
         if (pc.Movable) {
-            pc.Position = pc.Position + pc.Velocity;
-
-            //if (mEntityManager->HasComponent<CameraComponent>(entity)) {
-            //    UpdateCamera(dt, entity, pc);
-            //}
-
-            pc.Transform.translation = pc.Position;
-            // pc.Transform.SetRotation(
-            //     RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
-            pc.Transform.scale = vec3(pc.Scale);
+            pc.Transform.translation = pc.Transform.translation + pc.Velocity;
+            if (mEntityManager->HasComponent<CameraComponent>(entity)) {
+                UpdateCamera(dt, entity, pc);
+            }
         }
         else if (!pc.IsTransformSet) {
-            pc.Transform.translation = pc.Position;
-            // pc.Transform.SetRotation(
-            //     RotateAxis(ToRadians(pc.Yaw), vec3(0, 1, 0)));
-            pc.Transform.scale = vec3(pc.Scale);
             pc.IsTransformSet = true;
         }
     }
@@ -38,7 +27,8 @@ MoveSystem::Update(float dt) -> void
 auto
 MoveSystem::RegisterEntity(Entity entity) -> void
 {
-    if (mEntityManager->HasComponent<PositionComponent>(entity)) {
+    if (mEntityManager->HasComponent<PositionComponent>(entity) &&
+        std::ranges::find(mEntities, entity) == std::end(mEntities)) {
         mEntities.push_back(entity);
     }
 }
@@ -58,12 +48,16 @@ auto
 MoveSystem::UpdateCamera(float dt, Entity entity, const PositionComponent &pc)
     -> void
 {
+    return;
     auto &camComp = *mEntityManager->GetComponent<CameraComponent>(entity);
 
-    camComp.Camera.m_At = pc.Position;
-    camComp.Camera.m_Yaw = ToRadians(pc.Yaw);
-    camComp.Camera.m_Pitch = ToRadians(45.0f);
-    camComp.Camera.Arcball(dt);
+    // camComp.Camera.m_Yaw = ToRadians(pc.Yaw);
+    // camComp.Camera.m_Pitch = ToRadians(45.0f);
+    //  camComp.Camera.Arcball(dt);
+    camComp.Camera.Follow(pc.Transform.translation);
+    UTILS_PRINTLN("pc: %s, cam: %s",
+                  pc.Transform.translation.ToString().c_str(),
+                  camComp.Camera.ToString().c_str());
 }
 
 }  // namespace NEngine::ECS::Systems

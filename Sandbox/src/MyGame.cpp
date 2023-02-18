@@ -103,8 +103,8 @@ MyGame::UpdateImgui()
                     *mEntityManager.GetComponent<CameraComponent>(player->ID);
                 auto &pos =
                     *mEntityManager.GetComponent<PositionComponent>(player->ID);
-                cam.Camera.SetZFar(zFar);
-                cam.Camera.SetZNear(zNear);
+                cam.Camera.z_far = zFar;
+                cam.Camera.z_near = zNear;
             }
         }
     }
@@ -129,16 +129,15 @@ MyGame::UpdateImgui()
 
         auto &pc = *mEntityManager.GetComponent<PositionComponent>(
             mScene.FindEntityByName("Player")->ID);
-        auto translate = Mat4X4::Translate(pc.Position);
-        auto axis = Vec3D(0, 1, 0);
-        auto rotate = RotateAxis(ToRadians(pc.Yaw), axis);
+        auto translate = Mat4X4::Translate(pc.Transform.translation);
+        auto rotate = QuatToMat(pc.Transform.rotation);
         const auto scales = vec3(scale, scale, scale);
         auto scaleMat = Mat4X4::Scale(scales);
 
         ImGui::InputFloat("Player scale", &scale);
 
         if (ImGui::Button("Apply##World")) {
-            pc.Scale = scale;
+            pc.Transform.scale = scale;
         }
 
         ImGui::Text("%s", (translate * rotate * scaleMat).ToString().c_str());
@@ -215,7 +214,11 @@ MyGame::Update(float dt)
         }
     }
 
-    mSystemManager.Update(dt);
+    mSystemManager.GetSystem<InputSystem>().Update(dt);
+    mSystemManager.GetSystem<MoveSystem>().Update(dt);
+    mSystemManager.GetSystem<CollisionSystem>().Update(dt);
+    mSystemManager.GetSystem<AudioSystem>().Update(dt);
+    mSystemManager.GetSystem<RenderSystem>().Update(dt);
 
     Render();
 }
@@ -256,12 +259,14 @@ MyGame::InitWithEngine(NEngine::Engine &engine) -> void
         objMesh.Model = mEngine->LoadModel(
             UtilsFormatStr("%s/%s", GAME_RES_DIR, "\\gLTF\\cube.glb"));
         auto &objPos = mEntityManager.CreateComponent<PositionComponent>(obj);
-        objPos.Position = {5, 2, 5};
+        objPos.Transform.translation = {5, 2, 5};
+        objPos.Transform.use_matrix = false;
+        objPos.IsTransformSet = true;
         objPos.Movable = false;
 
         auto &dbgCubeCol =
             mEntityManager.CreateComponent<CollisionComponent>(obj);
-        dbgCubeCol.Center = objPos.Position;
+        dbgCubeCol.Center = objPos.Transform.translation;
         dbgCubeCol.Size = vec3(1);
 
         mScene.AddToScene({obj, "DebugCube", mEntityManager.GetBitmask(obj)});
@@ -285,7 +290,7 @@ MyGame::CreatePlayer() -> void
 {
     auto player = mEntityManager.CreateEntity();
     auto &pos = mEntityManager.CreateComponent<PositionComponent>(player);
-    pos.Position.Y = 2;
+    pos.Transform.translation.Y = 2;
 
     auto &renderComp = mEntityManager.CreateComponent<RenderComponent>(player);
     renderComp.Model = mEngine->LoadModel(UtilsFormatStr(
@@ -293,14 +298,16 @@ MyGame::CreatePlayer() -> void
     auto &ic = mEntityManager.CreateComponent<InputComponent>(player);
 
     auto &camComp = mEntityManager.CreateComponent<CameraComponent>(player);
-    camComp.Camera.SetZFar(10000);
-    camComp.Camera.SetZNear(0.1f);
-    camComp.Camera.LookAt({0, 10, -20}, {0, 0, -1}, {0, 1, 0});
+    camComp.Camera.fov = 45.0f;
+    camComp.Camera.z_far = 10000;
+    camComp.Camera.z_near = 1;
+    //camComp.Camera.LookAt({0, 100, -50}, {0, 0, -1}, {0, 1, 0});
     const auto winSize = mEngine->GetWindowSize();
-    camComp.Camera.SetViewDimensions(winSize.X, winSize.Y);
+    camComp.Camera.aspect_ratio = winSize.X / winSize.Y;
     pos.Movable = true;
+    pos.Transform.use_matrix = false;
     auto &cc = mEntityManager.CreateComponent<CollisionComponent>(player);
-    cc.Center = pos.Position;
+    cc.Center = pos.Transform.translation;
     cc.Size = vec3(1);
     cc.OnCollision = [this](Entity e1, Entity e2)
     {

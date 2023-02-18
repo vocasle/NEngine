@@ -105,10 +105,8 @@ InputSystem::Update(float dt) -> void
 
     for (auto entity : mEntities) {
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
-
         pc.Velocity = v;
-        pc.Pitch = mAngles.Pitch;
-        pc.Yaw = mAngles.Yaw;
+        pc.Transform.rotation = QuatFromEuler(vec3(mAngles.Pitch, mAngles.Yaw, 0));
     }
 }
 

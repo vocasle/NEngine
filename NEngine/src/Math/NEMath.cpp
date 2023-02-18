@@ -77,4 +77,28 @@ QuatSlerp(const vec4 &q1, const vec4 &q2, float t)
 #endif
     return ret;
 }
+
+vec4
+QuatFromEuler(const vec3 &angles)
+{
+    auto ret = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+#if NENGINE_USE_DIRECTXMATH
+    const auto quat = XMQuaternionRotationRollPitchYawFromVector(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&angles)));
+    XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), quat);
+#endif
+    return ret;
+}
+
+vec4
+MatToQuat(const mat4 &rot_mat)
+{
+    auto ret = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+#if NENGINE_USE_DIRECTXMATH
+    const auto quat = XMQuaternionRotationMatrix(
+        XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&rot_mat)));
+    XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), quat);
+#endif
+    return ret;
+}
 }  // namespace NEngine::Math

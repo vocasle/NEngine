@@ -23,6 +23,8 @@ mat4 LookAt(const vec3 &camPos, const vec3 &target, const vec3 &up);
 mat4 PerspectiveFov(float fov, float aspectRatio, float zNear, float zFar);
 mat4 QuatToMat(const vec4 &quat);
 vec4 QuatSlerp(const vec4 &q1, const vec4 &q2, float t);
+vec4 QuatFromEuler(const vec3 &angles);
+vec4 MatToQuat(const mat4 &rot_mat);
 
 template <typename T>
 T

@@ -53,7 +53,6 @@ RenderSystem::Update(float dt) -> void
 
     for (auto entity : mEntities) {
         auto &pc = *mEntityManager->GetComponent<PositionComponent>(entity);
-        const auto position = pc.Position;
         auto &rc = *mEntityManager->GetComponent<RenderComponent>(entity);
 
         mBasePass->draw(*mDeviceResources, rc.Model, pc.Transform);
