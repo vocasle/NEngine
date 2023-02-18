@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "NEngine/Math/MathUtils.h"
+#include "NEngine/Utils/Utils.h"
 
 using namespace NEngine::Math;
 
@@ -11,31 +12,23 @@ namespace NEngine::Helpers {
 static const Math::vec3 UP = Math::vec3(0, 1, 0);
 
 void
-Camera::Follow(const Math::vec3 &target_pos)
+Camera::Follow(const Transform &transform)
 {
-    pos = target_pos - vec3(0, 2, 5);
-    focus_pos = target_pos;
+    target_transform = transform;
+    // TODO:Calculate camera pos for lighting
 }
 
 Math::Mat4X4
 Camera::GetViewMat() const
 {
-    return LookAt(vec3(0, 10, -10), vec3(0, 0, 1), UP);
+    const auto view_mat = LookAt(vec3(0, target_offset_y, -target_offset_z), vec3(0, 0, 0), UP);
+    const auto tmp = target_transform.get_transform().Inverse() * view_mat;
+    return tmp;
 }
 
 Math::Mat4X4
 Camera::GetProjMat() const
 {
     return PerspectiveFov(ToRadians(fov), aspect_ratio, z_near, z_far);
-}
-
-std::string
-Camera::ToString() const
-{
-    std::ostringstream out;
-    out << "pos: " << pos.ToString() << "\nfocus_pos: " << focus_pos.ToString()
-        << "\nfov: " << fov << "\naspect_ratio: " << aspect_ratio
-        << "\nz_near: " << z_near << "\nz_far: " << z_far;
-    return out.str();
 }
 }  // namespace NEngine::Helpers

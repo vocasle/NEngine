@@ -25,6 +25,7 @@ struct Vec3D
     static float Dot(const Vec3D &lhs, const Vec3D &rhs);
     float Length() const;
     Vec3D Normalize() const;
+    Vec3D Rotate(const Vec4D &quat) const;
 
     float X;
     float Y;

@@ -95,18 +95,18 @@ MyGame::UpdateImgui()
         ImGui::InputFloat("z far", &zFar);
         ImGui::InputFloat("z near", &zNear);
 
-        if (ImGui::Button("Apply##Camera")) {
-            const auto player = mScene.FindEntityByName("Player");
+        const auto player = mScene.FindEntityByName("Player");
+        auto &cam = *mEntityManager.GetComponent<CameraComponent>(player->ID);
+        auto &pos = *mEntityManager.GetComponent<PositionComponent>(player->ID);
 
+        if (ImGui::Button("Apply##Camera")) {
             if (player) {
-                auto &cam =
-                    *mEntityManager.GetComponent<CameraComponent>(player->ID);
-                auto &pos =
-                    *mEntityManager.GetComponent<PositionComponent>(player->ID);
                 cam.Camera.z_far = zFar;
                 cam.Camera.z_near = zNear;
             }
         }
+
+        ImGui::Text("%s", cam.Camera.GetViewMat().ToString().c_str());
     }
 
     if (ImGui::Button("Open model")) {
@@ -301,7 +301,7 @@ MyGame::CreatePlayer() -> void
     camComp.Camera.fov = 45.0f;
     camComp.Camera.z_far = 10000;
     camComp.Camera.z_near = 1;
-    //camComp.Camera.LookAt({0, 100, -50}, {0, 0, -1}, {0, 1, 0});
+    // camComp.Camera.LookAt({0, 100, -50}, {0, 0, -1}, {0, 1, 0});
     const auto winSize = mEngine->GetWindowSize();
     camComp.Camera.aspect_ratio = winSize.X / winSize.Y;
     pos.Movable = true;

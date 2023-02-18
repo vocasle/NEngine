@@ -4,6 +4,7 @@
 
 #include "NEngine/Input/Mouse.h"
 #include "NEngine/Math/NEMath.h"
+#include "Transform.h"
 
 namespace NEngine {
 namespace Helpers {
@@ -12,18 +13,19 @@ namespace Helpers {
 
 struct Camera
 {
-    void Follow(const Math::vec3 &target_pos);
+    void Follow(const Transform &transform);
     Math::Mat4X4 GetViewMat() const;
     Math::Mat4X4 GetProjMat() const;
-    std::string ToString() const;
 
     Math::vec3 pos;
-    Math::vec3 focus_pos;
-
+    Transform target_transform;
     float fov;
     float aspect_ratio;
     float z_near;
     float z_far;
+
+    float target_offset_y = 10;
+    float target_offset_z = 10;
 };
 }  // namespace Helpers
 }  // namespace NEngine

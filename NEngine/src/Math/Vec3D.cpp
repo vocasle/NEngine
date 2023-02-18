@@ -109,6 +109,19 @@ Vec3D::Normalize() const
 #endif
 }
 
+Vec3D
+Vec3D::Rotate(const Vec4D &quat) const
+{
+    auto ret = *this;
+#if NENGINE_USE_DIRECTXMATH
+    const auto vec = XMVector3Rotate(
+        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(this)),
+        XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&quat)));
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+#endif
+    return ret;
+}
+
 bool
 Vec3D::operator==(const Vec3D &rhs) const
 {
