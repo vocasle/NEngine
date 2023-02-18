@@ -183,6 +183,9 @@
     <ClCompile Include="src\Renderer\Animation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ECS\Systems\AnimationSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\ECS\Components\InputComponent.h">
@@ -435,6 +438,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NEngine\Renderer\RenderModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NEngine\ECS\Components\AnimationComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NEngine\ECS\Systems\AnimationSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

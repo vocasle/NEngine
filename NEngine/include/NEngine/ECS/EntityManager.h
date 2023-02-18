@@ -5,6 +5,7 @@
 #include <functional>
 #include <unordered_map>
 
+#include "Components/AnimationComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/CameraComponent.h"
 #include "Components/CollisionComponent.h"
@@ -135,9 +136,9 @@ public:
     [[nodiscard]] auto
     GetBitmask(Entity entity) -> unsigned long
     {
-        //UTILS_PRINTLN("Bitmask: %s for entity: %d",
-        //              mEntities.at(entity).to_string().c_str(),
-        //              entity);
+        // UTILS_PRINTLN("Bitmask: %s for entity: %d",
+        //               mEntities.at(entity).to_string().c_str(),
+        //               entity);
         return mEntities.at(entity).to_ulong();
     }
 
@@ -174,10 +175,10 @@ private:
         const auto oldMask = mEntities.at(entity);
         auto component = Bitmask<Component>();
         const auto newMask = oldMask | component;
-        //UTILS_PRINTLN("\n[%ld]\nOld mask: %s\n, new mask: %s",
-        //              entity,
-        //              oldMask.to_string().c_str(),
-        //              newMask.to_string().c_str());
+        // UTILS_PRINTLN("\n[%ld]\nOld mask: %s\n, new mask: %s",
+        //               entity,
+        //               oldMask.to_string().c_str(),
+        //               newMask.to_string().c_str());
         mEntities.at(entity) = newMask;
     }
 
@@ -198,7 +199,8 @@ using DefaultEntityManager = EntityManager<Components::PositionComponent,
                                            Components::InputComponent,
                                            Components::CameraComponent,
                                            Components::CollisionComponent,
-                                           Components::AudioComponent>;
+                                           Components::AudioComponent,
+                                           Components::AnimationComponent>;
 
 enum ComponentType {
     ComponentType_POSITION = 1 << 0,
@@ -207,5 +209,6 @@ enum ComponentType {
     ComponentType_CAMERA = 1 << 3,
     ComponentType_COLLISION = 1 << 4,
     ComponentType_AUDIO = 1 << 5,
+    ComponentType_ANIMATION = 1 << 6,
 };
 }  // namespace NEngine::ECS
