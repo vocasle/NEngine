@@ -144,8 +144,6 @@ main(PSIn pin)
         baseColor *= baseColorTex.Sample(baseColorSam, pin.TexCoords);
     }
 
-    return baseColor;
-
     float roughness = 1.0;
     float metallic = 0.0;
 
