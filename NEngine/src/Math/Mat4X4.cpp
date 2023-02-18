@@ -118,9 +118,9 @@ Mat4X4::Mult(const Mat4X4 &lhs, const Vec4D &rhs)
     auto ret = Vec4D();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4 *>(&lhs));
-    const auto vec = XMVector3Transform(
-        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)), mat);
-    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+    const auto vec = XMVector4Transform(
+        XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&rhs)), mat);
+    XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), vec);
 #endif
     return ret;
 }
