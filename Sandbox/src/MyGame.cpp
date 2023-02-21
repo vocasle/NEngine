@@ -59,6 +59,10 @@ MyGame::PrintComponents(const GameObject &go) const
     if ((go.ComponentMask & ComponentType_AUDIO) == ComponentType_AUDIO) {
         ImGui::Text("\tAUDIO");
     }
+    if ((go.ComponentMask & ComponentType_ANIMATION) ==
+        ComponentType_ANIMATION) {
+        ImGui::Text("\tANIMATION");
+    }
 
     UTILS_ASSERT(
         mEntityManager.Bitmask<CameraComponent>() == ComponentType_CAMERA,
@@ -125,9 +129,20 @@ MyGame::UpdateImgui()
         ofn.nMaxFile = ARRAYSIZE(szPath);
         ofn.hwndOwner = mEngine->GetDeviceResources().GetWindow();
         if (GetOpenFileName(&ofn)) {
-            auto &renderComp = *mEntityManager.GetComponent<RenderComponent>(
-                mScene.FindEntityByName("Player")->ID);
+            auto &player = *mScene.FindEntityByName("Player");
+            mEntityManager.RemoveComponent<RenderComponent>(player.ID);
+            if (mEntityManager.HasComponent<AnimationComponent>(player.ID)) {
+                mEntityManager.RemoveComponent<AnimationComponent>(player.ID);
+            }
+            auto &renderComp =
+                mEntityManager.CreateComponent<RenderComponent>(player.ID);
             renderComp.Model = mEngine->LoadModel(UtilsWstrToStr(szPath));
+            if (!renderComp.Model.animations.empty()) {
+                const auto &ac =
+                    mEntityManager.CreateComponent<AnimationComponent>(
+                        player.ID);
+            }
+            player.ComponentMask = mEntityManager.GetBitmask(player.ID);
         }
     }
 
@@ -324,7 +339,7 @@ MyGame::CreatePlayer() -> void
         UTILS_PRINTLN(
             "%s collided with %s", go1.Name.c_str(), go2.Name.c_str());
     };
-    
+
     if (!renderComp.Model.animations.empty()) {
         auto &ac = mEntityManager.CreateComponent<AnimationComponent>(player);
     }

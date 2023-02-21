@@ -93,6 +93,26 @@ public:
         return mRepo.GetVec<Component>();
     }
 
+    template <typename Component>
+    auto
+    RemoveComponent(Entity entity) noexcept -> void
+    {
+        auto &comps = mRepo.GetVec<Component>();
+        auto &comp = *GetComponent<Component>(entity);
+        auto it = std::begin(comps);
+        for (; it != std::end(comps); ++it) {
+            if (it->Entity == entity) {
+                break;
+            }
+        }
+        comps.erase(it);
+        NotifyComponentRemove<Component>(entity);
+        // Update bitmask
+        const auto component_bitmask = Bitmask<Component>();
+        mEntities.at(entity) &= ~component_bitmask;
+        UTILS_ASSERT(GetComponent<Component>(entity) == nullptr, "Failed to remove component");
+    }
+
 #if DEBUG_ENTITY_MANAGER
     template <typename Component>
     [[nodiscard]] auto
