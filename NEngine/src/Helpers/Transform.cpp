@@ -13,6 +13,10 @@ Transform::get_transform() const
     if (use_matrix) {
         return transform;
     }
+    if (updated) {
+        return Mat4X4::Scale(anim_scale) * QuatToMat(anim_rotation) *
+            Mat4X4::Translate(anim_translation);
+    }
     return Mat4X4::Scale(scale) * QuatToMat(rotation) *
            Mat4X4::Translate(translation);
 }
