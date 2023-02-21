@@ -17,7 +17,7 @@ float Abs(float n);
 
 template <typename T>
 T
-Clamp(const T &min, const T &max, const T &val)
+Clamp(const T &val, const T &min, const T &max)
 {
     if (val >= max) {
         return max;
