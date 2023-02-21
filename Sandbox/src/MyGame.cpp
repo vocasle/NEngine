@@ -21,6 +21,7 @@
 
 #include <stdexcept>
 
+#include "NEngine/ECS/Systems/AnimationSystem.h"
 #include "NEngine/Helpers/ModelImporter.h"
 #include "NEngine/Helpers/ShaderManager.h"
 
@@ -222,6 +223,7 @@ MyGame::Update(float dt)
 
     mSystemManager.GetSystem<InputSystem>().Update(dt);
     mSystemManager.GetSystem<MoveSystem>().Update(dt);
+    mSystemManager.GetSystem<AnimationSystem>().Update(dt);
     mSystemManager.GetSystem<CollisionSystem>().Update(dt);
     mSystemManager.GetSystem<AudioSystem>().Update(dt);
     mSystemManager.GetSystem<RenderSystem>().Update(dt);
@@ -322,6 +324,10 @@ MyGame::CreatePlayer() -> void
         UTILS_PRINTLN(
             "%s collided with %s", go1.Name.c_str(), go2.Name.c_str());
     };
+    
+    if (!renderComp.Model.animations.empty()) {
+        auto &ac = mEntityManager.CreateComponent<AnimationComponent>(player);
+    }
 
     mScene.AddToScene({player, "Player", mEntityManager.GetBitmask(player)});
 }
@@ -335,4 +341,5 @@ MyGame::CreateSystems() -> void
     mSystemManager.SetSystem(std::make_unique<InputSystem>(mEntityManager));
     mSystemManager.SetSystem(std::make_unique<CollisionSystem>(mEntityManager));
     mSystemManager.SetSystem(std::make_unique<AudioSystem>(mEntityManager));
+    mSystemManager.SetSystem(std::make_unique<AnimationSystem>(mEntityManager));
 }

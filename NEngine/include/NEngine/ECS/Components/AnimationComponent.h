@@ -6,6 +6,5 @@
 namespace NEngine::ECS::Components {
 struct AnimationComponent
 {
-    NEngine::Renderer::Animation animation;
 };
 }  // namespace NEngine::ECS::Components
