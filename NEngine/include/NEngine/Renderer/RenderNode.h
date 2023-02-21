@@ -12,6 +12,6 @@ struct RenderNode
     Helpers::Transform transform;
     std::string name;
     Mesh mesh;
-    size_t id = 0;
+    int id = 0;
 };
 }  // namespace NEngine::Renderer
