@@ -15,23 +15,8 @@ Mesh::GetMeshPrimitives() const
     return mMeshPrimitives;
 }
 
-const std::vector<Animation> &
-Mesh::GetAnimations() const
-{
-    return m_animations;
-}
-
-std::vector<Animation> &
-Mesh::GetAnimations()
-{
-    return m_animations;
-}
-
-Mesh::Mesh(DeviceResources &deviceResources,
-           std::vector<MeshPrimitive> meshes,
-           std::vector<Animation> animations)
-    : mMeshPrimitives(std::move(meshes)),
-      m_animations(std::move(animations))
+Mesh::Mesh(DeviceResources &deviceResources, std::vector<MeshPrimitive> meshes)
+    : mMeshPrimitives(std::move(meshes))
 {
 }
 

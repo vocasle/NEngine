@@ -314,7 +314,7 @@ GLTFLoader::ProcessMesh(const tinygltf::Node &node,
         meshPrimitives.push_back(ProcessMeshPrimitive(primitive, model));
     }
 
-    return Mesh(m_deviceResources, std::move(meshPrimitives), {});
+    return Mesh(m_deviceResources, std::move(meshPrimitives));
 }
 
 static std::vector<NEngine::Math::Vec4D>
