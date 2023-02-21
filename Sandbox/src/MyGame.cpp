@@ -63,25 +63,6 @@ MyGame::PrintComponents(const GameObject &go) const
         ComponentType_ANIMATION) {
         ImGui::Text("\tANIMATION");
     }
-
-    UTILS_ASSERT(
-        mEntityManager.Bitmask<CameraComponent>() == ComponentType_CAMERA,
-        "Bitmask does not match");
-    UTILS_ASSERT(
-        mEntityManager.Bitmask<PositionComponent>() == ComponentType_POSITION,
-        "Bitmask does not match");
-    UTILS_ASSERT(
-        mEntityManager.Bitmask<RenderComponent>() == ComponentType_RENDER,
-        "Bitmask does not match");
-    UTILS_ASSERT(
-        mEntityManager.Bitmask<InputComponent>() == ComponentType_INPUT,
-        "Bitmask does not match");
-    UTILS_ASSERT(
-        mEntityManager.Bitmask<CollisionComponent>() == ComponentType_COLLISION,
-        "Bitmask does not match");
-    UTILS_ASSERT(
-        mEntityManager.Bitmask<AudioComponent>() == ComponentType_AUDIO,
-        "Bitmask does not match");
 }
 
 void
