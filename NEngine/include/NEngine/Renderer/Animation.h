@@ -2,10 +2,8 @@
 #include <string>
 #include <vector>
 
-#include "NEngine/Helpers/Transform.h"
-#include "NEngine/Math/MathUtils.h"
 #include "NEngine/Math/NEMath.h"
-#include "NEngine/Utils/Utils.h"
+#include "RenderNode.h"
 
 using namespace NEngine::Math;
 
@@ -27,7 +25,7 @@ struct Channel
         Invalid
     };
     Path target_path = Path::Invalid;
-    size_t target_node = 0;
+    int target_node = 0;
     AnimSampler sampler;
 };
 
@@ -58,48 +56,6 @@ struct Animation
     float max_time = 0.0f;
     float cur_time = 0.0f;
 
-    void
-    Advance(float dt, Helpers::Transform &transform)
-    {
-        cur_time += dt / 1000.0f;
-
-        if (NearlyEqual(0.0f, max_time)) {
-            for (const auto &ch : channels) {
-                for (const auto &t : ch.sampler.input) {
-                    max_time = std::max(max_time, t);
-                }
-            }
-        }
-
-        for (size_t i = 0; i < interpolators.size(); ++i) {
-            const auto &ch = channels[i];
-            auto &interpolator = interpolators[i];
-
-            switch (ch.target_path) {
-                case Channel::Path::Translation:
-                {
-                    const auto t =
-                        interpolator.InterpolateVec3(ch, cur_time, max_time);
-                    transform.translation = t;
-                } break;
-                case Channel::Path::Rotation:
-                {
-                    const auto r =
-                        interpolator.InterpolateVec4(ch, cur_time, max_time);
-                    transform.rotation = r;
-                } break;
-                case Channel::Path::Scale:
-                {
-                    const auto s =
-                        interpolator.InterpolateVec3(ch, cur_time, max_time);
-                    transform.scale = s;
-                } break;
-                case Channel::Path::Weights:
-                    break;
-                default:
-                    UTILS_ASSERT(false, "Invalid path");
-            }
-        }
-    }
+    void Advance(float dt, std::vector<RenderNode> &render_nodes);
 };
 }  // namespace NEngine::Renderer
