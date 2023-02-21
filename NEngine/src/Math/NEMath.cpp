@@ -101,4 +101,32 @@ MatToQuat(const mat4 &rot_mat)
 #endif
     return ret;
 }
+
+//vec3
+//Lerp(const vec3 &v1, const vec3 &v2, float t)
+//{
+//    auto ret = vec3();
+//#if NENGINE_USE_DIRECTXMATH
+//    const auto vec =
+//        XMVectorLerp(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&v1)),
+//                     XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&v2)),
+//                     t);
+//    XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
+//#endif
+//    return ret;
+//}
+//
+//vec4
+//Lerp(const vec4 &v1, const vec4 &v2, float t)
+//{
+//    auto ret = vec4();
+//#if NENGINE_USE_DIRECTXMATH
+//    const auto vec =
+//        XMVectorLerp(XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&v1)),
+//                     XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&v2)),
+//                     t);
+//    XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), vec);
+//#endif
+//    return ret;
+//}
 }  // namespace NEngine::Math

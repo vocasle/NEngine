@@ -25,6 +25,8 @@ mat4 QuatToMat(const vec4 &quat);
 vec4 QuatSlerp(const vec4 &q1, const vec4 &q2, float t);
 vec4 QuatFromEuler(const vec3 &angles);
 vec4 MatToQuat(const mat4 &rot_mat);
+//vec3 Lerp(const vec3 &v1, const vec3 &v2, float t);
+//vec4 Lerp(const vec4 &v1, const vec4 &v2, float t);
 
 template <typename T>
 T
