@@ -53,8 +53,6 @@ Interpolator::Interpolate(const Channel &ch, float t, float max_time)
     const auto key_delta = input[next_key] - input[prev_key];
     const auto tn = (t - input[prev_key]) / key_delta;
     UTILS_ASSERT(tn <= 1.0f, "Invalid normalization");
-    if (ch.target_path == Channel::Path::Translation)
-        UTILS_PRINTLN("%f %f %llu %llu", tn, key_delta, next_key, prev_key);
     return tn;
 }
 
