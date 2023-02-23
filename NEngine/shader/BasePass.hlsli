@@ -62,13 +62,15 @@ struct PSIn
 };
 
 // Constant buffers
-
+static const int MAX_WEIGHTS = 64;
 cbuffer PerObjectConstants : register(b0)
 {
     float4x4 worldInvTranspose;
     float4x4 world;
     float4x4 shadowTransform;
     Material material;
+    float4 weights[MAX_WEIGHTS];
+    int num_weights;
 };
 
 cbuffer PerFrameConstants : register(b1)

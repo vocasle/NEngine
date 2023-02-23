@@ -86,7 +86,8 @@ DynamicConstBuffer::DynamicConstBuffer(const DynamicConstBufferDesc &desc,
         auto visitor = [&sz](const Node &node) -> void
         {
             if (node.Type != NodeType::Array && node.Type != NodeType::Struct) {
-                sz += static_cast<size_t>(node.Type);
+                const size_t type_size = static_cast<size_t>(node.Type);
+                sz += type_size;
             }
         };
         node.Visit(visitor);

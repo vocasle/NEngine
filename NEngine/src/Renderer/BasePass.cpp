@@ -15,6 +15,8 @@ using namespace NEngine::Renderer;
 using namespace NEngine::Math;
 using namespace Microsoft::WRL;
 
+static constexpr int MAX_WEIGHTS = 64;
+
 void
 NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
                                   std::vector<NEngine::Renderer::Mesh> &meshes)
@@ -41,17 +43,6 @@ NEngine::Renderer::BasePass::Draw(Helpers::DeviceResources &deviceResources,
 
     mPerSceneBuffer->Bind(deviceResources);
     mPerFrameBuffer->Bind(deviceResources);
-
-    //for (auto &mesh : meshes) {
-    //    const auto world = mesh.GetTransform().get_transform();
-    //    mPerObjectBuffer->SetValue("world", world);
-    //    const auto invWorld = world.Inverse().Transpose();
-    //    mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
-
-    //    for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
-    //        DrawMeshPrimitive(meshPrimitive, deviceResources);
-    //    }
-    //}
 
     deviceResources.PIXEndEvent();
 }
@@ -103,6 +94,9 @@ BasePass::draw_node(Helpers::DeviceResources &device_resources,
 
     for (auto &meshPrimitive : node.mesh.GetMeshPrimitives()) {
         DrawMeshPrimitive(meshPrimitive, device_resources);
+        mPerObjectBuffer->SetValue("weights", node.mesh.GetWeights());
+        mPerObjectBuffer->SetValue("num_weights",
+                                   node.mesh.GetWeights().size());
     }
     for (const auto &child : node.children) {
         draw_node(device_resources, child, world);
@@ -191,6 +185,10 @@ NEngine::Renderer::BasePass::BasePass(Helpers::DeviceResources &deviceResources)
         material.AddChild("HasEmissiveTex", NodeType::Bool);
         material.AddChild("HasNormalTex", NodeType::Bool);
         desc.AddNode(material);
+        Node weights("weights", NodeType::Array);
+        weights.AddChildN(Node("", NodeType::Float4), MAX_WEIGHTS);
+        desc.AddNode(weights);
+        desc.AddNode(Node("num_weights", NodeType::Float));
         desc.SetBindSlot(0);
 
         mPerObjectBuffer =
