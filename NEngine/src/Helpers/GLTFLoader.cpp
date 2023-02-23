@@ -160,6 +160,41 @@ GLTFLoader::parse_animations(const tinygltf::Model &model)
     return anims;
 }
 
+std::vector<NEngine::Renderer::MorphTarget>
+GLTFLoader::get_morph_targets(const tinygltf::Primitive &prim,
+                              const tinygltf::Model &model) const
+{
+    if (prim.targets.empty()) {
+        return {};
+    }
+
+    auto morph_targets = std::vector<MorphTarget>();
+    morph_targets.reserve(prim.targets.size());
+    for (auto &mt : prim.targets) {
+        auto morph_target = MorphTarget();
+        for (auto &[k, v] : mt) {
+            const auto &a = model.accessors[v];
+            const auto &bv = model.bufferViews[a.bufferView];
+            const auto &b = model.buffers[bv.buffer];
+            if (k == "POSITION") {
+                morph_target.positions = ReadData<vec3>(
+                    b.data, a.count, a.byteOffset + bv.byteOffset);
+            }
+            else if (k == "NORMAL") {
+                morph_target.normals = ReadData<vec3>(
+                    b.data, a.count, a.byteOffset + bv.byteOffset);
+            }
+            else if (k == "TANGENT") {
+                morph_target.tangents = ReadData<vec4>(
+                    b.data, a.count, a.byteOffset + bv.byteOffset);
+            }
+        }
+        morph_targets.push_back(std::move(morph_target));
+    }
+
+    return morph_targets;
+}
+
 NEngine::Renderer::RenderModel
 GLTFLoader::load(const std::string &path)
 {
@@ -645,7 +680,12 @@ GLTFLoader::ProcessMeshPrimitive(const tinygltf::Primitive &primitive,
     assert(!vertices.empty() && "Vertices is empty! gLTF import failed!");
     assert(!indices.empty() && "Indices is empty! gLTF import failed!");
 
-    auto meshPrim = MeshPrimitive(m_deviceResources, vertices, indices);
+    auto morph_targets = get_morph_targets(primitive, model);
+
+    auto meshPrim = MeshPrimitive(m_deviceResources,
+                                  std::move(vertices),
+                                  std::move(indices),
+                                  std::move(morph_targets));
     tmpMaterial.BaseColorTexture = std::move(baseColorTex);
     tmpMaterial.MetallicRoughnessTexture = std::move(metallicRoughnessTex);
     tmpMaterial.NormalTexture = std::move(normalTex);

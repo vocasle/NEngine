@@ -10,11 +10,13 @@ using namespace NEngine::Utils;
 NEngine::Renderer::MeshPrimitive::MeshPrimitive(
     Helpers::DeviceResources &deviceResources,
     std::vector<PosNormTangTex> vertices,
-    std::vector<unsigned int> indices)
+    std::vector<unsigned int> indices,
+    std::vector<MorphTarget> morph_targets)
     : mIndexBuffer(deviceResources, indices),
       mVertexBuffer(deviceResources, vertices),
       mVertices(std::move(vertices)),
-      mIndices(std::move(indices))
+      mIndices(std::move(indices)),
+      m_morph_targets(std::move(morph_targets))
 
 {
 }

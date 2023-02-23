@@ -46,6 +46,9 @@ private:
     std::vector<NEngine::Renderer::Animation> parse_animations(
         const tinygltf::Model &model);
 
+    std::vector<NEngine::Renderer::MorphTarget> get_morph_targets(
+        const tinygltf::Primitive &prim, const tinygltf::Model &model) const;
+
     DeviceResources &m_deviceResources;
 };
 }  // namespace NEngine::Helpers

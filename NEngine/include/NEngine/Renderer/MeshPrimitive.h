@@ -46,12 +46,20 @@ struct Material
     AlphaMode AlphaMode = AlphaMode::Blend;
 };
 
+struct MorphTarget
+{
+    std::vector<Math::vec3> normals;
+    std::vector<Math::vec4> tangents;
+    std::vector<Math::vec3> positions;
+};
+
 class MeshPrimitive
 {
 public:
     MeshPrimitive(Helpers::DeviceResources &deviceResources,
                   std::vector<PosNormTangTex> vertices,
-                  std::vector<unsigned int> indices);
+                  std::vector<unsigned int> indices,
+                  std::vector<MorphTarget> morph_targets);
 
     void SetMaterial(Material material);
     void Bind(Helpers::DeviceResources &deviceResources) const;
@@ -66,8 +74,7 @@ private:
     std::vector<unsigned int> mIndices;
 
     Material mMaterial;
-
-    friend class FileWriter;
+    std::vector<MorphTarget> m_morph_targets;
 };
 }  // namespace Renderer
 }  // namespace NEngine
