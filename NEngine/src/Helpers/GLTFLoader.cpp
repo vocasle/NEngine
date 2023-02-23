@@ -314,7 +314,12 @@ GLTFLoader::ProcessMesh(const tinygltf::Node &node,
         meshPrimitives.push_back(ProcessMeshPrimitive(primitive, model));
     }
 
-    return Mesh(m_deviceResources, std::move(meshPrimitives));
+    std::vector<float> weights;
+    std::ranges::transform(mesh.weights,
+                           std::begin(weights),
+                           [](const double d) { return static_cast<float>(d); });
+    return Mesh(
+        m_deviceResources, std::move(meshPrimitives), std::move(weights));
 }
 
 static std::vector<NEngine::Math::Vec4D>

@@ -11,15 +11,16 @@ class Mesh
 {
 public:
     Mesh() = default;
-    Mesh(Helpers::DeviceResources &deviceResources,
-         std::vector<MeshPrimitive> meshes);
+    Mesh(Helpers::DeviceResources &device_resources,
+         std::vector<MeshPrimitive> primitives,
+         std::vector<float> weights);
 
-    const std::vector<MeshPrimitive> &GetMeshPrimitives() const;
+    [[nodiscard]] const std::vector<MeshPrimitive> &GetMeshPrimitives() const;
+    [[nodiscard]] const std::vector<float> &GetWeights() const;
 
 private:
-    std::vector<MeshPrimitive> mMeshPrimitives;
-
-    friend class FileWriter;
+    std::vector<MeshPrimitive> m_primitives;
+    std::vector<float> m_weights;
 };
 }  // namespace Renderer
 }  // namespace NEngine

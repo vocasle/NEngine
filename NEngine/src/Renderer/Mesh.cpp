@@ -12,11 +12,20 @@ namespace NEngine::Renderer {
 const std::vector<MeshPrimitive> &
 Mesh::GetMeshPrimitives() const
 {
-    return mMeshPrimitives;
+    return m_primitives;
 }
 
-Mesh::Mesh(DeviceResources &deviceResources, std::vector<MeshPrimitive> meshes)
-    : mMeshPrimitives(std::move(meshes))
+const std::vector<float> &
+Mesh::GetWeights() const
+{
+    return m_weights;
+}
+
+Mesh::Mesh(DeviceResources &device_resources,
+           std::vector<MeshPrimitive> primitives,
+           std::vector<float> weights)
+    : m_primitives(std::move(primitives)),
+      m_weights(std::move(weights))
 {
 }
 
