@@ -37,6 +37,10 @@ struct Interpolator
     float next_t = 0.0f;
     vec3 InterpolateVec3(const Channel &ch, float t, float max_time);
     vec4 InterpolateVec4(const Channel &ch, float t, float max_time);
+    std::vector<float> InterpolateWeights(const Channel &ch,
+                                          int len,
+                                          float t,
+                                          float max_time);
 
 private:
     float Interpolate(const Channel &ch, float t, float max_time);

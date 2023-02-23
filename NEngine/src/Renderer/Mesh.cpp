@@ -21,6 +21,14 @@ Mesh::GetWeights() const
     return m_weights;
 }
 
+void
+Mesh::SetWeights(std::vector<float> weights)
+{
+    UTILS_ASSERT(weights.size() == m_weights.size(),
+                 "Size mismatch. Weight interpolation error");
+    m_weights = std::move(weights);
+}
+
 Mesh::Mesh(DeviceResources &device_resources,
            std::vector<MeshPrimitive> primitives,
            std::vector<float> weights)

@@ -1,4 +1,5 @@
 ﻿#include "NEngine/Renderer/Animation.h"
+
 #include "NEngine/Math/MathUtils.h"
 #include "NEngine/Math/NEMath.h"
 
@@ -26,6 +27,23 @@ Interpolator::InterpolateVec4(const Channel &ch, float t, float max_time)
     //     "t: %.4f, prev_key: %llu, next_key: %llu", t, prev_key, next_key);
 
     return QuatSlerp(output[prev_key], output[next_key], tn);
+}
+
+std::vector<float>
+Interpolator::InterpolateWeights(const Channel &ch,
+                                 int len,
+                                 float t,
+                                 float max_time)
+{
+    const auto tn = Interpolate(ch, t, max_time);
+    const auto output =
+        *reinterpret_cast<const std::vector<float> *>(&ch.sampler.output);
+    std::vector<float> weights;
+    weights.reserve(len);
+    for (int i = 0; i < len; ++i) {
+        weights.push_back(Lerp(output[prev_key + i], output[next_key + i], tn));
+    }
+    return weights;
 }
 
 float
@@ -114,7 +132,14 @@ Animation::Advance(float dt, std::vector<RenderNode> &render_nodes)
                 transform.updated = true;
             } break;
             case Channel::Path::Weights:
-                break;
+            {
+                auto weights = interpolator.InterpolateWeights(
+                    ch,
+                    found_node->mesh.GetWeights().size(),
+                    cur_time,
+                    max_time);
+                found_node->mesh.SetWeights(std::move(weights));
+            } break;
             default:
                 UTILS_ASSERT(false, "Invalid path");
         }

@@ -17,6 +17,7 @@ public:
 
     [[nodiscard]] const std::vector<MeshPrimitive> &GetMeshPrimitives() const;
     [[nodiscard]] const std::vector<float> &GetWeights() const;
+    void SetWeights(std::vector<float> weights);
 
 private:
     std::vector<MeshPrimitive> m_primitives;

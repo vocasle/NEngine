@@ -315,9 +315,11 @@ GLTFLoader::ProcessMesh(const tinygltf::Node &node,
     }
 
     std::vector<float> weights;
-    std::ranges::transform(mesh.weights,
-                           std::begin(weights),
-                           [](const double d) { return static_cast<float>(d); });
+    weights.reserve(mesh.weights.size());
+    for (const auto w : mesh.weights) {
+        weights.push_back(w);
+    }
+
     return Mesh(
         m_deviceResources, std::move(meshPrimitives), std::move(weights));
 }
