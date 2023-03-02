@@ -79,11 +79,13 @@ MyGame::UpdateImgui()
         static float zNear = 0.1f;
         static float cam_offset_y = 10.0f;
         static float cam_offset_z = 10.0f;
+        static bool arcball_mode = false;
 
         ImGui::InputFloat("z far", &zFar);
         ImGui::InputFloat("z near", &zNear);
         ImGui::InputFloat("offset z", &cam_offset_z);
         ImGui::InputFloat("offset y", &cam_offset_y);
+        ImGui::Checkbox("arcball mode", &arcball_mode);
 
         const auto player = mScene.FindEntityByName("Player");
         auto &cam = *mEntityManager.GetComponent<CameraComponent>(player->ID);
@@ -95,6 +97,7 @@ MyGame::UpdateImgui()
                 cam.Camera.z_near = zNear;
                 cam.Camera.target_offset_y = cam_offset_y;
                 cam.Camera.target_offset_z = cam_offset_z;
+                cam.Camera.arcball_mode = arcball_mode;
             }
         }
 

@@ -26,6 +26,7 @@ struct Camera
 
     float target_offset_y = 10;
     float target_offset_z = 10;
+    bool arcball_mode = false;
 };
 }  // namespace Helpers
 }  // namespace NEngine
