@@ -205,6 +205,25 @@ public:
         }
     }
 
+    template <typename T, typename S>
+    void
+    set_array_value(const S &name, const std::vector<T> &in_value)
+    {
+        bool is_set = false;
+        for (const auto &[key, value] : mValues) {
+            if (key == name && value.Type == NodeType::Array) {
+                *static_cast<std::vector<T> *>(value.Ptr) = in_value;
+                is_set = true;
+                break;
+            }
+        }
+
+        if (!is_set) {
+            UtilsFormatStr("WARN: key %s does not exist in this cbuffer\n",
+                           name);
+        }
+    }
+
     void UpdateConstantBuffer() const;
     void CreateConstantBuffer();
     [[nodiscard]] const std::vector<uint8_t> &GetBytes() const;
