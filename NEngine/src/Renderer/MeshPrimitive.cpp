@@ -12,10 +12,10 @@ NEngine::Renderer::MeshPrimitive::MeshPrimitive(
     std::vector<PosNormTangTex> vertices,
     std::vector<unsigned int> indices,
     std::vector<MorphTarget> morph_targets)
-    : mIndexBuffer(deviceResources, indices),
-      mVertexBuffer(deviceResources, vertices),
-      mVertices(std::move(vertices)),
-      mIndices(std::move(indices)),
+    : m_ib(deviceResources, indices),
+      m_vb(deviceResources, vertices),
+      m_vertices(std::move(vertices)),
+      m_indices(std::move(indices)),
       m_morph_targets(std::move(morph_targets))
 
 {
@@ -24,31 +24,37 @@ NEngine::Renderer::MeshPrimitive::MeshPrimitive(
 void
 NEngine::Renderer::MeshPrimitive::SetMaterial(Material material)
 {
-    mMaterial = std::move(material);
+    m_material = std::move(material);
 }
 
 void
 NEngine::Renderer::MeshPrimitive::Bind(
     Helpers::DeviceResources &deviceResources) const
 {
-    mVertexBuffer.Bind(deviceResources);
-    mIndexBuffer.Bind(deviceResources);
+    m_vb.Bind(deviceResources);
+    m_ib.Bind(deviceResources);
 
-    mMaterial.BaseColorTexture.Bind(deviceResources);
-    mMaterial.MetallicRoughnessTexture.Bind(deviceResources);
-    mMaterial.EmissiveTexture.Bind(deviceResources);
-    mMaterial.NormalTexture.Bind(deviceResources);
-    mMaterial.OcclusionTexture.Bind(deviceResources);
-    mMaterial.KHRMaterial.DiffuseTexture.Bind(deviceResources);
+    m_material.BaseColorTexture.Bind(deviceResources);
+    m_material.MetallicRoughnessTexture.Bind(deviceResources);
+    m_material.EmissiveTexture.Bind(deviceResources);
+    m_material.NormalTexture.Bind(deviceResources);
+    m_material.OcclusionTexture.Bind(deviceResources);
+    m_material.KHRMaterial.DiffuseTexture.Bind(deviceResources);
 }
 size_t
 NEngine::Renderer::MeshPrimitive::GetIndexNum() const
 {
-    return mIndices.size();
+    return m_indices.size();
 }
 
 const NEngine::Renderer::Material &
 NEngine::Renderer::MeshPrimitive::GetMaterial() const
 {
-    return mMaterial;
+    return m_material;
+}
+
+const std::vector<NEngine::Renderer::MorphTarget> &
+NEngine::Renderer::MeshPrimitive::get_morph_targets() const
+{
+    return m_morph_targets;
 }

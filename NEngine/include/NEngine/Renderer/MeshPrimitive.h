@@ -63,17 +63,18 @@ public:
 
     void SetMaterial(Material material);
     void Bind(Helpers::DeviceResources &deviceResources) const;
-    size_t GetIndexNum() const;
-    const Material &GetMaterial() const;
+    [[nodiscard]] size_t GetIndexNum() const;
+    [[nodiscard]] const Material &GetMaterial() const;
+    [[nodiscard]] const std::vector<MorphTarget> &get_morph_targets() const;
 
 private:
-    IndexBuffer mIndexBuffer;
-    VertexBuffer<PosNormTangTex> mVertexBuffer;
+    IndexBuffer m_ib;
+    VertexBuffer<PosNormTangTex> m_vb;
 
-    std::vector<PosNormTangTex> mVertices;
-    std::vector<unsigned int> mIndices;
+    std::vector<PosNormTangTex> m_vertices;
+    std::vector<unsigned int> m_indices;
 
-    Material mMaterial;
+    Material m_material;
     std::vector<MorphTarget> m_morph_targets;
 };
 }  // namespace Renderer
