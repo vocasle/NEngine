@@ -44,7 +44,7 @@ WireframePass::Draw(Helpers::DeviceResources &deviceResources,
     //    const auto invWorld = world.Inverse().Transpose();
     //    mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
-    //    for (auto &meshPrimitive : mesh.GetMeshPrimitives()) {
+    //    for (auto &meshPrimitive : mesh.get_mesh_primitives()) {
     //        DrawMeshPrimitive(meshPrimitive, deviceResources);
     //    }
     //}

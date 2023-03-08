@@ -92,11 +92,11 @@ BasePass::draw_node(Helpers::DeviceResources &device_resources,
     const auto invWorld = world.Inverse().Transpose();
     mPerObjectBuffer->SetValue("worldInvTranspose", invWorld);
 
-    for (auto &meshPrimitive : node.mesh.GetMeshPrimitives()) {
+    for (auto &meshPrimitive : node.mesh.get_mesh_primitives()) {
         DrawMeshPrimitive(meshPrimitive, device_resources);
-        mPerObjectBuffer->SetValue("weights", node.mesh.GetWeights());
+        mPerObjectBuffer->SetValue("weights", node.mesh.get_weights());
         mPerObjectBuffer->SetValue("num_weights",
-                                   node.mesh.GetWeights().size());
+                                   node.mesh.get_weights().size());
     }
     for (const auto &child : node.children) {
         draw_node(device_resources, child, world);

@@ -10,19 +10,19 @@ using namespace NEngine::Renderer;
 
 namespace NEngine::Renderer {
 const std::vector<MeshPrimitive> &
-Mesh::GetMeshPrimitives() const
+Mesh::get_mesh_primitives() const
 {
     return m_primitives;
 }
 
 const std::vector<float> &
-Mesh::GetWeights() const
+Mesh::get_weights() const
 {
     return m_weights;
 }
 
 void
-Mesh::SetWeights(std::vector<float> weights)
+Mesh::set_weights(std::vector<float> weights)
 {
     UTILS_ASSERT(weights.size() == m_weights.size(),
                  "Size mismatch. Weight interpolation error");

@@ -135,10 +135,10 @@ Animation::Advance(float dt, std::vector<RenderNode> &render_nodes)
             {
                 auto weights = interpolator.InterpolateWeights(
                     ch,
-                    found_node->mesh.GetWeights().size(),
+                    found_node->mesh.get_weights().size(),
                     cur_time,
                     max_time);
-                found_node->mesh.SetWeights(std::move(weights));
+                found_node->mesh.set_weights(std::move(weights));
             } break;
             default:
                 UTILS_ASSERT(false, "Invalid path");
