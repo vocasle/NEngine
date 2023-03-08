@@ -146,7 +146,6 @@
     <ClInclude Include="include\Sandbox\MyGame.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\MyGame.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
