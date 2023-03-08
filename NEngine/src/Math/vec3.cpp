@@ -1,10 +1,9 @@
-#include "NEngine/Math/Vec3D.h"
+#include "NEngine/Math/vec3.h"
 
 #include <sstream>
 
 #include "NEngine/Math/MathUtils.h"
-#include "NEngine/Math/Vec4D.h"
-#include "NEngine/Utils/Utils.h"
+#include "NEngine/Math/vec4.h"
 
 #if NENGINE_USE_DIRECTXMATH
 #include <DirectXMath.h>
@@ -13,39 +12,39 @@ using namespace DirectX;
 
 namespace NEngine::Math {
 std::string
-Vec3D::ToString() const
+vec3::ToString() const
 {
     std::stringstream out;
     out << "{ " << X << ", " << Y << ", " << Z << " }";
     return out.str();
 }
 
-Vec3D::Vec3D(float x, float y, float z)
+vec3::vec3(float x, float y, float z)
     : X{x},
       Y{y},
       Z{z}
 {
 }
 
-Vec3D::Vec3D(const Vec4D &rhs)
+vec3::vec3(const vec4 &rhs)
     : X(rhs.X),
       Y(rhs.Y),
       Z(rhs.Z)
 {
 }
 
-Vec3D::Vec3D(float x)
-    : Vec3D(x, x, x)
+vec3::vec3(float x)
+    : vec3(x, x, x)
 {
 }
 
-Vec3D::Vec3D()
-    : Vec3D(0, 0, 0)
+vec3::vec3()
+    : vec3(0, 0, 0)
 {
 }
 
 float
-Vec3D::Length() const
+vec3::Length() const
 {
 #if NENGINE_USE_DIRECTXMATH
     auto len = 0.0f;
@@ -58,14 +57,14 @@ Vec3D::Length() const
 #endif
 }
 
-Vec3D
-Vec3D::Cross(const Vec3D &lhs, const Vec3D &rhs)
+vec3
+vec3::Cross(const vec3 &lhs, const vec3 &rhs)
 {
 #if NENGINE_USE_DIRECTXMATH
     const auto vec =
         XMVector3Cross(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)),
                        XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)));
-    auto ret = Vec3D();
+    auto ret = vec3();
     XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
     return ret;
 #else
@@ -76,7 +75,7 @@ Vec3D::Cross(const Vec3D &lhs, const Vec3D &rhs)
 }
 
 float
-Vec3D::Dot(const Vec3D &lhs, const Vec3D &rhs)
+vec3::Dot(const vec3 &lhs, const vec3 &rhs)
 {
 #if NENGINE_USE_DIRECTXMATH
     const auto vec =
@@ -90,13 +89,13 @@ Vec3D::Dot(const Vec3D &lhs, const Vec3D &rhs)
 #endif
 }
 
-Vec3D
-Vec3D::Normalize() const
+vec3
+vec3::Normalize() const
 {
 #if NENGINE_USE_DIRECTXMATH
     const auto vec = XMVector3Normalize(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(this)));
-    auto ret = Vec3D();
+    auto ret = vec3();
     XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
     return ret;
 #else
@@ -109,8 +108,8 @@ Vec3D::Normalize() const
 #endif
 }
 
-Vec3D
-Vec3D::Rotate(const Vec4D &quat) const
+vec3
+vec3::Rotate(const vec4 &quat) const
 {
     auto ret = *this;
 #if NENGINE_USE_DIRECTXMATH
@@ -123,23 +122,23 @@ Vec3D::Rotate(const Vec4D &quat) const
 }
 
 bool
-Vec3D::operator==(const Vec3D &rhs) const
+vec3::operator==(const vec3 &rhs) const
 {
     return NearlyEqual(X, rhs.X) && NearlyEqual(Y, rhs.Y) &&
            NearlyEqual(Z, rhs.Z);
 }
 
 bool
-Vec3D::operator!=(const Vec3D &rhs) const
+vec3::operator!=(const vec3 &rhs) const
 {
     return !(*this == rhs);
 }
 
-Vec3D
-operator+(const Vec3D &lhs, const Vec3D &rhs)
+vec3
+operator+(const vec3 &lhs, const vec3 &rhs)
 {
 #if NENGINE_USE_DIRECTXMATH
-    auto ret = Vec3D();
+    auto ret = vec3();
     const auto vec =
         XMVectorAdd(XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)),
                     XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)));
@@ -150,11 +149,11 @@ operator+(const Vec3D &lhs, const Vec3D &rhs)
 #endif
 }
 
-Vec3D
-operator-(const Vec3D &lhs, const Vec3D &rhs)
+vec3
+operator-(const vec3 &lhs, const vec3 &rhs)
 {
 #if NENGINE_USE_DIRECTXMATH
-    auto ret = Vec3D();
+    auto ret = vec3();
     const auto vec = XMVectorSubtract(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)),
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)));
@@ -165,11 +164,11 @@ operator-(const Vec3D &lhs, const Vec3D &rhs)
 #endif
 }
 
-Vec3D
-operator*(const Vec3D &lhs, const float s)
+vec3
+operator*(const vec3 &lhs, const float s)
 {
 #if NENGINE_USE_DIRECTXMATH
-    auto ret = Vec3D();
+    auto ret = vec3();
     const auto vec = XMVectorScale(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&lhs)), s);
     XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
@@ -179,26 +178,26 @@ operator*(const Vec3D &lhs, const float s)
 #endif
 }
 
-Vec3D
-operator*(const float s, const Vec3D &rhs)
+vec3
+operator*(const float s, const vec3 &rhs)
 {
     return rhs * s;
 }
 
-Vec3D
-operator/(const Vec3D &lhs, const float s)
+vec3
+operator/(const vec3 &lhs, const float s)
 {
     return lhs * (1 / s);
 }
 
 float
-Vec3D::operator[](size_t i) const
+vec3::operator[](size_t i) const
 {
     return operator[](i);
 }
 
 float &
-Vec3D::operator[](size_t i)
+vec3::operator[](size_t i)
 {
     switch (i) {
         case 0:
@@ -208,8 +207,7 @@ Vec3D::operator[](size_t i)
         case 2:
             return Z;
         default:
-            throw std::invalid_argument(
-                Utils::UtilsFormatStr("%llu is out of bounds", i));
+            throw std::invalid_argument("Index out of bounds");
     }
 }
 

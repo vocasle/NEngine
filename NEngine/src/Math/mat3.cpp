@@ -1,4 +1,4 @@
-#include "NEngine/Math/Mat3X3.h"
+#include "NEngine/Math/mat3.h"
 
 #include <iomanip>
 #include <iostream>
@@ -13,46 +13,44 @@ using namespace DirectX;
 
 namespace NEngine::Math {
 
-Mat3X3::Mat3X3()
-    : Mat3X3(1, 0, 0, 0, 1, 0, 0, 0, 1)
+mat3::mat3()
+    : mat3(1, 0, 0, 0, 1, 0, 0, 0, 1)
 {
 }
 
-Mat3X3::Mat3X3(float n)
-    : Mat3X3(n, n, n, n, n, n, n, n, n)
+mat3::mat3(float n)
+    : mat3(n, n, n, n, n, n, n, n, n)
 {
 }
 
-Mat3X3::Mat3X3(float v0x,
-               float v0y,
-               float v0z,
-               float v1x,
-               float v1y,
-               float v1z,
-               float v2x,
-               float v2y,
-               float v2z)
+mat3::mat3(float v0x,
+           float v0y,
+           float v0z,
+           float v1x,
+           float v1y,
+           float v1z,
+           float v2x,
+           float v2y,
+           float v2z)
     : mData{{v0x, v0y, v0z}, {v1x, v1y, v1z}, {v2x, v2y, v2z}}
 {
 }
 
 float &
-Mat3X3::operator()(size_t i, size_t j)
+mat3::operator()(size_t i, size_t j)
 {
-    UTILS_ASSERT(i < 3 && j < 3, "i and j must be in range [0, 3)");
     return mData[i][j];
 }
 float
-Mat3X3::operator()(size_t i, size_t j) const
+mat3::operator()(size_t i, size_t j) const
 {
-    UTILS_ASSERT(i < 3 && j < 3, "i and j must be in range [0, 3)");
     return mData[i][j];
 }
 
-Mat3X3
-Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
+mat3
+mat3::Add(const mat3 &lhs, const mat3 &rhs)
 {
-    auto ret = Mat3X3();
+    auto ret = mat3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat =
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) +
@@ -68,10 +66,10 @@ Mat3X3::Add(const Mat3X3 &lhs, const Mat3X3 &rhs)
     return ret;
 }
 
-Mat3X3
-Mat3X3::Mult(const Mat3X3 &lhs, const Mat3X3 &rhs)
+mat3
+mat3::Mult(const mat3 &lhs, const mat3 &rhs)
 {
-    auto ret = Mat3X3();
+    auto ret = mat3();
 #if NENGINE_USE_DIRECTXMATH
     const auto m1 = XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs));
     const auto m2 = XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&rhs));
@@ -100,8 +98,8 @@ Mat3X3::Mult(const Mat3X3 &lhs, const Mat3X3 &rhs)
     return ret;
 }
 
-Mat3X3
-Mat3X3::Transpose() const
+mat3
+mat3::Transpose() const
 {
     auto ret = *this;
 #if NENGINE_USE_DIRECTXMATH
@@ -118,10 +116,10 @@ Mat3X3::Transpose() const
     return ret;
 }
 
-Mat3X3
-Mat3X3::Mult(const Mat3X3 &lhs, float s)
+mat3
+mat3::Mult(const mat3 &lhs, float s)
 {
-    auto ret = Mat3X3();
+    auto ret = mat3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat =
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) * s;
@@ -136,30 +134,30 @@ Mat3X3::Mult(const Mat3X3 &lhs, float s)
     return ret;
 }
 
-Vec3D
-Mat3X3::Mult(const Mat3X3 &lhs, const Vec3D &rhs)
+vec3
+mat3::Mult(const mat3 &lhs, const vec3 &rhs)
 {
-    auto ret = Vec3D();
+    auto ret = vec3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs));
     const auto vec = XMVector3Transform(
         XMLoadFloat3(reinterpret_cast<const XMFLOAT3 *>(&rhs)), mat);
     XMStoreFloat3(reinterpret_cast<XMFLOAT3 *>(&ret), vec);
 #else
-    const auto row0 = Vec3D(lhs(0, 0), lhs(0, 1), lhs(0, 2));
-    const auto row1 = Vec3D(lhs(1, 0), lhs(1, 1), lhs(1, 2));
-    const auto row2 = Vec3D(lhs(2, 0), lhs(2, 1), lhs(2, 2));
-    ret.X = Vec3D::Dot(row0, rhs);
-    ret.Y = Vec3D::Dot(row1, rhs);
-    ret.Z = Vec3D::Dot(row2, rhs);
+    const auto row0 = vec3(lhs(0, 0), lhs(0, 1), lhs(0, 2));
+    const auto row1 = vec3(lhs(1, 0), lhs(1, 1), lhs(1, 2));
+    const auto row2 = vec3(lhs(2, 0), lhs(2, 1), lhs(2, 2));
+    ret.X = vec3::Dot(row0, rhs);
+    ret.Y = vec3::Dot(row1, rhs);
+    ret.Z = vec3::Dot(row2, rhs);
 #endif
     return ret;
 }
 
-Mat3X3
-Mat3X3::Subtract(const Mat3X3 &lhs, const Mat3X3 &rhs)
+mat3
+mat3::Subtract(const mat3 &lhs, const mat3 &rhs)
 {
-    auto ret = Mat3X3();
+    auto ret = mat3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat =
         XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(&lhs)) +
@@ -175,10 +173,10 @@ Mat3X3::Subtract(const Mat3X3 &lhs, const Mat3X3 &rhs)
     return ret;
 }
 
-Mat3X3
-Mat3X3::RotZ(float phi)
+mat3
+mat3::RotZ(float phi)
 {
-    auto ret = Mat3X3();
+    auto ret = mat3();
 #if NENGINE_USE_DIRECTXMATH
     const auto mat = XMMatrixRotationZ(phi);
     XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
@@ -194,7 +192,7 @@ Mat3X3::RotZ(float phi)
 }
 
 float
-Mat3X3::Determinant() const
+mat3::Determinant() const
 {
 #if NENGINE_USE_DIRECTXMATH
     const auto vec = XMMatrixDeterminant(
@@ -211,21 +209,21 @@ Mat3X3::Determinant() const
 #endif
 }
 
-Mat3X3
-Mat3X3::Inverse() const
+mat3
+mat3::Inverse() const
 {
 #if NENGINE_USE_DIRECTXMATH
     XMVECTOR det;
     const auto mat = XMMatrixInverse(
         &det, XMLoadFloat3x3(reinterpret_cast<const XMFLOAT3X3 *>(this)));
-    auto ret = Mat3X3();
+    auto ret = mat3();
     XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret), mat);
     return ret;
 #else
     const auto det = Determinant();
     UTILS_ASSERT(det != 0, "Determinant is zero, matrix has no inverse!");
     const auto &self = *this;
-    auto ret = Mat3X3();
+    auto ret = mat3();
 
     /*
      * | a00 a01 a02 |
@@ -258,10 +256,10 @@ Mat3X3::Inverse() const
 #endif
 }
 
-Mat3X3
-Mat3X3::RotX(float phi)
+mat3
+mat3::RotX(float phi)
 {
-    auto ret = Mat3X3();
+    auto ret = mat3();
 #if NENGINE_USE_DIRECTXMATH
     XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
                     XMMatrixRotationX(phi));
@@ -276,10 +274,10 @@ Mat3X3::RotX(float phi)
     return ret;
 }
 
-Mat3X3
-Mat3X3::RotY(float phi)
+mat3
+mat3::RotY(float phi)
 {
-    auto ret = Mat3X3();
+    auto ret = mat3();
 #if NENGINE_USE_DIRECTXMATH
     XMStoreFloat3x3(reinterpret_cast<XMFLOAT3X3 *>(&ret),
                     XMMatrixRotationY(phi));
@@ -294,16 +292,15 @@ Mat3X3::RotY(float phi)
     return ret;
 }
 
-Vec3D
-Mat3X3::operator[](size_t i) const
+vec3
+mat3::operator[](size_t i) const
 {
-    UTILS_ASSERT(i < 3, "i must be in range [0, 3)");
     return {
         this->operator()(i, 0), this->operator()(i, 1), this->operator()(i, 2)};
 }
 
 bool
-operator==(const Mat3X3 &lhs, const Mat3X3 &rhs)
+operator==(const mat3 &lhs, const mat3 &rhs)
 {
     bool isEqual = true;
     for (size_t i = 0; i < 3; ++i) {
@@ -314,44 +311,44 @@ operator==(const Mat3X3 &lhs, const Mat3X3 &rhs)
     return isEqual;
 }
 
-Mat3X3
-operator+(const Mat3X3 &lhs, const Mat3X3 &rhs)
+mat3
+operator+(const mat3 &lhs, const mat3 &rhs)
 {
-    return Mat3X3::Add(lhs, rhs);
+    return mat3::Add(lhs, rhs);
 }
-Mat3X3
-operator-(const Mat3X3 &lhs, const Mat3X3 &rhs)
+mat3
+operator-(const mat3 &lhs, const mat3 &rhs)
 {
     return lhs + (rhs * (-1));
 }
-Mat3X3
-operator*(const Mat3X3 &lhs, const Mat3X3 &rhs)
+mat3
+operator*(const mat3 &lhs, const mat3 &rhs)
 {
-    return Mat3X3::Mult(lhs, rhs);
+    return mat3::Mult(lhs, rhs);
 }
-Mat3X3
-operator*(const Mat3X3 &lhs, float s)
+mat3
+operator*(const mat3 &lhs, float s)
 {
-    return Mat3X3::Mult(lhs, s);
+    return mat3::Mult(lhs, s);
 }
-Mat3X3
-operator*(float s, const Mat3X3 &rhs)
+mat3
+operator*(float s, const mat3 &rhs)
 {
     return rhs * s;
 }
-Mat3X3
-operator/(const Mat3X3 &lhs, float s)
+mat3
+operator/(const mat3 &lhs, float s)
 {
     return lhs * (1 / s);
 }
-Vec3D
-operator*(const Mat3X3 &lhs, const Vec3D &rhs)
+vec3
+operator*(const mat3 &lhs, const vec3 &rhs)
 {
-    return Mat3X3::Mult(lhs, rhs);
+    return mat3::Mult(lhs, rhs);
 }
 
 std::string
-Mat3X3::ToString() const
+mat3::ToString() const
 {
     std::ostringstream out;
     const auto &self = *this;

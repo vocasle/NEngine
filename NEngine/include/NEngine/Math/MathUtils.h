@@ -4,14 +4,14 @@
 #include <numbers>
 
 namespace NEngine::Math {
-struct Vec3D;
+struct vec3;
 
 constexpr static const auto PI = std::numbers::pi;
 constexpr static const auto EPSILON = 0.000001f;
 float ToRadians(float degrees);
 float ToDegrees(float radians);
 bool NearlyEqual(float lhs, float rhs);
-bool NearlyEqual(const Vec3D &lhs, const Vec3D &rhs);
+bool NearlyEqual(const vec3 &lhs, const vec3 &rhs);
 float ClampToZero(float n);
 float Abs(float n);
 

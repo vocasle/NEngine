@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Math\Mat3X3.cpp">
+    <ClCompile Include="src\Math\mat3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Math\Mat4X4.cpp">
+    <ClCompile Include="src\Math\mat4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Math\MathTest.cpp">
@@ -27,13 +27,13 @@
     <ClCompile Include="src\Math\MathUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Math\Vec2D.cpp">
+    <ClCompile Include="src\Math\vec2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Math\Vec3D.cpp">
+    <ClCompile Include="src\Math\vec3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Math\Vec4D.cpp">
+    <ClCompile Include="src\Math\vec4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\src\imgui.cpp">
@@ -74,10 +74,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\NEngine\Math\Mat3X3.h">
+    <ClInclude Include="include\NEngine\Math\mat3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NEngine\Math\Mat4X4.h">
+    <ClInclude Include="include\NEngine\Math\mat4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NEngine\Math\NEMath.h">
@@ -89,13 +89,13 @@
     <ClInclude Include="include\NEngine\Math\MathUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NEngine\Math\Vec2D.h">
+    <ClInclude Include="include\NEngine\Math\vec2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NEngine\Math\Vec3D.h">
+    <ClInclude Include="include\NEngine\Math\vec3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NEngine\Math\Vec4D.h">
+    <ClInclude Include="include\NEngine\Math\vec4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h">

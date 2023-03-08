@@ -1,15 +1,15 @@
 #pragma once
 #include <string>
 namespace NEngine::Math {
-struct Vec2D
+struct vec2
 {
-    Vec2D()
+    vec2()
         : X{0},
           Y{0}
     {
     }
 
-    Vec2D(float x, float y)
+    vec2(float x, float y)
         : X{x},
           Y{y}
     {
@@ -21,5 +21,5 @@ struct Vec2D
     float Y;
 };
 
-bool operator==(const Vec2D &lhs, const Vec2D &rhs);
+bool operator==(const vec2 &lhs, const vec2 &rhs);
 }  // namespace NEngine::Math

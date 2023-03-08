@@ -1,4 +1,4 @@
-#include "NEngine/Math/Vec2D.h"
+#include "NEngine/Math/vec2.h"
 
 #include <sstream>
 
@@ -11,7 +11,7 @@ using namespace DirectX;
 
 namespace NEngine::Math {
 float
-Vec2D::Length() const
+vec2::Length() const
 {
 #if NENGINE_USE_DIRECTXMATH
     auto len = 0.0f;
@@ -25,14 +25,14 @@ Vec2D::Length() const
 }
 
 std::string
-Vec2D::ToString() const
+vec2::ToString() const
 {
     std::stringstream out;
     out << "{ " << X << ", " << Y << " }";
     return out.str();
 }
 bool
-operator==(const Vec2D &lhs, const Vec2D &rhs)
+operator==(const vec2 &lhs, const vec2 &rhs)
 {
     return NearlyEqual(lhs.X, rhs.X) && NearlyEqual(lhs.Y, rhs.Y);
 }

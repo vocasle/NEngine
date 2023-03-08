@@ -3,19 +3,19 @@
 #include <cstring>
 #include <sstream>
 
-#include "Mat3X3.h"
-#include "Mat4X4.h"
-#include "Vec2D.h"
-#include "Vec3D.h"
+#include "mat3.h"
+#include "mat4.h"
+#include "vec2.h"
+#include "vec3.h"
 
 namespace NEngine {
 namespace Math {
 
-using mat4 = NEngine::Math::Mat4X4;
-using mat3 = NEngine::Math::Mat3X3;
-using vec2 = NEngine::Math::Vec2D;
-using vec3 = NEngine::Math::Vec3D;
-using vec4 = NEngine::Math::Vec4D;
+using mat4 = NEngine::Math::mat4;
+using mat3 = NEngine::Math::mat3;
+using vec2 = NEngine::Math::vec2;
+using vec3 = NEngine::Math::vec3;
+using vec4 = NEngine::Math::vec4;
 
 mat4 RotateAxis(float radians, const vec3 &axis);
 mat4 LookTo(const vec3 &camPos, const vec3 &target, const vec3 &up);

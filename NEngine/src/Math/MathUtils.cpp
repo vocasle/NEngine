@@ -1,6 +1,6 @@
 #include "NEngine/Math/MathUtils.h"
 
-#include "NEngine/Math/Vec3D.h"
+#include "NEngine/Math/vec3.h"
 
 namespace NEngine::Math {
 float
@@ -21,7 +21,7 @@ NearlyEqual(float lhs, float rhs)
 }
 
 bool
-NearlyEqual(const Vec3D &lhs, const Vec3D &rhs)
+NearlyEqual(const vec3 &lhs, const vec3 &rhs)
 {
     return NearlyEqual(lhs.X, rhs.X) && NearlyEqual(lhs.Y, rhs.Y) &&
            NearlyEqual(lhs.Z, rhs.Z);

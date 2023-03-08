@@ -1,8 +1,6 @@
-#include "NEngine/Math/Vec4D.h"
+#include "NEngine/Math/vec4.h"
 
 #include <sstream>
-
-#include "NEngine/Utils/Utils.h"
 
 #if NENGINE_USE_DIRECTXMATH
 #include <DirectXMath.h>
@@ -10,7 +8,7 @@ using namespace DirectX;
 #endif
 
 namespace NEngine::Math {
-Vec4D::Vec4D()
+vec4::vec4()
     : X{0},
       Y{0},
       Z{0},
@@ -18,20 +16,20 @@ Vec4D::Vec4D()
 {
 }
 
-Vec4D::Vec4D(float x, float y, float z, float w)
+vec4::vec4(float x, float y, float z, float w)
     : X{x},
       Y{y},
       Z{z},
       W{w}
 {
 }
-Vec4D::Vec4D(const Vec3D &v, float w)
-    : Vec4D(v.X, v.Y, v.Z, w)
+vec4::vec4(const vec3 &v, float w)
+    : vec4(v.X, v.Y, v.Z, w)
 {
 }
 
 std::string
-Vec4D::ToString() const
+vec4::ToString() const
 {
     std::stringstream out;
     out << "{ " << X << ", " << Y << ", " << Z << ", " << W << " }";
@@ -39,7 +37,7 @@ Vec4D::ToString() const
 }
 
 float
-Vec4D::Length() const
+vec4::Length() const
 {
 #if NENGINE_USE_DIRECTXMATH
     auto len = 0.0f;
@@ -53,19 +51,19 @@ Vec4D::Length() const
 }
 
 bool
-Vec4D::operator==(const Vec4D &rhs) const
+vec4::operator==(const vec4 &rhs) const
 {
     return X == rhs.X && Y == rhs.Y && Z == rhs.Z && W == rhs.W;
 }
 
 float
-Vec4D::operator[](size_t i) const
+vec4::operator[](size_t i) const
 {
     return operator[](i);
 }
 
 float &
-Vec4D::operator[](size_t i)
+vec4::operator[](size_t i)
 {
     switch (i) {
         case 0:
@@ -77,24 +75,23 @@ Vec4D::operator[](size_t i)
         case 3:
             return W;
         default:
-            throw std::invalid_argument(
-                Utils::UtilsFormatStr("%llu is out of bounds", i));
+            throw std::invalid_argument("Index out of bounds");
     }
 }
 
-Vec3D
-Vec4D::ToVec3D() const
+vec3
+vec4::ToVec3D() const
 {
-    return Vec3D(X, Y, Z);
+    return vec3(X, Y, Z);
 }
 
-Vec4D
-Vec4D::Normalize() const
+vec4
+vec4::Normalize() const
 {
 #if NENGINE_USE_DIRECTXMATH
     const auto vec = XMVector4Normalize(
         XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(this)));
-    auto ret = Vec4D();
+    auto ret = vec4();
     XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), vec);
     return ret;
 #else
@@ -107,11 +104,11 @@ Vec4D::Normalize() const
 #endif
 }
 
-Vec4D
-operator+(const Vec4D &lhs, const Vec4D &rhs)
+vec4
+operator+(const vec4 &lhs, const vec4 &rhs)
 {
 #if NENGINE_USE_DIRECTXMATH
-    auto ret = Vec4D();
+    auto ret = vec4();
     const auto vec =
         XMVectorAdd(XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&lhs)),
                     XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&rhs)));
@@ -122,11 +119,11 @@ operator+(const Vec4D &lhs, const Vec4D &rhs)
 #endif
 }
 
-Vec4D
-operator-(const Vec4D &lhs, const Vec4D &rhs)
+vec4
+operator-(const vec4 &lhs, const vec4 &rhs)
 {
 #if NENGINE_USE_DIRECTXMATH
-    auto ret = Vec4D();
+    auto ret = vec4();
     const auto vec = XMVectorSubtract(
         XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&lhs)),
         XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&rhs)));
@@ -137,11 +134,11 @@ operator-(const Vec4D &lhs, const Vec4D &rhs)
 #endif
 }
 
-Vec4D
-operator*(const Vec4D &lhs, const float s)
+vec4
+operator*(const vec4 &lhs, const float s)
 {
 #if NENGINE_USE_DIRECTXMATH
-    auto ret = Vec4D();
+    auto ret = vec4();
     const auto vec = XMVectorScale(
         XMLoadFloat4(reinterpret_cast<const XMFLOAT4 *>(&lhs)), s);
     XMStoreFloat4(reinterpret_cast<XMFLOAT4 *>(&ret), vec);
@@ -150,18 +147,18 @@ operator*(const Vec4D &lhs, const float s)
     return {lhs.X * s, lhs.Y * s, lhs.Z * s, lhs.W};
 #endif
 }
-Vec4D
-operator*(const float s, const Vec4D &rhs)
+vec4
+operator*(const float s, const vec4 &rhs)
 {
     return rhs * s;
 }
-Vec4D
-operator/(const Vec4D &lhs, const float s)
+vec4
+operator/(const vec4 &lhs, const float s)
 {
     return lhs * (1 / s);
 }
-Vec4D
-operator/(const float s, const Vec4D &rhs)
+vec4
+operator/(const float s, const vec4 &rhs)
 {
     return rhs / s;
 }

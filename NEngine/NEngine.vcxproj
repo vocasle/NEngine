@@ -139,14 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Math\Mat3X3.cpp" />
-    <ClCompile Include="src\Math\Mat4X4.cpp" />
+    <ClCompile Include="src\Math\mat3.cpp" />
+    <ClCompile Include="src\Math\mat4.cpp" />
     <ClCompile Include="src\Math\MathTest.cpp" />
     <ClCompile Include="src\Math\MathUtils.cpp" />
     <ClCompile Include="src\Math\NEMath.cpp" />
-    <ClCompile Include="src\Math\Vec2D.cpp" />
-    <ClCompile Include="src\Math\Vec3D.cpp" />
-    <ClCompile Include="src\Math\Vec4D.cpp" />
+    <ClCompile Include="src\Math\vec2.cpp" />
+    <ClCompile Include="src\Math\vec3.cpp" />
+    <ClCompile Include="src\Math\vec4.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx11.cpp" />
@@ -161,14 +161,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\Config.h" />
-    <ClInclude Include="include\NEngine\Math\Mat3X3.h" />
-    <ClInclude Include="include\NEngine\Math\Mat4X4.h" />
+    <ClInclude Include="include\NEngine\Math\mat3.h" />
+    <ClInclude Include="include\NEngine\Math\mat4.h" />
     <ClInclude Include="include\NEngine\Math\NEMath.h" />
     <ClInclude Include="include\NEngine\Math\MathTest.h" />
     <ClInclude Include="include\NEngine\Math\MathUtils.h" />
-    <ClInclude Include="include\NEngine\Math\Vec2D.h" />
-    <ClInclude Include="include\NEngine\Math\Vec3D.h" />
-    <ClInclude Include="include\NEngine\Math\Vec4D.h" />
+    <ClInclude Include="include\NEngine\Math\vec2.h" />
+    <ClInclude Include="include\NEngine\Math\vec3.h" />
+    <ClInclude Include="include\NEngine\Math\vec4.h" />
     <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXCollision.h" />
     <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXColors.h" />
     <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXMath.h" />
