@@ -157,7 +157,6 @@
     <ClCompile Include="thirdparty\mikktspace\src\mikktspace.c" />
     <ClCompile Include="thirdparty\stb_image\src\stb_image.cpp" />
     <ClCompile Include="thirdparty\stb_image_write\src\stb_image_write.cpp" />
-    <ClCompile Include="thirdparty\tinygltf\src\tiny_gltf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\Config.h" />
@@ -186,8 +185,6 @@
     <ClInclude Include="thirdparty\mikktspace\include\mikktspace\mikktspace.h" />
     <ClInclude Include="thirdparty\stb_image\include\stb_image\stb_image.h" />
     <ClInclude Include="thirdparty\stb_image_write\include\stb_image_write\stb_image_write.h" />
-    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\json.hpp" />
-    <ClInclude Include="thirdparty\tinygltf\include\tinygltf\tiny_gltf.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\BasePass.hlsli" />
