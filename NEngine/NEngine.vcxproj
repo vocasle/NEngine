@@ -113,6 +113,7 @@
       <PreprocessorDefinitions>NENGINE_TEST_MATH=1;NENGINE_USE_DIRECTXMATH=1;NENGINE_DEBUG=1;NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +130,7 @@
       <PreprocessorDefinitions>NENGINE_TEST_MATH=1;NENGINE_USE_DIRECTXMATH=1;NENGINE_DEBUG=1;NENGINE_BUILD_DIR="$(OutDir.Replace('\','/'))";NENGINE_SHADER_BUILD_DIR="$(OutDir.Replace('\','/'))shader";NENGINE_SHADER_SOURCE_DIR="$(ProjectDir.Replace('\','/'))shader";NENGINE_RES_DIR="$(ProjectDir.Replace('\','/'))res";NOMINMAX;STBI_MSC_SECURE_CRT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,14 +141,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Math\mat3.cpp" />
-    <ClCompile Include="src\Math\mat4.cpp" />
-    <ClCompile Include="src\Math\MathTest.cpp" />
-    <ClCompile Include="src\Math\MathUtils.cpp" />
-    <ClCompile Include="src\Math\NEMath.cpp" />
-    <ClCompile Include="src\Math\vec2.cpp" />
-    <ClCompile Include="src\Math\vec3.cpp" />
-    <ClCompile Include="src\Math\vec4.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_impl_dx11.cpp" />
@@ -160,14 +154,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NEngine\Config.h" />
-    <ClInclude Include="include\NEngine\Math\mat3.h" />
-    <ClInclude Include="include\NEngine\Math\mat4.h" />
-    <ClInclude Include="include\NEngine\Math\NEMath.h" />
-    <ClInclude Include="include\NEngine\Math\MathTest.h" />
-    <ClInclude Include="include\NEngine\Math\MathUtils.h" />
-    <ClInclude Include="include\NEngine\Math\vec2.h" />
-    <ClInclude Include="include\NEngine\Math\vec3.h" />
-    <ClInclude Include="include\NEngine\Math\vec4.h" />
     <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXCollision.h" />
     <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXColors.h" />
     <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXMath.h" />

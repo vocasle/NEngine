@@ -146,7 +146,7 @@
     <ClInclude Include="include\Sandbox\MyGame.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NEngine\NEngine.vcxproj">
