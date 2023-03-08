@@ -3,8 +3,11 @@
 
 #include <iostream>
 
+#include "vulkan_application.h"
+
 SDL_Surface *win_surface = nullptr;
 SDL_Window *window = nullptr;
+nengine::vulkan_application *app = nullptr;
 
 bool
 loop()
@@ -34,7 +37,8 @@ init_sdl_context()
         return false;
     }
 
-    window = SDL_CreateWindow("Test window", 100, 100, 1280, 720, 0);
+    window = SDL_CreateWindow(
+        "Vulkan triangle", 100, 100, 1280, 720, SDL_WINDOW_VULKAN);
     if (!window) {
         std::cerr << "Failed to create window" << std::endl;
         return false;
@@ -62,6 +66,8 @@ main(int argc, char **argv)
     if (!init_sdl_context()) {
         return 1;
     }
+
+    app = new nengine::vulkan_application(window);
 
     while (loop()) {
         SDL_Delay(16);
