@@ -4,6 +4,7 @@
 
 #include <format>
 #include <iostream>
+#include <optional>
 
 namespace nengine {
 
@@ -41,19 +42,19 @@ create_debug_utils_messenger_ext(
 
 static void
 destroy_debug_utils_messenger_ext(VkInstance instance,
-                              VkDebugUtilsMessengerEXT debug_messenger,
-                              const VkAllocationCallbacks *p_allocator)
+                                  VkDebugUtilsMessengerEXT debug_messenger,
+                                  const VkAllocationCallbacks *p_allocator)
 {
-    auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(
-        instance,
-        "vkDestroyDebugUtilsMessengerEXT"));
+    auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
+        vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
     if (func != nullptr) {
         func(instance, debug_messenger, p_allocator);
     }
 }
 
 static void
-populate_debug_messenger_create_info(VkDebugUtilsMessengerCreateInfoEXT &create_info)
+populate_debug_messenger_create_info(
+    VkDebugUtilsMessengerCreateInfoEXT &create_info)
 {
     create_info = {};
     create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -62,8 +63,8 @@ populate_debug_messenger_create_info(VkDebugUtilsMessengerCreateInfoEXT &create_
         VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
         VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+                              VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                              VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     create_info.pfnUserCallback = debug_callback;
 }
 
@@ -96,13 +97,15 @@ vulkan_application::init_vulkan()
 {
     create_instance();
     setup_debug_messenger();
+    pick_physical_device();
 }
 
 void
 vulkan_application::cleanup()
 {
     if constexpr (enable_validation_layers) {
-        destroy_debug_utils_messenger_ext(instance_, debug_util_messenger_, nullptr);
+        destroy_debug_utils_messenger_ext(
+            instance_, debug_util_messenger_, nullptr);
     }
 
     vkDestroyInstance(instance_, nullptr);
@@ -203,7 +206,8 @@ vulkan_application::create_instance()
         get_required_extensions(window_);
 
     create_info.ppEnabledExtensionNames = required_extensions.data();
-    create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
+    create_info.enabledExtensionCount =
+        static_cast<uint32_t>(required_extensions.size());
 
     if constexpr (enable_validation_layers) {
         create_info.ppEnabledLayerNames = validation_layers.data();
@@ -218,6 +222,90 @@ vulkan_application::create_instance()
     }
 
     VKRESULT(vkCreateInstance(&create_info, nullptr, &instance_));
+}
+
+struct queue_family_indices
+{
+    std::optional<uint32_t> graphics_family;
+
+    [[nodiscard]] bool
+    is_complete() const
+    {
+        return graphics_family.has_value();
+    }
+};
+
+static queue_family_indices
+find_queue_families(VkPhysicalDevice device)
+{
+    queue_family_indices indices;
+
+    uint32_t queue_family_count = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(
+        device, &queue_family_count, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
+    vkGetPhysicalDeviceQueueFamilyProperties(
+        device, &queue_family_count, queue_families.data());
+
+    int i = 0;
+    for (const auto &queue_family : queue_families) {
+        if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphics_family = i;
+        }
+        if (indices.is_complete()) {
+            break;
+        }
+        ++i;
+    }
+
+    return indices;
+}
+
+static bool
+is_device_suitable(VkPhysicalDevice device)
+{
+    // VkPhysicalDeviceProperties device_properties;
+    // vkGetPhysicalDeviceProperties(device, &device_properties);
+
+    // VkPhysicalDeviceFeatures device_features;
+    // vkGetPhysicalDeviceFeatures(device, &device_features);
+
+    // return device_properties.deviceType ==
+    //            VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+    //        device_features.geometryShader;
+
+    const queue_family_indices indices = find_queue_families(device);
+    return indices.is_complete();
+}
+
+void
+vulkan_application::pick_physical_device()
+{
+    VkPhysicalDevice physical_device = VK_NULL_HANDLE;
+
+    uint32_t device_count = 0;
+    VKRESULT(
+        vkEnumeratePhysicalDevices(instance_, &device_count, nullptr));
+
+    if (device_count == 0) {
+        throw std::runtime_error("Failed to find GPUs with Vulkan support");
+    }
+
+    std::vector<VkPhysicalDevice> devices(device_count);
+    VKRESULT(
+        vkEnumeratePhysicalDevices(instance_, &device_count, devices.data()));
+
+    for (const VkPhysicalDevice &device : devices) {
+        if (is_device_suitable(device)) {
+            physical_device = device;
+            break;
+        }
+    }
+
+    if (physical_device == VK_NULL_HANDLE) {
+        throw std::runtime_error("Failed to find a suitable GPU");
+    }
 }
 
 }  // namespace nengine

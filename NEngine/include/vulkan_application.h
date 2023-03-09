@@ -16,8 +16,8 @@ private:
     void main_loop();
     void cleanup();
     void setup_debug_messenger();
-
     void create_instance();
+    void pick_physical_device();
 
     VkInstance instance_;
     VkDebugUtilsMessengerEXT debug_util_messenger_;
