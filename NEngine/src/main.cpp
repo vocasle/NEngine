@@ -58,6 +58,7 @@ destroy_sdl2_context()
 {
     SDL_DestroyWindow(window);
     SDL_Quit();
+    delete app;
 }
 
 int
