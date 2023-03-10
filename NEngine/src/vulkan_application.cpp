@@ -330,6 +330,59 @@ vulkan_application::check_device_extension_support(
     return required_extensions.empty();
 }
 
+static VkSurfaceFormatKHR
+choose_swap_surface_format(
+    const std::vector<VkSurfaceFormatKHR> &available_formats)
+{
+    for (const auto &available_format : available_formats) {
+        if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB &&
+            available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            return available_format;
+        }
+    }
+
+    return available_formats[0];
+}
+
+static VkPresentModeKHR
+choose_swap_present_mode(
+    const std::vector<VkPresentModeKHR> &available_present_modes)
+{
+    for (const auto &available_present_mode : available_present_modes) {
+        if (available_present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+            return available_present_mode;
+        }
+    }
+
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+static VkExtent2D
+choose_swap_extent(SDL_Window *window, VkSurfaceCapabilitiesKHR &capabilities)
+{
+    if (capabilities.currentExtent.width !=
+        std::numeric_limits<uint32_t>::max()) {
+        return capabilities.currentExtent;
+    }
+
+    int width = 0;
+    int height = 0;
+    SDL_GetWindowSizeInPixels(window, &width, &height);
+
+    VkExtent2D actual_extent{static_cast<uint32_t>(width),
+                             static_cast<uint32_t>(height)};
+
+    actual_extent.width = std::clamp(actual_extent.width,
+                                     capabilities.minImageExtent.width,
+                                     capabilities.maxImageExtent.width);
+
+    actual_extent.height = std::clamp(actual_extent.height,
+                                      capabilities.minImageExtent.height,
+                                      capabilities.maxImageExtent.height);
+
+    return actual_extent;
+}
+
 bool
 vulkan_application::is_device_suitable(VkPhysicalDevice device) const
 {
