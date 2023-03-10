@@ -28,6 +28,7 @@ private:
     [[nodiscard]] VkShaderModule create_shader_module(
         const std::vector<char> &code) const;
     void create_render_pass();
+    void create_framebuffers();
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -45,6 +46,7 @@ private:
     VkPipelineLayout pipeline_layout_;
     VkRenderPass render_pass_;
     VkPipeline graphics_pipeline_;
+    std::vector<VkFramebuffer> swap_chain_framebuffers_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

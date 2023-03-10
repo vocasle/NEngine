@@ -135,11 +135,16 @@ vulkan_application::init_vulkan()
     create_image_views();
     create_render_pass();
     create_graphics_pipeline();
+    create_framebuffers();
 }
 
 void
 vulkan_application::cleanup() const
 {
+    for (auto framebuffer : swap_chain_framebuffers_) {
+        vkDestroyFramebuffer(device_, framebuffer, nullptr);
+    }
+
     vkDestroyPipeline(device_, graphics_pipeline_, nullptr);
     vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
     vkDestroyRenderPass(device_, render_pass_, nullptr);
@@ -555,6 +560,28 @@ vulkan_application::create_render_pass()
 
     VKRESULT(
         vkCreateRenderPass(device_, &render_pass_info, nullptr, &render_pass_));
+}
+
+void
+vulkan_application::create_framebuffers()
+{
+    swap_chain_framebuffers_.resize(swap_chain_image_views_.size());
+
+    for (size_t i = 0; i < swap_chain_image_views_.size(); ++i) {
+        VkImageView attachments[] = {swap_chain_image_views_[i]};
+
+        VkFramebufferCreateInfo create_info{};
+        create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        create_info.renderPass = render_pass_;
+        create_info.attachmentCount = 1;
+        create_info.pAttachments = attachments;
+        create_info.width = swap_chain_extent_.width;
+        create_info.height = swap_chain_extent_.height;
+        create_info.layers = 1;
+
+        VKRESULT(vkCreateFramebuffer(
+            device_, &create_info, nullptr, &swap_chain_framebuffers_[i]));
+    }
 }
 
 void
