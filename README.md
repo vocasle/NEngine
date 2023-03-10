@@ -26,6 +26,11 @@ List of third party libs:
 
 For now I use Visual Studio 2022 to build the project. Just open NEngine.sln and build. Do checkout with git submodules.
 
+There is an old brach `dx11` that is not supported by me. It uses DirecX 11 and contains
+enough facilities to start a simple 3D game development.
+
+From now on only `vulkan` branch will be supported.
+
 ## Roadmap
 
 ### Utility
