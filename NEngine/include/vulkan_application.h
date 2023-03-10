@@ -19,6 +19,7 @@ private:
     void create_instance();
     void pick_physical_device();
     void create_logical_device();
+    void create_surface();
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -26,6 +27,7 @@ private:
     VkPhysicalDevice physical_device_;
     VkDevice device_;
     VkQueue queue_;
+    VkSurfaceKHR surface_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

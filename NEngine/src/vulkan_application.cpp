@@ -100,6 +100,7 @@ vulkan_application::init_vulkan()
 {
     create_instance();
     setup_debug_messenger();
+    create_surface();
     pick_physical_device();
     create_logical_device();
 }
@@ -112,7 +113,7 @@ vulkan_application::cleanup()
         destroy_debug_utils_messenger_ext(
             instance_, debug_util_messenger_, nullptr);
     }
-
+    vkDestroySurfaceKHR(instance_, surface_, nullptr);
     vkDestroyInstance(instance_, nullptr);
 }
 
@@ -232,16 +233,17 @@ vulkan_application::create_instance()
 struct queue_family_indices
 {
     std::optional<uint32_t> graphics_family;
+    std::optional<uint32_t> present_family;
 
     [[nodiscard]] bool
     is_complete() const
     {
-        return graphics_family.has_value();
+        return graphics_family.has_value() && present_family.has_value();
     }
 };
 
 static queue_family_indices
-find_queue_families(VkPhysicalDevice device)
+find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
     queue_family_indices indices;
 
@@ -261,6 +263,13 @@ find_queue_families(VkPhysicalDevice device)
         if (indices.is_complete()) {
             break;
         }
+
+        VkBool32 present_support = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(
+            device, i, surface, &present_support);
+        if (present_support) {
+            indices.present_family = i;
+        }
         ++i;
     }
 
@@ -268,7 +277,7 @@ find_queue_families(VkPhysicalDevice device)
 }
 
 static bool
-is_device_suitable(VkPhysicalDevice device)
+is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
     // VkPhysicalDeviceProperties device_properties;
     // vkGetPhysicalDeviceProperties(device, &device_properties);
@@ -280,7 +289,7 @@ is_device_suitable(VkPhysicalDevice device)
     //            VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
     //        device_features.geometryShader;
 
-    const queue_family_indices indices = find_queue_families(device);
+    const queue_family_indices indices = find_queue_families(device, surface);
     return indices.is_complete();
 }
 
@@ -301,7 +310,7 @@ vulkan_application::pick_physical_device()
         vkEnumeratePhysicalDevices(instance_, &device_count, devices.data()));
 
     for (const VkPhysicalDevice &device : devices) {
-        if (is_device_suitable(device)) {
+        if (is_device_suitable(device, surface_)) {
             physical_device_ = device;
             break;
         }
@@ -315,7 +324,8 @@ vulkan_application::pick_physical_device()
 void
 vulkan_application::create_logical_device()
 {
-    const queue_family_indices indices = find_queue_families(physical_device_);
+    const queue_family_indices indices =
+        find_queue_families(physical_device_, surface_);
 
     VkDeviceQueueCreateInfo queue_create_info{};
     queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -347,6 +357,14 @@ vulkan_application::create_logical_device()
     VKRESULT(vkCreateDevice(physical_device_, &create_info, nullptr, &device_));
 
     vkGetDeviceQueue(device_, indices.graphics_family.value(), 0, &queue_);
+}
+
+void
+vulkan_application::create_surface()
+{
+    if (SDL_Vulkan_CreateSurface(window_, instance_, &surface_) == SDL_FALSE) {
+        throw std::runtime_error("Failed to create surface");
+    }
 }
 
 }  // namespace nengine
