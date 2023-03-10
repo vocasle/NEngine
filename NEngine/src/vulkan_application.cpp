@@ -244,6 +244,37 @@ struct queue_family_indices
     }
 };
 
+struct swap_chain_support_details
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> present_modes;
+};
+
+static swap_chain_support_details
+query_swap_chain_support(VkPhysicalDevice device, VkSurfaceKHR surface)
+{
+    swap_chain_support_details details;
+    VKRESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        device, surface, &details.capabilities));
+
+    uint32_t format_count = 0;
+    VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device, surface, &format_count, nullptr));
+    details.formats.resize(format_count);
+    VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device, surface, &format_count, details.formats.data()));
+
+    uint32_t present_mode_count = 0;
+    VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device, surface, &present_mode_count, nullptr));
+    details.present_modes.resize(present_mode_count);
+    VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device, surface, &present_mode_count, details.present_modes.data()));
+
+    return details;
+}
+
 static queue_family_indices
 find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
@@ -279,7 +310,8 @@ find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
 }
 
 bool
-vulkan_application::check_device_extension_support(VkPhysicalDevice device) const
+vulkan_application::check_device_extension_support(
+    VkPhysicalDevice device) const
 {
     uint32_t extensions_count = 0;
     VKRESULT(vkEnumerateDeviceExtensionProperties(
@@ -289,7 +321,8 @@ vulkan_application::check_device_extension_support(VkPhysicalDevice device) cons
     VKRESULT(vkEnumerateDeviceExtensionProperties(
         device, nullptr, &extensions_count, available_extensions.data()));
 
-    std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
+    std::set<std::string> required_extensions(device_extensions.begin(),
+                                              device_extensions.end());
     for (const auto &extension : available_extensions) {
         required_extensions.erase(extension.extensionName);
     }
@@ -313,7 +346,15 @@ vulkan_application::is_device_suitable(VkPhysicalDevice device) const
     const queue_family_indices indices = find_queue_families(device, surface_);
     const bool extensions_supported = check_device_extension_support(device);
 
-    return indices.is_complete() && extensions_supported;
+    bool is_swap_chain_valid = false;
+    if (extensions_supported) {
+        const swap_chain_support_details details =
+            query_swap_chain_support(device, surface_);
+        is_swap_chain_valid =
+            !details.formats.empty() && !details.present_modes.empty();
+    }
+
+    return indices.is_complete() && extensions_supported && is_swap_chain_valid;
 }
 
 void
@@ -373,7 +414,9 @@ vulkan_application::create_logical_device()
     create_info.queueCreateInfoCount =
         static_cast<uint32_t>(queue_create_infos.size());
     create_info.pEnabledFeatures = &device_features;
-    create_info.enabledExtensionCount = 0;
+    create_info.enabledExtensionCount =
+        static_cast<uint32_t>(device_extensions.size());
+    create_info.ppEnabledExtensionNames = device_extensions.data();
 
     if constexpr (enable_validation_layers) {
         create_info.enabledLayerCount =
