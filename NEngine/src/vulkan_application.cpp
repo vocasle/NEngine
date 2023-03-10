@@ -257,6 +257,42 @@ vulkan_application::vulkan_application(SDL_Window *window)
 void
 vulkan_application::draw_frame()
 {
+    VKRESULT(
+        vkWaitForFences(device_, 1, &in_flight_fence_, VK_TRUE, UINT64_MAX));
+
+    VKRESULT(vkResetFences(device_, 1, &in_flight_fence_));
+
+    uint32_t image_idx;
+    VKRESULT(vkAcquireNextImageKHR(device_,
+                                   swap_chain_,
+                                   UINT64_MAX,
+                                   image_available_semaphore_,
+                                   VK_NULL_HANDLE,
+                                   &image_idx));
+
+    VKRESULT(vkResetCommandBuffer(command_buffer_, 0));
+
+    record_command_buffer(command_buffer_, image_idx);
+
+    VkSubmitInfo submit_info{};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    const VkSemaphore wait_semaphores[] = {image_available_semaphore_};
+    const VkPipelineStageFlags wait_stages[] = {
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+    submit_info.waitSemaphoreCount = 1;
+    submit_info.pWaitSemaphores = wait_semaphores;
+    submit_info.pWaitDstStageMask = wait_stages;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &command_buffer_;
+
+    const VkSemaphore signal_semaphores[] = {render_finished_semaphore_};
+
+    submit_info.signalSemaphoreCount = 1;
+    submit_info.pSignalSemaphores = signal_semaphores;
+
+    VKRESULT(vkQueueSubmit(queue_, 1, &submit_info, in_flight_fence_));
 }
 
 vulkan_application::~vulkan_application()
@@ -686,6 +722,7 @@ vulkan_application::create_sync_objects()
 
     VkFenceCreateInfo fence_info{};
     fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     VKRESULT(vkCreateSemaphore(
         device_, &semaphore_info, nullptr, &image_available_semaphore_));
