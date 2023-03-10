@@ -4,7 +4,7 @@ This is my personal game engine. It is continuos work in progress.
 
 I have started this project to learn internals of game engine.
 
-I strive to use third party libs as little as possible. Because the 
+I have strived to use third party libs as little as possible. Because the 
 main goal is to have a firm understanding on how everything works under the hood.
 
 Well, that was my goal 6 months ago. Right now I have a good grasp of core engine subsystems.
@@ -24,7 +24,13 @@ List of third party libs:
 
 **How to build**
 
-For now I use Visual Studio 2022 to build the project. Just open NEngine.sln and build. Do checkout with git submodules.
+Do checkout with git submodules. Please note that `fx-gltf` will pull gLTF sample models which are quite heavy.
+
+Install Vulkan SDK.
+
+Compile shaders in `NEngine/shaders` directory with `glslc.exe`.
+
+For now I use Visual Studio 2022 to build the project. Just open NEngine.sln and build. 
 
 There is an old brach `dx11` that is not supported by me. It uses DirecX 11 and contains
 enough facilities to start a simple 3D game development.
