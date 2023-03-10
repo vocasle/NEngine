@@ -278,8 +278,27 @@ find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
     return indices;
 }
 
-static bool
-is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface)
+bool
+vulkan_application::check_device_extension_support(VkPhysicalDevice device) const
+{
+    uint32_t extensions_count = 0;
+    VKRESULT(vkEnumerateDeviceExtensionProperties(
+        device, nullptr, &extensions_count, nullptr));
+
+    std::vector<VkExtensionProperties> available_extensions(extensions_count);
+    VKRESULT(vkEnumerateDeviceExtensionProperties(
+        device, nullptr, &extensions_count, available_extensions.data()));
+
+    std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
+    for (const auto &extension : available_extensions) {
+        required_extensions.erase(extension.extensionName);
+    }
+
+    return required_extensions.empty();
+}
+
+bool
+vulkan_application::is_device_suitable(VkPhysicalDevice device) const
 {
     // VkPhysicalDeviceProperties device_properties;
     // vkGetPhysicalDeviceProperties(device, &device_properties);
@@ -291,8 +310,10 @@ is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface)
     //            VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
     //        device_features.geometryShader;
 
-    const queue_family_indices indices = find_queue_families(device, surface);
-    return indices.is_complete();
+    const queue_family_indices indices = find_queue_families(device, surface_);
+    const bool extensions_supported = check_device_extension_support(device);
+
+    return indices.is_complete() && extensions_supported;
 }
 
 void
@@ -312,7 +333,7 @@ vulkan_application::pick_physical_device()
         vkEnumeratePhysicalDevices(instance_, &device_count, devices.data()));
 
     for (const VkPhysicalDevice &device : devices) {
-        if (is_device_suitable(device, surface_)) {
+        if (is_device_suitable(device)) {
             physical_device_ = device;
             break;
         }

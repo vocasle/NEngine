@@ -20,6 +20,9 @@ private:
     void pick_physical_device();
     void create_logical_device();
     void create_surface();
+    [[nodiscard]] bool is_device_suitable(VkPhysicalDevice device) const;
+    [[nodiscard]] bool check_device_extension_support(
+        VkPhysicalDevice device) const;
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -32,6 +35,8 @@ private:
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
+    const std::vector<const char *> device_extensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
 
 }  // namespace nengine
