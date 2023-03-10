@@ -8,7 +8,7 @@ class vulkan_application
 {
 public:
     explicit vulkan_application(SDL_Window *window);
-    void run();
+    void draw_frame();
     ~vulkan_application();
 
 private:
@@ -32,6 +32,7 @@ private:
     void create_framebuffers();
     void create_command_buffer();
     void record_command_buffer(VkCommandBuffer cb, uint32_t image_idx);
+    void create_sync_objects();
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -52,6 +53,9 @@ private:
     std::vector<VkFramebuffer> swap_chain_framebuffers_;
     VkCommandPool command_pool_;
     VkCommandBuffer command_buffer_;
+    VkSemaphore image_available_semaphore_;
+    VkSemaphore render_finished_semaphore_;
+    VkFence in_flight_fence_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

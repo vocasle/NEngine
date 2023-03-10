@@ -246,9 +246,17 @@ vulkan_application::vulkan_application(SDL_Window *window)
       render_pass_(),
       graphics_pipeline_(),
       command_pool_(),
-      command_buffer_()
+      command_buffer_(),
+      image_available_semaphore_(),
+      render_finished_semaphore_(),
+      in_flight_fence_()
 {
     init_vulkan();
+}
+
+void
+vulkan_application::draw_frame()
+{
 }
 
 vulkan_application::~vulkan_application()
@@ -286,11 +294,16 @@ vulkan_application::init_vulkan()
     create_framebuffers();
     create_command_pool();
     create_command_buffer();
+    create_sync_objects();
 }
 
 void
 vulkan_application::cleanup() const
 {
+    vkDestroySemaphore(device_, image_available_semaphore_, nullptr);
+    vkDestroySemaphore(device_, render_finished_semaphore_, nullptr);
+    vkDestroyFence(device_, in_flight_fence_, nullptr);
+
     vkDestroyCommandPool(device_, command_pool_, nullptr);
 
     for (auto framebuffer : swap_chain_framebuffers_) {
@@ -663,6 +676,22 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
     vkCmdEndRenderPass(cb);
 
     VKRESULT(vkEndCommandBuffer(cb));
+}
+
+void
+vulkan_application::create_sync_objects()
+{
+    VkSemaphoreCreateInfo semaphore_info{};
+    semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkFenceCreateInfo fence_info{};
+    fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    VKRESULT(vkCreateSemaphore(
+        device_, &semaphore_info, nullptr, &image_available_semaphore_));
+    VKRESULT(vkCreateSemaphore(
+        device_, &semaphore_info, nullptr, &render_finished_semaphore_));
+    VKRESULT(vkCreateFence(device_, &fence_info, nullptr, &in_flight_fence_));
 }
 
 void
