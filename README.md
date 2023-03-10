@@ -7,28 +7,24 @@ I have started this project to learn internals of game engine.
 I strive to use third party libs as little as possible. Because the 
 main goal is to have a firm understanding on how everything works under the hood.
 
-Game engine is nailed to Windows and DirectX 11. I would like to switch to 
-Vulkan in future and add an abstraction layer to support Linux as well. But those are
-plans for distant future.
+Well, that was my goal 6 months ago. Right now I have a good grasp of core engine subsystems.
+
+Recently I have switched to Vulkan. I have removed everything and started from scratch.
+Right now I use SDL2 for platform indpendent window creation and user input processing.
+
+Game engine is written for Windows and utilizes Vulkan.
 
 List of third party libs:
 1. ImGui
-2. ImGuizmo
 3. mikktspace
 4. stb_image
 5. stb_image_write
-6. tinygltf
+6. fx-gltf
+7. SDL2
 
 **How to build**
 
-For now I use CMake + Visual Studio 2022 to build the project. 
-
-To build with VS 2022 you just need to open the project as CMake project.
-
-To build with CMake navigate to root of the repo and execute:
-
-	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -S . - B build-debug -G Ninja
-
+For now I use Visual Studio 2022 to build the project. Just open NEngine.sln and build. Do checkout with git submodules.
 
 ## Roadmap
 
