@@ -293,6 +293,19 @@ vulkan_application::draw_frame()
     submit_info.pSignalSemaphores = signal_semaphores;
 
     VKRESULT(vkQueueSubmit(queue_, 1, &submit_info, in_flight_fence_));
+
+    VkPresentInfoKHR present_info{};
+    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = signal_semaphores;
+
+    const VkSwapchainKHR swap_chains[] = {swap_chain_};
+
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = swap_chains;
+    present_info.pImageIndices = &image_idx;
+
+    VKRESULT(vkQueuePresentKHR(queue_, &present_info));
 }
 
 vulkan_application::~vulkan_application()
