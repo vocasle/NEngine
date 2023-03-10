@@ -3,6 +3,7 @@
 #include <SDL_vulkan.h>
 
 #include <format>
+#include <fstream>
 #include <iostream>
 #include <optional>
 #include <set>
@@ -14,6 +15,25 @@ constexpr bool enable_validation_layers = false;
 #else
 constexpr bool enable_validation_layers = true;
 #endif
+
+static std::vector<char>
+read_file(const std::string &filename)
+{
+    std::ifstream file(filename, std::ios_base::ate | std::ios_base::binary);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file");
+    }
+
+    const size_t file_size = file.tellg();
+    std::vector<char> buffer(file_size);
+
+    file.seekg(0);
+    file.read(buffer.data(), file_size);
+    file.close();
+
+    return buffer;
+}
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -110,6 +130,7 @@ vulkan_application::init_vulkan()
     create_logical_device();
     create_swap_chain();
     create_image_views();
+    create_graphics_pipeline();
 }
 
 void
@@ -478,6 +499,49 @@ vulkan_application::create_image_views()
         VKRESULT(vkCreateImageView(
             device_, &create_info, nullptr, &swap_chain_image_views_[i]));
     }
+}
+
+VkShaderModule
+vulkan_application::create_shader_module(const std::vector<char> &code) const
+{
+    VkShaderModuleCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    create_info.codeSize = code.size();
+    create_info.pCode = reinterpret_cast<const uint32_t *>(code.data());
+
+    VkShaderModule shader_module;
+    VKRESULT(
+        vkCreateShaderModule(device_, &create_info, nullptr, &shader_module));
+
+    return shader_module;
+}
+
+void
+vulkan_application::create_graphics_pipeline()
+{
+    const std::vector<char> vs_code = read_file("shaders/vert.spv");
+    const std::vector<char> ps_code = read_file("shaders/frag.spv");
+
+    const VkShaderModule vsm = create_shader_module(vs_code);
+    const VkShaderModule psm = create_shader_module(ps_code);
+
+    VkPipelineShaderStageCreateInfo vs_stage_info{};
+    vs_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vs_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vs_stage_info.module = vsm;
+    vs_stage_info.pName = "main";
+
+    VkPipelineShaderStageCreateInfo ps_stage_info{};
+    ps_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    ps_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    ps_stage_info.module = psm;
+    ps_stage_info.pName = "main";
+
+    const VkPipelineShaderStageCreateInfo shader_stages[] = {vs_stage_info,
+                                                             ps_stage_info};
+
+    vkDestroyShaderModule(device_, vsm, nullptr);
+    vkDestroyShaderModule(device_, psm, nullptr);
 }
 
 bool

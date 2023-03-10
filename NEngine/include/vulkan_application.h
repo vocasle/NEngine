@@ -24,6 +24,9 @@ private:
         VkPhysicalDevice device) const;
     void create_swap_chain();
     void create_image_views();
+    void create_graphics_pipeline();
+    [[nodiscard]] VkShaderModule create_shader_module(
+        const std::vector<char> &code) const;
 
     SDL_Window *window_;
     VkInstance instance_;
