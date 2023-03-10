@@ -391,5 +391,11 @@
     <None Include="thirdparty\sdl2\include\SDL_config.h.cmake" />
     <None Include="thirdparty\sdl2\include\SDL_config.h.in" />
     <None Include="thirdparty\sdl2\include\SDL_config_macosx.h.orig" />
+    <None Include="thirdparty\sdl2\lib\x64\SDL2.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="thirdparty\sdl2\lib\x64\SDL2.lib" />
+    <Library Include="thirdparty\sdl2\lib\x64\SDL2main.lib" />
+    <Library Include="thirdparty\sdl2\lib\x64\SDL2test.lib" />
   </ItemGroup>
 </Project>
