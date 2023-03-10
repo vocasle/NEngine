@@ -29,7 +29,7 @@ read_file(const std::string &filename)
     std::vector<char> buffer(file_size);
 
     file.seekg(0);
-    file.read(buffer.data(), file_size);
+    file.read(buffer.data(), static_cast<long long>(file_size));
     file.close();
 
     return buffer;
@@ -111,7 +111,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
       swap_chain_(),
       swap_chain_image_format_(),
       swap_chain_extent_(),
-      pipeline_layout_()
+      pipeline_layout_(),
+      render_pass_()
 {
     init_vulkan();
 }
@@ -131,13 +132,15 @@ vulkan_application::init_vulkan()
     create_logical_device();
     create_swap_chain();
     create_image_views();
+    create_render_pass();
     create_graphics_pipeline();
 }
 
 void
-vulkan_application::cleanup()
+vulkan_application::cleanup() const
 {
     vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
+    vkDestroyRenderPass(device_, render_pass_, nullptr);
 
     for (auto image_view : swap_chain_image_views_) {
         vkDestroyImageView(device_, image_view, nullptr);
@@ -280,7 +283,7 @@ struct queue_family_indices
 
 struct swap_chain_support_details
 {
-    VkSurfaceCapabilitiesKHR capabilities;
+    VkSurfaceCapabilitiesKHR capabilities{};
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> present_modes;
 };
@@ -517,6 +520,39 @@ vulkan_application::create_shader_module(const std::vector<char> &code) const
         vkCreateShaderModule(device_, &create_info, nullptr, &shader_module));
 
     return shader_module;
+}
+
+void
+vulkan_application::create_render_pass()
+{
+    VkAttachmentDescription color_attachment{};
+    color_attachment.format = swap_chain_image_format_;
+    color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference color_attachment_ref{};
+    color_attachment_ref.attachment = 0;
+    color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment_ref;
+
+    VkRenderPassCreateInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_info.attachmentCount = 1;
+    render_pass_info.pAttachments = &color_attachment;
+    render_pass_info.subpassCount = 1;
+    render_pass_info.pSubpasses = &subpass;
+
+    VKRESULT(
+        vkCreateRenderPass(device_, &render_pass_info, nullptr, &render_pass_));
 }
 
 void

@@ -13,7 +13,7 @@ public:
 
 private:
     void init_vulkan();
-    void cleanup();
+    void cleanup() const;
     void setup_debug_messenger();
     void create_instance();
     void pick_physical_device();
@@ -27,6 +27,7 @@ private:
     void create_graphics_pipeline();
     [[nodiscard]] VkShaderModule create_shader_module(
         const std::vector<char> &code) const;
+    void create_render_pass();
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -34,7 +35,7 @@ private:
     VkPhysicalDevice physical_device_;
     VkDevice device_;
     VkQueue queue_;
-    VkSurfaceKHR surface_;
+    VkSurfaceKHR surface_{};
     VkQueue present_queue_;
     VkSwapchainKHR swap_chain_;
     std::vector<VkImage> swap_chain_images_;
@@ -42,6 +43,7 @@ private:
     VkExtent2D swap_chain_extent_;
     std::vector<VkImageView> swap_chain_image_views_;
     VkPipelineLayout pipeline_layout_;
+    VkRenderPass render_pass_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
