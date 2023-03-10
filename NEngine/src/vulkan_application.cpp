@@ -87,7 +87,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
       physical_device_(),
       device_(),
       queue_(),
-      present_queue_()
+      present_queue_(),
+      swap_chain_()
 {
     init_vulkan();
 }
@@ -105,11 +106,13 @@ vulkan_application::init_vulkan()
     create_surface();
     pick_physical_device();
     create_logical_device();
+    create_swap_chain();
 }
 
 void
 vulkan_application::cleanup()
 {
+    vkDestroySwapchainKHR(device_, swap_chain_, nullptr);
     vkDestroyDevice(device_, nullptr);
     if constexpr (enable_validation_layers) {
         destroy_debug_utils_messenger_ext(
@@ -358,7 +361,8 @@ choose_swap_present_mode(
 }
 
 static VkExtent2D
-choose_swap_extent(SDL_Window *window, VkSurfaceCapabilitiesKHR &capabilities)
+choose_swap_extent(SDL_Window *window,
+                   const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if (capabilities.currentExtent.width !=
         std::numeric_limits<uint32_t>::max()) {
@@ -381,6 +385,59 @@ choose_swap_extent(SDL_Window *window, VkSurfaceCapabilitiesKHR &capabilities)
                                       capabilities.maxImageExtent.height);
 
     return actual_extent;
+}
+
+void
+vulkan_application::create_swap_chain()
+{
+    const swap_chain_support_details details =
+        query_swap_chain_support(physical_device_, surface_);
+
+    const VkSurfaceFormatKHR surface_format =
+        choose_swap_surface_format(details.formats);
+    const VkPresentModeKHR present_mode =
+        choose_swap_present_mode(details.present_modes);
+    const VkExtent2D extent = choose_swap_extent(window_, details.capabilities);
+
+    uint32_t image_count = details.capabilities.minImageCount + 1;
+
+    if (details.capabilities.maxImageCount > 0 &&
+        image_count > details.capabilities.maxImageCount) {
+        image_count = details.capabilities.minImageCount;
+    }
+
+    VkSwapchainCreateInfoKHR create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    create_info.surface = surface_;
+    create_info.minImageCount = image_count;
+    create_info.imageFormat = surface_format.format;
+    create_info.imageColorSpace = surface_format.colorSpace;
+    create_info.imageExtent = extent;
+    create_info.imageArrayLayers = 1;
+    create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+    const queue_family_indices indices =
+        find_queue_families(physical_device_, surface_);
+    const uint32_t queue_family_indices[] = {indices.graphics_family.value(),
+                                             indices.present_family.value()};
+    if (indices.graphics_family != indices.present_family) {
+        create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        create_info.queueFamilyIndexCount = 2;
+        create_info.pQueueFamilyIndices = queue_family_indices;
+    }
+    else {
+        create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        create_info.queueFamilyIndexCount = 0;
+        create_info.pQueueFamilyIndices = nullptr;
+    }
+    create_info.preTransform = details.capabilities.currentTransform;
+    create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    create_info.presentMode = present_mode;
+    create_info.clipped = VK_TRUE;
+    create_info.oldSwapchain = VK_NULL_HANDLE;
+
+    VKRESULT(
+        vkCreateSwapchainKHR(device_, &create_info, nullptr, &swap_chain_));
 }
 
 bool

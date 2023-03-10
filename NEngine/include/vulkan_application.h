@@ -23,6 +23,7 @@ private:
     [[nodiscard]] bool is_device_suitable(VkPhysicalDevice device) const;
     [[nodiscard]] bool check_device_extension_support(
         VkPhysicalDevice device) const;
+    void create_swap_chain();
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -32,6 +33,7 @@ private:
     VkQueue queue_;
     VkSurfaceKHR surface_;
     VkQueue present_queue_;
+    VkSwapchainKHR swap_chain_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
