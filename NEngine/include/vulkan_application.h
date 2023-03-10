@@ -30,6 +30,7 @@ private:
         const std::vector<char> &code) const;
     void create_render_pass();
     void create_framebuffers();
+    void create_command_buffer();
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -49,6 +50,7 @@ private:
     VkPipeline graphics_pipeline_;
     std::vector<VkFramebuffer> swap_chain_framebuffers_;
     VkCommandPool command_pool_;
+    VkCommandBuffer command_buffer_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

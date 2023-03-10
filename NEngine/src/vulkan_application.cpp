@@ -245,7 +245,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
       pipeline_layout_(),
       render_pass_(),
       graphics_pipeline_(),
-      command_pool_()
+      command_pool_(),
+      command_buffer_()
 {
     init_vulkan();
 }
@@ -284,6 +285,7 @@ vulkan_application::init_vulkan()
     create_graphics_pipeline();
     create_framebuffers();
     create_command_pool();
+    create_command_buffer();
 }
 
 void
@@ -601,6 +603,19 @@ vulkan_application::create_framebuffers()
         VKRESULT(vkCreateFramebuffer(
             device_, &create_info, nullptr, &swap_chain_framebuffers_[i]));
     }
+}
+
+void
+vulkan_application::create_command_buffer()
+{
+    VkCommandBufferAllocateInfo allocate_info{};
+    allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocate_info.commandPool = command_pool_;
+    allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocate_info.commandBufferCount = 1;
+
+    VKRESULT(
+        vkAllocateCommandBuffers(device_, &allocate_info, &command_buffer_));
 }
 
 void
