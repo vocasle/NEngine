@@ -628,6 +628,17 @@ vulkan_application::create_render_pass()
     render_pass_info.subpassCount = 1;
     render_pass_info.pSubpasses = &subpass;
 
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    render_pass_info.dependencyCount = 1;
+    render_pass_info.pDependencies = &dependency;
+
     VKRESULT(
         vkCreateRenderPass(device_, &render_pass_info, nullptr, &render_pass_));
 }
