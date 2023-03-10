@@ -88,7 +88,9 @@ vulkan_application::vulkan_application(SDL_Window *window)
       device_(),
       queue_(),
       present_queue_(),
-      swap_chain_()
+      swap_chain_(),
+      swap_chain_image_format_(),
+      swap_chain_extent_()
 {
     init_vulkan();
 }
@@ -438,6 +440,15 @@ vulkan_application::create_swap_chain()
 
     VKRESULT(
         vkCreateSwapchainKHR(device_, &create_info, nullptr, &swap_chain_));
+
+    VKRESULT(
+        vkGetSwapchainImagesKHR(device_, swap_chain_, &image_count, nullptr));
+    swap_chain_images_.resize(image_count);
+    VKRESULT(vkGetSwapchainImagesKHR(
+        device_, swap_chain_, &image_count, swap_chain_images_.data()));
+
+    swap_chain_image_format_ = create_info.imageFormat;
+    swap_chain_extent_ = create_info.imageExtent;
 }
 
 bool
