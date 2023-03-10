@@ -28,6 +28,7 @@ private:
     VkDevice device_;
     VkQueue queue_;
     VkSurfaceKHR surface_;
+    VkQueue present_queue_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

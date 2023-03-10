@@ -5,6 +5,7 @@
 #include <format>
 #include <iostream>
 #include <optional>
+#include <set>
 
 namespace nengine {
 
@@ -85,7 +86,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
       debug_util_messenger_(),
       physical_device_(),
       device_(),
-      queue_()
+      queue_(),
+      present_queue_()
 {
     init_vulkan();
 }
@@ -327,21 +329,28 @@ vulkan_application::create_logical_device()
     const queue_family_indices indices =
         find_queue_families(physical_device_, surface_);
 
-    VkDeviceQueueCreateInfo queue_create_info{};
-    queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queue_create_info.queueFamilyIndex = indices.graphics_family.value();
-    queue_create_info.queueCount = 1;
-
+    std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
+    std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(),
+                                                indices.present_family.value()};
     float queue_priority = 1;
-    queue_create_info.pQueuePriorities = &queue_priority;
+
+    for (uint32_t queue_family : unique_queue_families) {
+        VkDeviceQueueCreateInfo queue_create_info{};
+        queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_create_info.queueFamilyIndex = queue_family;
+        queue_create_info.queueCount = 1;
+        queue_create_info.pQueuePriorities = &queue_priority;
+        queue_create_infos.push_back(queue_create_info);
+    }
 
     const VkPhysicalDeviceFeatures device_features{};
 
     VkDeviceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
-    create_info.pQueueCreateInfos = &queue_create_info;
-    create_info.queueCreateInfoCount = 1;
+    create_info.pQueueCreateInfos = queue_create_infos.data();
+    create_info.queueCreateInfoCount =
+        static_cast<uint32_t>(queue_create_infos.size());
     create_info.pEnabledFeatures = &device_features;
     create_info.enabledExtensionCount = 0;
 
@@ -357,6 +366,8 @@ vulkan_application::create_logical_device()
     VKRESULT(vkCreateDevice(physical_device_, &create_info, nullptr, &device_));
 
     vkGetDeviceQueue(device_, indices.graphics_family.value(), 0, &queue_);
+    vkGetDeviceQueue(
+        device_, indices.present_family.value(), 0, &present_queue_);
 }
 
 void
