@@ -374,3 +374,5 @@ FodyWeavers.xsd
 compile_commands.json
 log.txt
 imgui.ini
+/NEngine/shaders/vert.spv
+/NEngine/shaders/frag.spv

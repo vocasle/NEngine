@@ -370,9 +370,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\BasePass.hlsli" />
-    <None Include="shader\PBR\PBR.hlsli" />
-    <None Include="shader\PBR\ToneMapping.hlsli" />
     <None Include="thirdparty\DirectXMath\Inc\DirectXCollision.inl">
       <Filter>Header Files</Filter>
     </None>
@@ -394,12 +391,5 @@
     <None Include="thirdparty\sdl2\include\SDL_config.h.cmake" />
     <None Include="thirdparty\sdl2\include\SDL_config.h.in" />
     <None Include="thirdparty\sdl2\include\SDL_config_macosx.h.orig" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="shader\BasePassPS.hlsl" />
-    <FxCompile Include="shader\PBRPassPS.hlsl" />
-    <FxCompile Include="shader\PBRPS.hlsl" />
-    <FxCompile Include="shader\BasePassVS.hlsl" />
-    <FxCompile Include="shader\WireframePS.hlsl" />
   </ItemGroup>
 </Project>
