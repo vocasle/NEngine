@@ -31,6 +31,7 @@ private:
     void create_render_pass();
     void create_framebuffers();
     void create_command_buffer();
+    void record_command_buffer(VkCommandBuffer cb, uint32_t image_idx);
 
     SDL_Window *window_;
     VkInstance instance_;

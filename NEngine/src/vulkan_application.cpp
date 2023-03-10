@@ -619,6 +619,53 @@ vulkan_application::create_command_buffer()
 }
 
 void
+vulkan_application::record_command_buffer(VkCommandBuffer cb,
+                                          uint32_t image_idx)
+{
+    VkCommandBufferBeginInfo begin_info{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = 0;
+    begin_info.pInheritanceInfo = nullptr;
+
+    VKRESULT(vkBeginCommandBuffer(cb, &begin_info));
+
+    VkRenderPassBeginInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_info.renderPass = render_pass_;
+    render_pass_info.framebuffer = swap_chain_framebuffers_[image_idx];
+    render_pass_info.renderArea.offset = {0, 0};
+    render_pass_info.renderArea.extent = swap_chain_extent_;
+
+    const VkClearValue clear_color = {{{0, 0, 0, 1}}};
+    render_pass_info.clearValueCount = 1;
+    render_pass_info.pClearValues = &clear_color;
+
+    vkCmdBeginRenderPass(cb, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(swap_chain_extent_.width);
+    viewport.height = static_cast<float>(swap_chain_extent_.height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(command_buffer_, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = swap_chain_extent_;
+    vkCmdSetScissor(cb, 0, 1, &scissor);
+
+    vkCmdDraw(cb, 3, 1, 0, 0);
+
+    vkCmdEndRenderPass(cb);
+
+    VKRESULT(vkEndCommandBuffer(cb));
+}
+
+void
 vulkan_application::create_graphics_pipeline()
 {
     const std::vector<char> vs_code = read_file("shaders/vert.spv");
