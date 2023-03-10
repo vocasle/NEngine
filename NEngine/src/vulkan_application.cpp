@@ -16,6 +16,90 @@ constexpr bool enable_validation_layers = false;
 constexpr bool enable_validation_layers = true;
 #endif
 
+struct queue_family_indices
+{
+    std::optional<uint32_t> graphics_family;
+    std::optional<uint32_t> present_family;
+
+    [[nodiscard]] bool
+    is_complete() const
+    {
+        return graphics_family.has_value() && present_family.has_value();
+    }
+};
+
+struct swap_chain_support_details
+{
+    VkSurfaceCapabilitiesKHR capabilities{};
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> present_modes;
+};
+
+static void
+vk_result(const VkResult &result, const char *filename, int line)
+{
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error(std::format(
+            "{}:{} - ERROR: Vulkan API call failed.", filename, line));
+    }
+}
+
+#define VKRESULT(result) vk_result(result, __FILE__, __LINE__)
+
+static VkSurfaceFormatKHR
+choose_swap_surface_format(
+    const std::vector<VkSurfaceFormatKHR> &available_formats)
+{
+    for (const auto &available_format : available_formats) {
+        if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB &&
+            available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            return available_format;
+        }
+    }
+
+    return available_formats[0];
+}
+
+static VkPresentModeKHR
+choose_swap_present_mode(
+    const std::vector<VkPresentModeKHR> &available_present_modes)
+{
+    for (const auto &available_present_mode : available_present_modes) {
+        if (available_present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+            return available_present_mode;
+        }
+    }
+
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+static VkExtent2D
+choose_swap_extent(SDL_Window *window,
+                   const VkSurfaceCapabilitiesKHR &capabilities)
+{
+    if (capabilities.currentExtent.width !=
+        std::numeric_limits<uint32_t>::max()) {
+        return capabilities.currentExtent;
+    }
+
+    int width = 0;
+    int height = 0;
+    SDL_GetWindowSizeInPixels(window, &width, &height);
+
+    VkExtent2D actual_extent{static_cast<uint32_t>(width),
+                             static_cast<uint32_t>(height)};
+
+    actual_extent.width = std::clamp(actual_extent.width,
+                                     capabilities.minImageExtent.width,
+                                     capabilities.maxImageExtent.width);
+
+    actual_extent.height = std::clamp(actual_extent.height,
+                                      capabilities.minImageExtent.height,
+                                      capabilities.maxImageExtent.height);
+
+    return actual_extent;
+}
+
 static std::vector<char>
 read_file(const std::string &filename)
 {
@@ -89,16 +173,63 @@ populate_debug_messenger_create_info(
     create_info.pfnUserCallback = debug_callback;
 }
 
-void
-vk_result(const VkResult &result, const char *filename, int line)
+static swap_chain_support_details
+query_swap_chain_support(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
-    if (result != VK_SUCCESS) {
-        throw std::runtime_error(std::format(
-            "{}:{} - ERROR: Vulkan API call failed.", filename, line));
-    }
+    swap_chain_support_details details;
+    VKRESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        device, surface, &details.capabilities));
+
+    uint32_t format_count = 0;
+    VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device, surface, &format_count, nullptr));
+    details.formats.resize(format_count);
+    VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device, surface, &format_count, details.formats.data()));
+
+    uint32_t present_mode_count = 0;
+    VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device, surface, &present_mode_count, nullptr));
+    details.present_modes.resize(present_mode_count);
+    VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device, surface, &present_mode_count, details.present_modes.data()));
+
+    return details;
 }
 
-#define VKRESULT(result) vk_result(result, __FILE__, __LINE__)
+static queue_family_indices
+find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
+{
+    queue_family_indices indices;
+
+    uint32_t queue_family_count = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(
+        device, &queue_family_count, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
+    vkGetPhysicalDeviceQueueFamilyProperties(
+        device, &queue_family_count, queue_families.data());
+
+    int i = 0;
+    for (const auto &queue_family : queue_families) {
+        if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphics_family = i;
+        }
+        if (indices.is_complete()) {
+            break;
+        }
+
+        VkBool32 present_support = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(
+            device, i, surface, &present_support);
+        if (present_support) {
+            indices.present_family = i;
+        }
+        ++i;
+    }
+
+    return indices;
+}
 
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window),
@@ -113,7 +244,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
       swap_chain_extent_(),
       pipeline_layout_(),
       render_pass_(),
-      graphics_pipeline_()
+      graphics_pipeline_(),
+      command_pool_()
 {
     init_vulkan();
 }
@@ -121,6 +253,21 @@ vulkan_application::vulkan_application(SDL_Window *window)
 vulkan_application::~vulkan_application()
 {
     cleanup();
+}
+
+void
+vulkan_application::create_command_pool()
+{
+    const queue_family_indices indices =
+        find_queue_families(physical_device_, surface_);
+
+    VkCommandPoolCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    create_info.queueFamilyIndex = indices.graphics_family.value();
+
+    VKRESULT(
+        vkCreateCommandPool(device_, &create_info, nullptr, &command_pool_));
 }
 
 void
@@ -136,11 +283,14 @@ vulkan_application::init_vulkan()
     create_render_pass();
     create_graphics_pipeline();
     create_framebuffers();
+    create_command_pool();
 }
 
 void
 vulkan_application::cleanup() const
 {
+    vkDestroyCommandPool(device_, command_pool_, nullptr);
+
     for (auto framebuffer : swap_chain_framebuffers_) {
         vkDestroyFramebuffer(device_, framebuffer, nullptr);
     }
@@ -177,7 +327,7 @@ vulkan_application::setup_debug_messenger()
         instance_, &create_info, nullptr, &debug_util_messenger_));
 }
 
-bool
+static bool
 check_validation_layer_support(const std::vector<const char *> &required_layers)
 {
     uint32_t layer_count = 0;
@@ -207,7 +357,7 @@ check_validation_layer_support(const std::vector<const char *> &required_layers)
     return true;
 }
 
-std::vector<const char *>
+static std::vector<const char *>
 get_required_extensions(SDL_Window *window)
 {
     uint32_t extension_count = 0;
@@ -276,83 +426,6 @@ vulkan_application::create_instance()
     VKRESULT(vkCreateInstance(&create_info, nullptr, &instance_));
 }
 
-struct queue_family_indices
-{
-    std::optional<uint32_t> graphics_family;
-    std::optional<uint32_t> present_family;
-
-    [[nodiscard]] bool
-    is_complete() const
-    {
-        return graphics_family.has_value() && present_family.has_value();
-    }
-};
-
-struct swap_chain_support_details
-{
-    VkSurfaceCapabilitiesKHR capabilities{};
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> present_modes;
-};
-
-static swap_chain_support_details
-query_swap_chain_support(VkPhysicalDevice device, VkSurfaceKHR surface)
-{
-    swap_chain_support_details details;
-    VKRESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-        device, surface, &details.capabilities));
-
-    uint32_t format_count = 0;
-    VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(
-        device, surface, &format_count, nullptr));
-    details.formats.resize(format_count);
-    VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(
-        device, surface, &format_count, details.formats.data()));
-
-    uint32_t present_mode_count = 0;
-    VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(
-        device, surface, &present_mode_count, nullptr));
-    details.present_modes.resize(present_mode_count);
-    VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(
-        device, surface, &present_mode_count, details.present_modes.data()));
-
-    return details;
-}
-
-static queue_family_indices
-find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
-{
-    queue_family_indices indices;
-
-    uint32_t queue_family_count = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(
-        device, &queue_family_count, nullptr);
-
-    std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
-    vkGetPhysicalDeviceQueueFamilyProperties(
-        device, &queue_family_count, queue_families.data());
-
-    int i = 0;
-    for (const auto &queue_family : queue_families) {
-        if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-            indices.graphics_family = i;
-        }
-        if (indices.is_complete()) {
-            break;
-        }
-
-        VkBool32 present_support = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(
-            device, i, surface, &present_support);
-        if (present_support) {
-            indices.present_family = i;
-        }
-        ++i;
-    }
-
-    return indices;
-}
-
 bool
 vulkan_application::check_device_extension_support(
     VkPhysicalDevice device) const
@@ -372,60 +445,6 @@ vulkan_application::check_device_extension_support(
     }
 
     return required_extensions.empty();
-}
-
-static VkSurfaceFormatKHR
-choose_swap_surface_format(
-    const std::vector<VkSurfaceFormatKHR> &available_formats)
-{
-    for (const auto &available_format : available_formats) {
-        if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB &&
-            available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-            return available_format;
-        }
-    }
-
-    return available_formats[0];
-}
-
-static VkPresentModeKHR
-choose_swap_present_mode(
-    const std::vector<VkPresentModeKHR> &available_present_modes)
-{
-    for (const auto &available_present_mode : available_present_modes) {
-        if (available_present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-            return available_present_mode;
-        }
-    }
-
-    return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-static VkExtent2D
-choose_swap_extent(SDL_Window *window,
-                   const VkSurfaceCapabilitiesKHR &capabilities)
-{
-    if (capabilities.currentExtent.width !=
-        std::numeric_limits<uint32_t>::max()) {
-        return capabilities.currentExtent;
-    }
-
-    int width = 0;
-    int height = 0;
-    SDL_GetWindowSizeInPixels(window, &width, &height);
-
-    VkExtent2D actual_extent{static_cast<uint32_t>(width),
-                             static_cast<uint32_t>(height)};
-
-    actual_extent.width = std::clamp(actual_extent.width,
-                                     capabilities.minImageExtent.width,
-                                     capabilities.maxImageExtent.width);
-
-    actual_extent.height = std::clamp(actual_extent.height,
-                                      capabilities.minImageExtent.height,
-                                      capabilities.maxImageExtent.height);
-
-    return actual_extent;
 }
 
 void

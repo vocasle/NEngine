@@ -12,6 +12,7 @@ public:
     ~vulkan_application();
 
 private:
+    void create_command_pool();
     void init_vulkan();
     void cleanup() const;
     void setup_debug_messenger();
@@ -47,6 +48,7 @@ private:
     VkRenderPass render_pass_;
     VkPipeline graphics_pipeline_;
     std::vector<VkFramebuffer> swap_chain_framebuffers_;
+    VkCommandPool command_pool_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
