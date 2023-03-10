@@ -310,6 +310,8 @@ vulkan_application::draw_frame()
 
 vulkan_application::~vulkan_application()
 {
+    VKRESULT(vkDeviceWaitIdle(device_));
+
     cleanup();
 }
 
