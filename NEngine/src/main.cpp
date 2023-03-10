@@ -26,6 +26,9 @@ loop()
                 break;
         }
     }
+
+    app->draw_frame();
+
     return true;
 }
 
