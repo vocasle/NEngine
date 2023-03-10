@@ -44,6 +44,7 @@ private:
     std::vector<VkImageView> swap_chain_image_views_;
     VkPipelineLayout pipeline_layout_;
     VkRenderPass render_pass_;
+    VkPipeline graphics_pipeline_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

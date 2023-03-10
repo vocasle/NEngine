@@ -112,7 +112,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
       swap_chain_image_format_(),
       swap_chain_extent_(),
       pipeline_layout_(),
-      render_pass_()
+      render_pass_(),
+      graphics_pipeline_()
 {
     init_vulkan();
 }
@@ -139,6 +140,7 @@ vulkan_application::init_vulkan()
 void
 vulkan_application::cleanup() const
 {
+    vkDestroyPipeline(device_, graphics_pipeline_, nullptr);
     vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
     vkDestroyRenderPass(device_, render_pass_, nullptr);
 
@@ -676,6 +678,32 @@ vulkan_application::create_graphics_pipeline()
 
     VKRESULT(vkCreatePipelineLayout(
         device_, &pipeline_layout_info, nullptr, &pipeline_layout_));
+
+    VkGraphicsPipelineCreateInfo pipeline_create_info{};
+    pipeline_create_info.sType =
+        VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipeline_create_info.stageCount = 2;
+    pipeline_create_info.pStages = shader_stages;
+    pipeline_create_info.pVertexInputState = &vertex_input_info;
+    pipeline_create_info.pInputAssemblyState = &ia;
+    pipeline_create_info.pViewportState = &viewport_state;
+    pipeline_create_info.pRasterizationState = &rasterizer;
+    pipeline_create_info.pMultisampleState = &multisampling;
+    pipeline_create_info.pDepthStencilState = nullptr;
+    pipeline_create_info.pColorBlendState = &color_blending;
+    pipeline_create_info.pDynamicState = &dynamic_state;
+    pipeline_create_info.layout = pipeline_layout_;
+    pipeline_create_info.renderPass = render_pass_;
+    pipeline_create_info.subpass = 0;
+    pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
+    pipeline_create_info.basePipelineIndex = -1;
+
+    VKRESULT(vkCreateGraphicsPipelines(device_,
+                                       VK_NULL_HANDLE,
+                                       1,
+                                       &pipeline_create_info,
+                                       nullptr,
+                                       &graphics_pipeline_));
 
     vkDestroyShaderModule(device_, vsm, nullptr);
     vkDestroyShaderModule(device_, psm, nullptr);
