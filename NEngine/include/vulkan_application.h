@@ -18,10 +18,14 @@ private:
     void setup_debug_messenger();
     void create_instance();
     void pick_physical_device();
+    void create_logical_device();
 
+    SDL_Window *window_;
     VkInstance instance_;
     VkDebugUtilsMessengerEXT debug_util_messenger_;
-    SDL_Window *window_;
+    VkPhysicalDevice physical_device_;
+    VkDevice device_;
+    VkQueue queue_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

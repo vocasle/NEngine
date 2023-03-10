@@ -80,9 +80,12 @@ vk_result(const VkResult &result, const char *filename, int line)
 #define VKRESULT(result) vk_result(result, __FILE__, __LINE__)
 
 vulkan_application::vulkan_application(SDL_Window *window)
-    : instance_(),
+    : window_(window),
+      instance_(),
       debug_util_messenger_(),
-      window_(window)
+      physical_device_(),
+      device_(),
+      queue_()
 {
     init_vulkan();
 }
@@ -98,11 +101,13 @@ vulkan_application::init_vulkan()
     create_instance();
     setup_debug_messenger();
     pick_physical_device();
+    create_logical_device();
 }
 
 void
 vulkan_application::cleanup()
 {
+    vkDestroyDevice(device_, nullptr);
     if constexpr (enable_validation_layers) {
         destroy_debug_utils_messenger_ext(
             instance_, debug_util_messenger_, nullptr);
@@ -282,11 +287,10 @@ is_device_suitable(VkPhysicalDevice device)
 void
 vulkan_application::pick_physical_device()
 {
-    VkPhysicalDevice physical_device = VK_NULL_HANDLE;
+    physical_device_ = VK_NULL_HANDLE;
 
     uint32_t device_count = 0;
-    VKRESULT(
-        vkEnumeratePhysicalDevices(instance_, &device_count, nullptr));
+    VKRESULT(vkEnumeratePhysicalDevices(instance_, &device_count, nullptr));
 
     if (device_count == 0) {
         throw std::runtime_error("Failed to find GPUs with Vulkan support");
@@ -298,14 +302,51 @@ vulkan_application::pick_physical_device()
 
     for (const VkPhysicalDevice &device : devices) {
         if (is_device_suitable(device)) {
-            physical_device = device;
+            physical_device_ = device;
             break;
         }
     }
 
-    if (physical_device == VK_NULL_HANDLE) {
+    if (physical_device_ == VK_NULL_HANDLE) {
         throw std::runtime_error("Failed to find a suitable GPU");
     }
+}
+
+void
+vulkan_application::create_logical_device()
+{
+    const queue_family_indices indices = find_queue_families(physical_device_);
+
+    VkDeviceQueueCreateInfo queue_create_info{};
+    queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_create_info.queueFamilyIndex = indices.graphics_family.value();
+    queue_create_info.queueCount = 1;
+
+    float queue_priority = 1;
+    queue_create_info.pQueuePriorities = &queue_priority;
+
+    const VkPhysicalDeviceFeatures device_features{};
+
+    VkDeviceCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+    create_info.pQueueCreateInfos = &queue_create_info;
+    create_info.queueCreateInfoCount = 1;
+    create_info.pEnabledFeatures = &device_features;
+    create_info.enabledExtensionCount = 0;
+
+    if constexpr (enable_validation_layers) {
+        create_info.enabledLayerCount =
+            static_cast<uint32_t>(validation_layers.size());
+        create_info.ppEnabledLayerNames = validation_layers.data();
+    }
+    else {
+        create_info.enabledLayerCount = 0;
+    }
+
+    VKRESULT(vkCreateDevice(physical_device_, &create_info, nullptr, &device_));
+
+    vkGetDeviceQueue(device_, indices.graphics_family.value(), 0, &queue_);
 }
 
 }  // namespace nengine
