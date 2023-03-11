@@ -436,6 +436,32 @@ vulkan_application::create_descriptor_set_layout()
         device_, &info, nullptr, &descriptor_set_layout_));
 }
 
+void
+vulkan_application::create_uniform_buffers()
+{
+    const VkDeviceSize buffer_size = sizeof(uniform_buffer_object);
+
+    uniform_buffers_.resize(MAX_FRAMES_IN_FLIGHT);
+    uniform_buffers_mapped_.resize(MAX_FRAMES_IN_FLIGHT);
+    uniform_buffers_memory_.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        create_buffer(buffer_size,
+                      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                      uniform_buffers_[i],
+                      uniform_buffers_memory_[i]);
+
+        vkMapMemory(device_,
+                    uniform_buffers_memory_[i],
+                    0,
+                    buffer_size,
+                    0,
+                    &uniform_buffers_mapped_[i]);
+    }
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
@@ -568,6 +594,7 @@ vulkan_application::init_vulkan()
     create_command_pool();
     create_vertex_buffer();
     create_index_buffer();
+    create_uniform_buffers();
     create_command_buffers();
     create_sync_objects();
 }
@@ -576,6 +603,11 @@ void
 vulkan_application::cleanup() const
 {
     cleanup_swap_chain();
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        vkDestroyBuffer(device_, uniform_buffers_[i], nullptr);
+        vkFreeMemory(device_, uniform_buffers_memory_[i], nullptr);
+    }
 
     vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
 

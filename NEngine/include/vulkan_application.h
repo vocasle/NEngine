@@ -48,6 +48,7 @@ private:
                      VkDeviceSize size);
     void create_index_buffer();
     void create_descriptor_set_layout();
+    void create_uniform_buffers();
 
     SDL_Window *window_;
     VkInstance instance_{};
@@ -80,6 +81,9 @@ private:
     VkCommandPool transfer_command_pool_{};
     VkBuffer index_buffer_{};
     VkDeviceMemory index_buffer_memory_{};
+    std::vector<VkBuffer> uniform_buffers_;
+    std::vector<VkDeviceMemory> uniform_buffers_memory_;
+    std::vector<void *> uniform_buffers_mapped_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
