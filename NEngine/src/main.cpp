@@ -22,6 +22,9 @@ loop()
                     return false;
                 }
                 break;
+            case SDL_WINDOWEVENT_RESIZED:
+                app->on_window_resized();
+                break;
             default:
                 break;
         }
@@ -40,8 +43,12 @@ init_sdl_context()
         return false;
     }
 
-    window = SDL_CreateWindow(
-        "Vulkan triangle", 100, 100, 1280, 720, SDL_WINDOW_VULKAN);
+    window = SDL_CreateWindow("Vulkan triangle",
+                              100,
+                              100,
+                              1280,
+                              720,
+                              SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     if (!window) {
         std::cerr << "Failed to create window" << std::endl;
         return false;

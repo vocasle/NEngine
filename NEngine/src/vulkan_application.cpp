@@ -258,15 +258,25 @@ vulkan_application::draw_frame()
     VKRESULT(vkWaitForFences(
         device_, 1, &in_flight_fences_[current_frame_], VK_TRUE, UINT64_MAX));
 
-    VKRESULT(vkResetFences(device_, 1, &in_flight_fences_[current_frame_]));
-
     uint32_t image_idx;
-    VKRESULT(vkAcquireNextImageKHR(device_,
-                                   swap_chain_,
-                                   UINT64_MAX,
-                                   image_available_semaphores_[current_frame_],
-                                   VK_NULL_HANDLE,
-                                   &image_idx));
+    VkResult result =
+        vkAcquireNextImageKHR(device_,
+                              swap_chain_,
+                              UINT64_MAX,
+                              image_available_semaphores_[current_frame_],
+                              VK_NULL_HANDLE,
+                              &image_idx);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+        is_framebuffer_resized) {
+        is_framebuffer_resized = false;
+        recreate_swap_chain();
+    }
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("Failed to acquire swap chain image");
+    }
+
+    VKRESULT(vkResetFences(device_, 1, &in_flight_fences_[current_frame_]));
 
     VKRESULT(vkResetCommandBuffer(command_buffers_[current_frame_], 0));
 
@@ -306,9 +316,21 @@ vulkan_application::draw_frame()
     present_info.pSwapchains = swap_chains;
     present_info.pImageIndices = &image_idx;
 
-    VKRESULT(vkQueuePresentKHR(queue_, &present_info));
+    result = vkQueuePresentKHR(queue_, &present_info);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+        recreate_swap_chain();
+    }
+    else {
+        VKRESULT(result);
+    }
 
     current_frame_ = (current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void
+vulkan_application::on_window_resized()
+{
+    is_framebuffer_resized = true;
 }
 
 vulkan_application::~vulkan_application()

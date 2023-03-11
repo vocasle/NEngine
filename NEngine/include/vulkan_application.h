@@ -9,6 +9,7 @@ class vulkan_application
 public:
     explicit vulkan_application(SDL_Window *window);
     void draw_frame();
+    void on_window_resized();
     ~vulkan_application();
 
 private:
@@ -59,6 +60,7 @@ private:
     std::vector<VkSemaphore> render_finished_semaphores_;
     std::vector<VkFence> in_flight_fences_;
     uint32_t current_frame_ = 0;
+    bool is_framebuffer_resized = false;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
