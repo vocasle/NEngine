@@ -46,6 +46,7 @@ private:
     void copy_buffer(VkBuffer src_buffer,
                      VkBuffer dst_buffer,
                      VkDeviceSize size);
+    void create_index_buffer();
 
     SDL_Window *window_;
     VkInstance instance_{};

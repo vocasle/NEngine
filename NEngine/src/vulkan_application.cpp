@@ -377,6 +377,38 @@ vulkan_application::copy_buffer(VkBuffer src_buffer,
     vkFreeCommandBuffers(device_, transfer_command_pool_, 1, &cb);
 }
 
+void
+vulkan_application::create_index_buffer()
+{
+    const VkDeviceSize buffer_size = sizeof(indices[0]) * indices.size();
+
+    VkBuffer staging_buffer;
+    VkDeviceMemory staging_buffer_memory;
+    create_buffer(buffer_size,
+                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                  staging_buffer,
+                  staging_buffer_memory);
+    void *data = nullptr;
+    VKRESULT(
+        vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0, &data));
+    memcpy(data, indices.data(), buffer_size);
+    vkUnmapMemory(device_, staging_buffer_memory);
+
+    create_buffer(
+        buffer_size,
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        index_buffer_,
+        index_buffer_memory_);
+
+    copy_buffer(staging_buffer, index_buffer_, buffer_size);
+
+    vkDestroyBuffer(device_, staging_buffer, nullptr);
+    vkFreeMemory(device_, staging_buffer_memory, nullptr);
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
@@ -507,6 +539,7 @@ vulkan_application::init_vulkan()
     create_framebuffers();
     create_command_pool();
     create_vertex_buffer();
+    create_index_buffer();
     create_command_buffers();
     create_sync_objects();
 }
@@ -518,6 +551,9 @@ vulkan_application::cleanup() const
 
     vkDestroyBuffer(device_, vertex_buffer_, nullptr);
     vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
+
+    vkDestroyBuffer(device_, index_buffer_, nullptr);
+    vkFreeMemory(device_, index_buffer_memory_, nullptr);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroySemaphore(device_, image_available_semaphores_[i], nullptr);
