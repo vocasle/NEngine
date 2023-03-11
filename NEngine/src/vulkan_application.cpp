@@ -4,6 +4,7 @@
 
 #include <format>
 #include <fstream>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <optional>
 #include <set>
@@ -17,6 +18,47 @@ constexpr bool enable_validation_layers = true;
 #endif
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+
+struct vertex
+{
+    glm::vec2 pos;
+    glm::vec3 color;
+
+    static constexpr VkVertexInputBindingDescription
+    get_binding_description()
+    {
+        VkVertexInputBindingDescription description{};
+        description.stride = sizeof(vertex);
+        description.binding = 0;
+        description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return description;
+    }
+
+    static constexpr std::array<VkVertexInputAttributeDescription, 2>
+    get_attribute_descriptions()
+    {
+        std::array<VkVertexInputAttributeDescription, 2>
+            attribute_descriptions{};
+        attribute_descriptions[0].offset =
+            static_cast<uint32_t>(offsetof(vertex, pos));
+        attribute_descriptions[0].binding = 0;
+        attribute_descriptions[0].location = 0;
+        attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+
+        attribute_descriptions[0].offset =
+            static_cast<uint32_t>(offsetof(vertex, color));
+        attribute_descriptions[0].binding = 0;
+        attribute_descriptions[0].location = 1;
+        attribute_descriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+
+        return attribute_descriptions;
+    }
+};
+
+const std::vector<vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+                                      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
 struct queue_family_indices
 {
@@ -795,17 +837,6 @@ vulkan_application::create_sync_objects()
 void
 vulkan_application::recreate_swap_chain()
 {
-    //using namespace std::chrono_literals;
-
-    //int width = 0;
-    //int height = 0;
-    //SDL_GetWindowSizeInPixels(window_, &width, &height);
-
-    //while (width == 0 || height == 0) {
-    //    std::this_thread::sleep_for(16ms);
-    //    SDL_GetWindowSizeInPixels(window_, &width, &height);
-    //}
-
     vkDeviceWaitIdle(device_);
 
     cleanup_swap_chain();
