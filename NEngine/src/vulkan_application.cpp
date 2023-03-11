@@ -354,6 +354,8 @@ vulkan_application::init_vulkan()
 void
 vulkan_application::cleanup() const
 {
+    cleanup_swap_chain();
+
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroySemaphore(device_, image_available_semaphores_[i], nullptr);
         vkDestroySemaphore(device_, render_finished_semaphores_[i], nullptr);
@@ -362,19 +364,10 @@ vulkan_application::cleanup() const
 
     vkDestroyCommandPool(device_, command_pool_, nullptr);
 
-    for (auto framebuffer : swap_chain_framebuffers_) {
-        vkDestroyFramebuffer(device_, framebuffer, nullptr);
-    }
-
     vkDestroyPipeline(device_, graphics_pipeline_, nullptr);
     vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
     vkDestroyRenderPass(device_, render_pass_, nullptr);
 
-    for (auto image_view : swap_chain_image_views_) {
-        vkDestroyImageView(device_, image_view, nullptr);
-    }
-
-    vkDestroySwapchainKHR(device_, swap_chain_, nullptr);
     vkDestroyDevice(device_, nullptr);
     if constexpr (enable_validation_layers) {
         destroy_debug_utils_messenger_ext(
@@ -774,6 +767,31 @@ vulkan_application::create_sync_objects()
         VKRESULT(vkCreateFence(
             device_, &fence_info, nullptr, &in_flight_fences_[i]));
     }
+}
+
+void
+vulkan_application::recreate_swap_chain()
+{
+    vkDeviceWaitIdle(device_);
+
+    cleanup_swap_chain();
+
+    create_swap_chain();
+    create_image_views();
+    create_framebuffers();
+}
+
+void
+vulkan_application::cleanup_swap_chain() const
+{
+    for (auto framebuffer : swap_chain_framebuffers_) {
+        vkDestroyFramebuffer(device_, framebuffer, nullptr);
+    }
+    for (auto image_view : swap_chain_image_views_) {
+        vkDestroyImageView(device_, image_view, nullptr);
+    }
+
+    vkDestroySwapchainKHR(device_, swap_chain_, nullptr);
 }
 
 void

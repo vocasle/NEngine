@@ -33,6 +33,8 @@ private:
     void create_command_buffers();
     void record_command_buffer(VkCommandBuffer cb, uint32_t image_idx);
     void create_sync_objects();
+    void recreate_swap_chain();
+    void cleanup_swap_chain() const;
 
     SDL_Window *window_;
     VkInstance instance_;
