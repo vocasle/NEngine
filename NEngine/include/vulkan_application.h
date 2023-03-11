@@ -49,6 +49,8 @@ private:
     void create_descriptor_set_layout();
     void create_uniform_buffers();
     void update_uniform_buffer(uint32_t current_image);
+    void create_descriptor_pool();
+    void create_descriptor_sets();
 
     SDL_Window *window_;
     VkInstance instance_{};
@@ -84,6 +86,8 @@ private:
     std::vector<VkBuffer> uniform_buffers_;
     std::vector<VkDeviceMemory> uniform_buffers_memory_;
     std::vector<void *> uniform_buffers_mapped_;
+    VkDescriptorPool descriptor_pool_{};
+    std::vector<VkDescriptorSet> descriptor_sets_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

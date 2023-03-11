@@ -496,6 +496,57 @@ vulkan_application::update_uniform_buffer(uint32_t current_image)
     memcpy(uniform_buffers_mapped_[current_image], &ubo, sizeof(ubo));
 }
 
+void
+vulkan_application::create_descriptor_pool()
+{
+    VkDescriptorPoolSize pool_size{};
+    pool_size.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pool_size.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    VkDescriptorPoolCreateInfo pool_info{};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.poolSizeCount = 1;
+    pool_info.pPoolSizes = &pool_size;
+    pool_info.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    VKRESULT(vkCreateDescriptorPool(
+        device_, &pool_info, nullptr, &descriptor_pool_));
+}
+
+void
+vulkan_application::create_descriptor_sets()
+{
+    const std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT,
+                                                     descriptor_set_layout_);
+
+    VkDescriptorSetAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    alloc_info.descriptorPool = descriptor_pool_;
+    alloc_info.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    alloc_info.pSetLayouts = layouts.data();
+
+    descriptor_sets_.resize(MAX_FRAMES_IN_FLIGHT);
+    VKRESULT(vkAllocateDescriptorSets(
+        device_, &alloc_info, descriptor_sets_.data()));
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        VkDescriptorBufferInfo buffer_info{};
+        buffer_info.offset = 0;
+        buffer_info.buffer = uniform_buffers_[i];
+        buffer_info.range = sizeof(uniform_buffer_object);
+
+        VkWriteDescriptorSet descriptor_write{};
+        descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptor_write.dstSet = descriptor_sets_[i];
+        descriptor_write.dstBinding = 0;
+        descriptor_write.dstArrayElement = 0;
+        descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptor_write.descriptorCount = 1;
+        descriptor_write.pBufferInfo = &buffer_info;
+        vkUpdateDescriptorSets(device_, 1, &descriptor_write, 0, nullptr);
+    }
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
@@ -631,6 +682,8 @@ vulkan_application::init_vulkan()
     create_vertex_buffer();
     create_index_buffer();
     create_uniform_buffers();
+    create_descriptor_pool();
+    create_descriptor_sets();
     create_command_buffers();
     create_sync_objects();
 }
@@ -644,6 +697,8 @@ vulkan_application::cleanup() const
         vkDestroyBuffer(device_, uniform_buffers_[i], nullptr);
         vkFreeMemory(device_, uniform_buffers_memory_[i], nullptr);
     }
+
+    vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
 
     vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
 
