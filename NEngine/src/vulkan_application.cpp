@@ -939,44 +939,19 @@ vulkan_application::cleanup_swap_chain() const
 void
 vulkan_application::create_vertex_buffer()
 {
-    VkBufferCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    info.size = sizeof(vertices[0]) * vertices.size();
-    info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    info.sharingMode = VK_SHARING_MODE_CONCURRENT;
-    const queue_family_indices indices =
-        find_queue_families(physical_device_, surface_);
-    const uint32_t queue_indices[] = {indices.transfer_family.value(),
-                                      indices.graphics_family.value()};
-    info.queueFamilyIndexCount = 2;
-    info.pQueueFamilyIndices = queue_indices;
-
-    VKRESULT(vkCreateBuffer(device_, &info, nullptr, &vertex_buffer_));
-
-    VkMemoryRequirements memory_requirements;
-    vkGetBufferMemoryRequirements(
-        device_, vertex_buffer_, &memory_requirements);
-
-    VkMemoryAllocateInfo alloc_info{};
-    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    alloc_info.allocationSize = memory_requirements.size;
-    alloc_info.memoryTypeIndex =
-        find_memory_type(physical_device_,
-                         memory_requirements.memoryTypeBits,
-                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    VKRESULT(vkAllocateMemory(
-        device_, &alloc_info, nullptr, &vertex_buffer_memory_));
-
-    VKRESULT(
-        vkBindBufferMemory(device_, vertex_buffer_, vertex_buffer_memory_, 0));
+    const VkDeviceSize buffer_size = sizeof(vertices[0]) * vertices.size();
+    create_buffer(buffer_size,
+                  VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                  vertex_buffer_,
+                  vertex_buffer_memory_);
 
     void *data = nullptr;
     VKRESULT(
-        vkMapMemory(device_, vertex_buffer_memory_, 0, info.size, 0, &data));
+        vkMapMemory(device_, vertex_buffer_memory_, 0, buffer_size, 0, &data));
 
-    memcpy(data, vertices.data(), static_cast<size_t>(info.size));
+    memcpy(data, vertices.data(), buffer_size);
     vkUnmapMemory(device_, vertex_buffer_memory_);
 }
 
