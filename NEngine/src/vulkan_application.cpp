@@ -64,11 +64,13 @@ struct queue_family_indices
 {
     std::optional<uint32_t> graphics_family;
     std::optional<uint32_t> present_family;
+    std::optional<uint32_t> transfer_family;
 
     [[nodiscard]] bool
     is_complete() const
     {
-        return graphics_family.has_value() && present_family.has_value();
+        return graphics_family.has_value() && present_family.has_value() &&
+               transfer_family.has_value();
     }
 };
 
@@ -256,11 +258,15 @@ find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
 
     int i = 0;
     for (const auto &queue_family : queue_families) {
+        if (indices.is_complete()) {
+            break;
+        }
+
         if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphics_family = i;
         }
-        if (indices.is_complete()) {
-            break;
+        else if (queue_family.queueFlags & VK_QUEUE_TRANSFER_BIT) {
+            indices.transfer_family = i;
         }
 
         VkBool32 present_support = false;
