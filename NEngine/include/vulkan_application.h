@@ -47,6 +47,7 @@ private:
                      VkBuffer dst_buffer,
                      VkDeviceSize size);
     void create_index_buffer();
+    void create_descriptor_set_layout();
 
     SDL_Window *window_;
     VkInstance instance_{};
@@ -61,6 +62,7 @@ private:
     VkFormat swap_chain_image_format_{};
     VkExtent2D swap_chain_extent_{};
     std::vector<VkImageView> swap_chain_image_views_;
+    VkDescriptorSetLayout descriptor_set_layout_{};
     VkPipelineLayout pipeline_layout_{};
     VkRenderPass render_pass_{};
     VkPipeline graphics_pipeline_{};

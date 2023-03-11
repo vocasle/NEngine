@@ -19,6 +19,13 @@ constexpr bool enable_validation_layers = true;
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
+struct uniform_buffer_object
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
+
 struct vertex
 {
     glm::vec2 pos;
@@ -410,6 +417,25 @@ vulkan_application::create_index_buffer()
     vkFreeMemory(device_, staging_buffer_memory, nullptr);
 }
 
+void
+vulkan_application::create_descriptor_set_layout()
+{
+    VkDescriptorSetLayoutBinding ubo_layout_binding{};
+    ubo_layout_binding.binding = 0;
+    ubo_layout_binding.descriptorCount = 1;
+    ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    ubo_layout_binding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    info.bindingCount = 1;
+    info.pBindings = &ubo_layout_binding;
+
+    VKRESULT(vkCreateDescriptorSetLayout(
+        device_, &info, nullptr, &descriptor_set_layout_));
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
@@ -536,6 +562,7 @@ vulkan_application::init_vulkan()
     create_swap_chain();
     create_image_views();
     create_render_pass();
+    create_descriptor_set_layout();
     create_graphics_pipeline();
     create_framebuffers();
     create_command_pool();
@@ -549,6 +576,8 @@ void
 vulkan_application::cleanup() const
 {
     cleanup_swap_chain();
+
+    vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
 
     vkDestroyBuffer(device_, vertex_buffer_, nullptr);
     vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
@@ -1152,8 +1181,8 @@ vulkan_application::create_graphics_pipeline()
 
     VkPipelineLayoutCreateInfo pipeline_layout_info{};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipeline_layout_info.setLayoutCount = 0;
-    pipeline_layout_info.pSetLayouts = nullptr;
+    pipeline_layout_info.setLayoutCount = 1;
+    pipeline_layout_info.pSetLayouts = &descriptor_set_layout_;
     pipeline_layout_info.pushConstantRangeCount = 0;
     pipeline_layout_info.pPushConstantRanges = nullptr;
 
