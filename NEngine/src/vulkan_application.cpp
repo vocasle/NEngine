@@ -35,7 +35,7 @@ struct vertex
         return description;
     }
 
-    static constexpr std::array<VkVertexInputAttributeDescription, 2>
+    static std::array<VkVertexInputAttributeDescription, 2>
     get_attribute_descriptions()
     {
         std::array<VkVertexInputAttributeDescription, 2>
@@ -46,11 +46,11 @@ struct vertex
         attribute_descriptions[0].location = 0;
         attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
 
-        attribute_descriptions[0].offset =
+        attribute_descriptions[1].offset =
             static_cast<uint32_t>(offsetof(vertex, color));
-        attribute_descriptions[0].binding = 0;
-        attribute_descriptions[0].location = 1;
-        attribute_descriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attribute_descriptions[1].binding = 0;
+        attribute_descriptions[1].location = 1;
+        attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 
         return attribute_descriptions;
     }
@@ -786,7 +786,7 @@ vulkan_application::create_command_buffers()
 
 void
 vulkan_application::record_command_buffer(VkCommandBuffer cb,
-                                          uint32_t image_idx)
+                                          uint32_t image_idx) const
 {
     VkCommandBufferBeginInfo begin_info{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -810,6 +810,10 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
 
     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
 
+    VkBuffer vertex_buffers[] = {vertex_buffer_};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(cb, 0, 1, vertex_buffers, offsets);
+
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -824,7 +828,7 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
     scissor.extent = swap_chain_extent_;
     vkCmdSetScissor(cb, 0, 1, &scissor);
 
-    vkCmdDraw(cb, 3, 1, 0, 0);
+    vkCmdDraw(cb, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
     vkCmdEndRenderPass(cb);
 

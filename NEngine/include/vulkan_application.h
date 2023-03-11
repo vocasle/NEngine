@@ -33,7 +33,7 @@ private:
     void create_render_pass();
     void create_framebuffers();
     void create_command_buffers();
-    void record_command_buffer(VkCommandBuffer cb, uint32_t image_idx);
+    void record_command_buffer(VkCommandBuffer cb, uint32_t image_idx) const;
     void create_sync_objects();
     void recreate_swap_chain();
     void cleanup_swap_chain() const;
