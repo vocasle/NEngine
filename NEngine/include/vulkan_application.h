@@ -38,6 +38,11 @@ private:
     void recreate_swap_chain();
     void cleanup_swap_chain() const;
     void create_vertex_buffer();
+    void create_buffer(VkDeviceSize size,
+                       VkBufferUsageFlags usage,
+                       VkMemoryPropertyFlags properties,
+                       VkBuffer &buffer,
+                       VkDeviceMemory &buffer_memory) const;
 
     SDL_Window *window_;
     VkInstance instance_;

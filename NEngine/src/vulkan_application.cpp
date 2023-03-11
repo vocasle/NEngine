@@ -300,6 +300,42 @@ find_memory_type(VkPhysicalDevice physical_device,
     throw std::runtime_error("Failed to find suitable memory type");
 }
 
+void
+vulkan_application::create_buffer(VkDeviceSize size,
+                                  VkBufferUsageFlags usage,
+                                  VkMemoryPropertyFlags properties,
+                                  VkBuffer &buffer,
+                                  VkDeviceMemory &buffer_memory) const
+{
+    const queue_family_indices indices =
+        find_queue_families(physical_device_, surface_);
+    const uint32_t queue_indices[] = {indices.transfer_family.value(),
+                                      indices.graphics_family.value()};
+
+    VkBufferCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    info.size = size;
+    info.usage = usage;
+    info.sharingMode = VK_SHARING_MODE_CONCURRENT;
+    info.queueFamilyIndexCount = 2;
+    info.pQueueFamilyIndices = queue_indices;
+
+    VKRESULT(vkCreateBuffer(device_, &info, nullptr, &buffer));
+
+    VkMemoryRequirements memory_requirements;
+    vkGetBufferMemoryRequirements(device_, buffer, &memory_requirements);
+
+    VkMemoryAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = memory_requirements.size;
+    alloc_info.memoryTypeIndex = find_memory_type(
+        physical_device_, memory_requirements.memoryTypeBits, properties);
+
+    VKRESULT(vkAllocateMemory(device_, &alloc_info, nullptr, &buffer_memory));
+
+    VKRESULT(vkBindBufferMemory(device_, buffer, buffer_memory, 0));
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window),
       instance_(),
