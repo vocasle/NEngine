@@ -466,11 +466,11 @@ vulkan_application::create_uniform_buffers()
 }
 
 void
-vulkan_application::update_uniform_buffer(uint32_t current_image)
+vulkan_application::update_uniform_buffer() const
 {
-    static auto start_time = std::chrono::high_resolution_clock::now();
+    static const auto start_time = std::chrono::high_resolution_clock::now();
 
-    auto current_time = std::chrono::high_resolution_clock::now();
+    const auto current_time = std::chrono::high_resolution_clock::now();
 
     const float time =
         std::chrono::duration<float, std::chrono::seconds::period>(
@@ -478,11 +478,13 @@ vulkan_application::update_uniform_buffer(uint32_t current_image)
             .count();
 
     uniform_buffer_object ubo{};
-    ubo.model =
-        glm::rotate(glm::mat4(1), time * glm::radians(90), glm::vec3(0, 0, 1));
+    ubo.model = glm::rotate(glm::mat4(1.0f),
+                            time * glm::radians(90.0f),
+                            glm::vec3(0.0f, 0.0f, 1.0f));
 
-    ubo.view =
-        glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+                           glm::vec3(0.0f, 0.0f, 0.0f),
+                           glm::vec3(0.0f, 0.0f, 1.0f));
 
     ubo.proj =
         glm::perspective(glm::radians(45.0f),
@@ -491,9 +493,9 @@ vulkan_application::update_uniform_buffer(uint32_t current_image)
                          0.1f,
                          10.0f);
 
-    ubo.proj[1][1] *= -1;  // invert Y TODO try to comment this out and see if
-                           // image is upside-down
-    memcpy(uniform_buffers_mapped_[current_image], &ubo, sizeof(ubo));
+    ubo.proj[1][1] *= -1;  // flip Y
+
+    memcpy(uniform_buffers_mapped_[current_frame_], &ubo, sizeof(ubo));
 }
 
 void
@@ -576,7 +578,7 @@ vulkan_application::draw_frame()
         throw std::runtime_error("Failed to acquire swap chain image");
     }
 
-    update_uniform_buffer(image_idx);
+    update_uniform_buffer();
 
     VKRESULT(vkResetFences(device_, 1, &in_flight_fences_[current_frame_]));
 
@@ -1093,6 +1095,15 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
     scissor.extent = swap_chain_extent_;
     vkCmdSetScissor(cb, 0, 1, &scissor);
 
+    vkCmdBindDescriptorSets(cb,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            pipeline_layout_,
+                            0,
+                            1,
+                            &descriptor_sets_[current_frame_],
+                            0,
+                            nullptr);
+
     vkCmdDrawIndexed(cb, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(cb);
@@ -1262,7 +1273,7 @@ vulkan_application::create_graphics_pipeline()
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
     rasterizer.depthBiasConstantFactor = 0;
     rasterizer.depthBiasClamp = 0;
