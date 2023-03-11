@@ -60,6 +60,8 @@ const std::vector<vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
                                       {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
                                       {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
+const std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
+
 struct queue_family_indices
 {
     std::optional<uint32_t> graphics_family;
@@ -376,23 +378,7 @@ vulkan_application::copy_buffer(VkBuffer src_buffer,
 }
 
 vulkan_application::vulkan_application(SDL_Window *window)
-    : window_(window),
-      instance_(),
-      debug_util_messenger_(),
-      physical_device_(),
-      device_(),
-      queue_(),
-      present_queue_(),
-      swap_chain_(),
-      swap_chain_image_format_(),
-      swap_chain_extent_(),
-      pipeline_layout_(),
-      render_pass_(),
-      graphics_pipeline_(),
-      command_pool_(),
-      vertex_buffer_(),
-      vertex_buffer_memory_(),
-      transfer_queue_()
+    : window_(window)
 {
     init_vulkan();
 }

@@ -43,36 +43,40 @@ private:
                        VkMemoryPropertyFlags properties,
                        VkBuffer &buffer,
                        VkDeviceMemory &buffer_memory) const;
-    void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size);
+    void copy_buffer(VkBuffer src_buffer,
+                     VkBuffer dst_buffer,
+                     VkDeviceSize size);
 
     SDL_Window *window_;
-    VkInstance instance_;
-    VkDebugUtilsMessengerEXT debug_util_messenger_;
-    VkPhysicalDevice physical_device_;
-    VkDevice device_;
-    VkQueue queue_;
+    VkInstance instance_{};
+    VkDebugUtilsMessengerEXT debug_util_messenger_{};
+    VkPhysicalDevice physical_device_{};
+    VkDevice device_{};
+    VkQueue queue_{};
     VkSurfaceKHR surface_{};
-    VkQueue present_queue_;
-    VkSwapchainKHR swap_chain_;
+    VkQueue present_queue_{};
+    VkSwapchainKHR swap_chain_{};
     std::vector<VkImage> swap_chain_images_;
-    VkFormat swap_chain_image_format_;
-    VkExtent2D swap_chain_extent_;
+    VkFormat swap_chain_image_format_{};
+    VkExtent2D swap_chain_extent_{};
     std::vector<VkImageView> swap_chain_image_views_;
-    VkPipelineLayout pipeline_layout_;
-    VkRenderPass render_pass_;
-    VkPipeline graphics_pipeline_;
+    VkPipelineLayout pipeline_layout_{};
+    VkRenderPass render_pass_{};
+    VkPipeline graphics_pipeline_{};
     std::vector<VkFramebuffer> swap_chain_framebuffers_;
-    VkCommandPool command_pool_;
+    VkCommandPool command_pool_{};
     std::vector<VkCommandBuffer> command_buffers_;
     std::vector<VkSemaphore> image_available_semaphores_;
     std::vector<VkSemaphore> render_finished_semaphores_;
     std::vector<VkFence> in_flight_fences_;
     uint32_t current_frame_ = 0;
     bool is_framebuffer_resized = false;
-    VkBuffer vertex_buffer_;
-    VkDeviceMemory vertex_buffer_memory_;
-    VkQueue transfer_queue_;
+    VkBuffer vertex_buffer_{};
+    VkDeviceMemory vertex_buffer_memory_{};
+    VkQueue transfer_queue_{};
     VkCommandPool transfer_command_pool_{};
+    VkBuffer index_buffer_{};
+    VkDeviceMemory index_buffer_memory_{};
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
