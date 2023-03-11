@@ -43,6 +43,7 @@ private:
                        VkMemoryPropertyFlags properties,
                        VkBuffer &buffer,
                        VkDeviceMemory &buffer_memory) const;
+    void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size);
 
     SDL_Window *window_;
     VkInstance instance_;

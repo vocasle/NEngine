@@ -336,6 +336,45 @@ vulkan_application::create_buffer(VkDeviceSize size,
     VKRESULT(vkBindBufferMemory(device_, buffer, buffer_memory, 0));
 }
 
+void
+vulkan_application::copy_buffer(VkBuffer src_buffer,
+                                VkBuffer dst_buffer,
+                                VkDeviceSize size)
+{
+    VkCommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info.commandPool = transfer_command_pool_;
+    alloc_info.commandBufferCount = 1;
+
+    VkCommandBuffer cb;
+    VKRESULT(vkAllocateCommandBuffers(device_, &alloc_info, &cb));
+
+    VkCommandBufferBeginInfo begin_info{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    VKRESULT(vkBeginCommandBuffer(cb, &begin_info));
+
+    VkBufferCopy copy_region{};
+    copy_region.size = size;
+    copy_region.srcOffset = 0;
+    copy_region.dstOffset = 0;
+    vkCmdCopyBuffer(cb, src_buffer, dst_buffer, 1, &copy_region);
+
+    VKRESULT(vkEndCommandBuffer(cb));
+
+    VkSubmitInfo submit_info{};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &cb;
+
+    VKRESULT(vkQueueSubmit(transfer_queue_, 1, &submit_info, VK_NULL_HANDLE));
+    VKRESULT(vkQueueWaitIdle(transfer_queue_));
+
+    vkFreeCommandBuffers(device_, transfer_command_pool_, 1, &cb);
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window),
       instance_(),
@@ -462,6 +501,7 @@ vulkan_application::create_command_pool()
         vkCreateCommandPool(device_, &create_info, nullptr, &command_pool_));
 
     create_info.queueFamilyIndex = indices.transfer_family.value();
+    create_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
     VKRESULT(vkCreateCommandPool(
         device_, &create_info, nullptr, &transfer_command_pool_));
 }
@@ -940,19 +980,34 @@ void
 vulkan_application::create_vertex_buffer()
 {
     const VkDeviceSize buffer_size = sizeof(vertices[0]) * vertices.size();
+
+    VkBuffer staging_buffer;
+    VkDeviceMemory staging_buffer_memory;
     create_buffer(buffer_size,
-                  VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                  vertex_buffer_,
-                  vertex_buffer_memory_);
+                  staging_buffer,
+                  staging_buffer_memory);
 
     void *data = nullptr;
     VKRESULT(
-        vkMapMemory(device_, vertex_buffer_memory_, 0, buffer_size, 0, &data));
+        vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0, &data));
 
     memcpy(data, vertices.data(), buffer_size);
-    vkUnmapMemory(device_, vertex_buffer_memory_);
+    vkUnmapMemory(device_, staging_buffer_memory);
+
+    create_buffer(
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        vertex_buffer_,
+        vertex_buffer_memory_);
+
+    copy_buffer(staging_buffer, vertex_buffer_, buffer_size);
+
+    vkDestroyBuffer(device_, staging_buffer, nullptr);
+    vkFreeMemory(device_, staging_buffer_memory, nullptr);
 }
 
 void
