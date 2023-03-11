@@ -56,9 +56,10 @@ struct vertex
     }
 };
 
-const std::vector<vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                                      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-                                      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+const std::vector<vertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                      {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                                      {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                                      {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
 
 const std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
 
@@ -920,9 +921,11 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
 
     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
 
-    VkBuffer vertex_buffers[] = {vertex_buffer_};
-    VkDeviceSize offsets[] = {0};
+    const VkBuffer vertex_buffers[] = {vertex_buffer_};
+    const VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(cb, 0, 1, vertex_buffers, offsets);
+
+    vkCmdBindIndexBuffer(cb, index_buffer_, 0, VK_INDEX_TYPE_UINT32);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -938,7 +941,7 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
     scissor.extent = swap_chain_extent_;
     vkCmdSetScissor(cb, 0, 1, &scissor);
 
-    vkCmdDraw(cb, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+    vkCmdDrawIndexed(cb, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(cb);
 
