@@ -37,6 +37,7 @@ private:
     void create_sync_objects();
     void recreate_swap_chain();
     void cleanup_swap_chain() const;
+    void create_vertex_buffer();
 
     SDL_Window *window_;
     VkInstance instance_;
@@ -62,6 +63,8 @@ private:
     std::vector<VkFence> in_flight_fences_;
     uint32_t current_frame_ = 0;
     bool is_framebuffer_resized = false;
+    VkBuffer vertex_buffer_;
+    VkDeviceMemory vertex_buffer_memory_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

@@ -275,6 +275,25 @@ find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
     return indices;
 }
 
+static uint32_t
+find_memory_type(VkPhysicalDevice physical_device,
+                 uint32_t type_filter,
+                 VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
+
+    for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i) {
+        if (type_filter & (1 << i) &&
+            (memory_properties.memoryTypes[i].propertyFlags & properties) ==
+                properties) {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("Failed to find suitable memory type");
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window),
       instance_(),
@@ -289,7 +308,9 @@ vulkan_application::vulkan_application(SDL_Window *window)
       pipeline_layout_(),
       render_pass_(),
       graphics_pipeline_(),
-      command_pool_()
+      command_pool_(),
+      vertex_buffer_(),
+      vertex_buffer_memory_()
 {
     init_vulkan();
 }
@@ -412,6 +433,7 @@ vulkan_application::init_vulkan()
     create_graphics_pipeline();
     create_framebuffers();
     create_command_pool();
+    create_vertex_buffer();
     create_command_buffers();
     create_sync_objects();
 }
@@ -420,6 +442,9 @@ void
 vulkan_application::cleanup() const
 {
     cleanup_swap_chain();
+
+    vkDestroyBuffer(device_, vertex_buffer_, nullptr);
+    vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroySemaphore(device_, image_available_semaphores_[i], nullptr);
@@ -860,6 +885,44 @@ vulkan_application::cleanup_swap_chain() const
 }
 
 void
+vulkan_application::create_vertex_buffer()
+{
+    VkBufferCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    info.size = sizeof(vertices[0]) * vertices.size();
+    info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VKRESULT(vkCreateBuffer(device_, &info, nullptr, &vertex_buffer_));
+
+    VkMemoryRequirements memory_requirements;
+    vkGetBufferMemoryRequirements(
+        device_, vertex_buffer_, &memory_requirements);
+
+    VkMemoryAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = memory_requirements.size;
+    alloc_info.memoryTypeIndex =
+        find_memory_type(physical_device_,
+                         memory_requirements.memoryTypeBits,
+                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    VKRESULT(vkAllocateMemory(
+        device_, &alloc_info, nullptr, &vertex_buffer_memory_));
+
+    VKRESULT(
+        vkBindBufferMemory(device_, vertex_buffer_, vertex_buffer_memory_, 0));
+
+    void *data = nullptr;
+    VKRESULT(
+        vkMapMemory(device_, vertex_buffer_memory_, 0, info.size, 0, &data));
+
+    memcpy(data, vertices.data(), static_cast<size_t>(info.size));
+    vkUnmapMemory(device_, vertex_buffer_memory_);
+}
+
+void
 vulkan_application::create_graphics_pipeline()
 {
     const std::vector<char> vs_code = read_file("shaders/vert.spv");
@@ -883,13 +946,16 @@ vulkan_application::create_graphics_pipeline()
     const VkPipelineShaderStageCreateInfo shader_stages[] = {vs_stage_info,
                                                              ps_stage_info};
 
+    const auto binding_desc = vertex::get_binding_description();
+    const auto attribute_desc = vertex::get_attribute_descriptions();
+
     VkPipelineVertexInputStateCreateInfo vertex_input_info{};
     vertex_input_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertex_input_info.vertexBindingDescriptionCount = 0;
-    vertex_input_info.pVertexBindingDescriptions = nullptr;
-    vertex_input_info.vertexAttributeDescriptionCount = 0;
-    vertex_input_info.pVertexAttributeDescriptions = nullptr;
+    vertex_input_info.vertexBindingDescriptionCount = 1;
+    vertex_input_info.pVertexBindingDescriptions = &binding_desc;
+    vertex_input_info.vertexAttributeDescriptionCount = attribute_desc.size();
+    vertex_input_info.pVertexAttributeDescriptions = attribute_desc.data();
 
     VkPipelineInputAssemblyStateCreateInfo ia{};
     ia.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
