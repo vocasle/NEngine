@@ -4,7 +4,10 @@
 
 #include <format>
 #include <fstream>
+#define GLM_FORCE_RADIANS
+#include <chrono>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <optional>
 #include <set>
@@ -462,6 +465,37 @@ vulkan_application::create_uniform_buffers()
     }
 }
 
+void
+vulkan_application::update_uniform_buffer(uint32_t current_image)
+{
+    static auto start_time = std::chrono::high_resolution_clock::now();
+
+    auto current_time = std::chrono::high_resolution_clock::now();
+
+    const float time =
+        std::chrono::duration<float, std::chrono::seconds::period>(
+            current_time - start_time)
+            .count();
+
+    uniform_buffer_object ubo{};
+    ubo.model =
+        glm::rotate(glm::mat4(1), time * glm::radians(90), glm::vec3(0, 0, 1));
+
+    ubo.view =
+        glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+
+    ubo.proj =
+        glm::perspective(glm::radians(45.0f),
+                         swap_chain_extent_.width /
+                             static_cast<float>(swap_chain_extent_.height),
+                         0.1f,
+                         10.0f);
+
+    ubo.proj[1][1] *= -1;  // invert Y TODO try to comment this out and see if
+                           // image is upside-down
+    memcpy(uniform_buffers_mapped_[current_image], &ubo, sizeof(ubo));
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
@@ -490,6 +524,8 @@ vulkan_application::draw_frame()
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("Failed to acquire swap chain image");
     }
+
+    update_uniform_buffer(image_idx);
 
     VKRESULT(vkResetFences(device_, 1, &in_flight_fences_[current_frame_]));
 
