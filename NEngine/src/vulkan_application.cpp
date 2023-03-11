@@ -16,6 +16,8 @@ constexpr bool enable_validation_layers = false;
 constexpr bool enable_validation_layers = true;
 #endif
 
+constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+
 struct queue_family_indices
 {
     std::optional<uint32_t> graphics_family;
@@ -245,11 +247,7 @@ vulkan_application::vulkan_application(SDL_Window *window)
       pipeline_layout_(),
       render_pass_(),
       graphics_pipeline_(),
-      command_pool_(),
-      command_buffer_(),
-      image_available_semaphore_(),
-      render_finished_semaphore_(),
-      in_flight_fence_()
+      command_pool_()
 {
     init_vulkan();
 }
@@ -257,27 +255,28 @@ vulkan_application::vulkan_application(SDL_Window *window)
 void
 vulkan_application::draw_frame()
 {
-    VKRESULT(
-        vkWaitForFences(device_, 1, &in_flight_fence_, VK_TRUE, UINT64_MAX));
+    VKRESULT(vkWaitForFences(
+        device_, 1, &in_flight_fences_[current_frame_], VK_TRUE, UINT64_MAX));
 
-    VKRESULT(vkResetFences(device_, 1, &in_flight_fence_));
+    VKRESULT(vkResetFences(device_, 1, &in_flight_fences_[current_frame_]));
 
     uint32_t image_idx;
     VKRESULT(vkAcquireNextImageKHR(device_,
                                    swap_chain_,
                                    UINT64_MAX,
-                                   image_available_semaphore_,
+                                   image_available_semaphores_[current_frame_],
                                    VK_NULL_HANDLE,
                                    &image_idx));
 
-    VKRESULT(vkResetCommandBuffer(command_buffer_, 0));
+    VKRESULT(vkResetCommandBuffer(command_buffers_[current_frame_], 0));
 
-    record_command_buffer(command_buffer_, image_idx);
+    record_command_buffer(command_buffers_[current_frame_], image_idx);
 
     VkSubmitInfo submit_info{};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    const VkSemaphore wait_semaphores[] = {image_available_semaphore_};
+    const VkSemaphore wait_semaphores[] = {
+        image_available_semaphores_[current_frame_]};
     const VkPipelineStageFlags wait_stages[] = {
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
@@ -285,14 +284,16 @@ vulkan_application::draw_frame()
     submit_info.pWaitSemaphores = wait_semaphores;
     submit_info.pWaitDstStageMask = wait_stages;
     submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &command_buffer_;
+    submit_info.pCommandBuffers = &command_buffers_[current_frame_];
 
-    const VkSemaphore signal_semaphores[] = {render_finished_semaphore_};
+    const VkSemaphore signal_semaphores[] = {
+        render_finished_semaphores_[current_frame_]};
 
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = signal_semaphores;
 
-    VKRESULT(vkQueueSubmit(queue_, 1, &submit_info, in_flight_fence_));
+    VKRESULT(vkQueueSubmit(
+        queue_, 1, &submit_info, in_flight_fences_[current_frame_]));
 
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -306,6 +307,8 @@ vulkan_application::draw_frame()
     present_info.pImageIndices = &image_idx;
 
     VKRESULT(vkQueuePresentKHR(queue_, &present_info));
+
+    current_frame_ = (current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 vulkan_application::~vulkan_application()
@@ -344,16 +347,18 @@ vulkan_application::init_vulkan()
     create_graphics_pipeline();
     create_framebuffers();
     create_command_pool();
-    create_command_buffer();
+    create_command_buffers();
     create_sync_objects();
 }
 
 void
 vulkan_application::cleanup() const
 {
-    vkDestroySemaphore(device_, image_available_semaphore_, nullptr);
-    vkDestroySemaphore(device_, render_finished_semaphore_, nullptr);
-    vkDestroyFence(device_, in_flight_fence_, nullptr);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        vkDestroySemaphore(device_, image_available_semaphores_[i], nullptr);
+        vkDestroySemaphore(device_, render_finished_semaphores_[i], nullptr);
+        vkDestroyFence(device_, in_flight_fences_[i], nullptr);
+    }
 
     vkDestroyCommandPool(device_, command_pool_, nullptr);
 
@@ -681,16 +686,19 @@ vulkan_application::create_framebuffers()
 }
 
 void
-vulkan_application::create_command_buffer()
+vulkan_application::create_command_buffers()
 {
+    command_buffers_.resize(MAX_FRAMES_IN_FLIGHT);
+
     VkCommandBufferAllocateInfo allocate_info{};
     allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocate_info.commandPool = command_pool_;
     allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocate_info.commandBufferCount = 1;
+    allocate_info.commandBufferCount =
+        static_cast<uint32_t>(command_buffers_.size());
 
-    VKRESULT(
-        vkAllocateCommandBuffers(device_, &allocate_info, &command_buffer_));
+    VKRESULT(vkAllocateCommandBuffers(
+        device_, &allocate_info, command_buffers_.data()));
 }
 
 void
@@ -726,7 +734,7 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
     viewport.height = static_cast<float>(swap_chain_extent_.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(command_buffer_, 0, 1, &viewport);
+    vkCmdSetViewport(cb, 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
@@ -743,6 +751,10 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
 void
 vulkan_application::create_sync_objects()
 {
+    image_available_semaphores_.resize(MAX_FRAMES_IN_FLIGHT);
+    render_finished_semaphores_.resize(MAX_FRAMES_IN_FLIGHT);
+    in_flight_fences_.resize(MAX_FRAMES_IN_FLIGHT);
+
     VkSemaphoreCreateInfo semaphore_info{};
     semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -750,11 +762,18 @@ vulkan_application::create_sync_objects()
     fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    VKRESULT(vkCreateSemaphore(
-        device_, &semaphore_info, nullptr, &image_available_semaphore_));
-    VKRESULT(vkCreateSemaphore(
-        device_, &semaphore_info, nullptr, &render_finished_semaphore_));
-    VKRESULT(vkCreateFence(device_, &fence_info, nullptr, &in_flight_fence_));
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        VKRESULT(vkCreateSemaphore(device_,
+                                   &semaphore_info,
+                                   nullptr,
+                                   &image_available_semaphores_[i]));
+        VKRESULT(vkCreateSemaphore(device_,
+                                   &semaphore_info,
+                                   nullptr,
+                                   &render_finished_semaphores_[i]));
+        VKRESULT(vkCreateFence(
+            device_, &fence_info, nullptr, &in_flight_fences_[i]));
+    }
 }
 
 void

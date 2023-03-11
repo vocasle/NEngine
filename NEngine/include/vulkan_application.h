@@ -30,7 +30,7 @@ private:
         const std::vector<char> &code) const;
     void create_render_pass();
     void create_framebuffers();
-    void create_command_buffer();
+    void create_command_buffers();
     void record_command_buffer(VkCommandBuffer cb, uint32_t image_idx);
     void create_sync_objects();
 
@@ -52,10 +52,11 @@ private:
     VkPipeline graphics_pipeline_;
     std::vector<VkFramebuffer> swap_chain_framebuffers_;
     VkCommandPool command_pool_;
-    VkCommandBuffer command_buffer_;
-    VkSemaphore image_available_semaphore_;
-    VkSemaphore render_finished_semaphore_;
-    VkFence in_flight_fence_;
+    std::vector<VkCommandBuffer> command_buffers_;
+    std::vector<VkSemaphore> image_available_semaphores_;
+    std::vector<VkSemaphore> render_finished_semaphores_;
+    std::vector<VkFence> in_flight_fences_;
+    uint32_t current_frame_ = 0;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
