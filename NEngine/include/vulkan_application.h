@@ -10,6 +10,7 @@ public:
     explicit vulkan_application(SDL_Window *window);
     void draw_frame();
     void on_window_resized();
+    void on_window_minimized();
     ~vulkan_application();
 
 private:

@@ -267,10 +267,9 @@ vulkan_application::draw_frame()
                               VK_NULL_HANDLE,
                               &image_idx);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-        is_framebuffer_resized) {
-        is_framebuffer_resized = false;
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         recreate_swap_chain();
+        return;
     }
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("Failed to acquire swap chain image");
@@ -317,7 +316,9 @@ vulkan_application::draw_frame()
     present_info.pImageIndices = &image_idx;
 
     result = vkQueuePresentKHR(queue_, &present_info);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+        is_framebuffer_resized) {
+        is_framebuffer_resized = false;
         recreate_swap_chain();
     }
     else {
@@ -794,6 +795,17 @@ vulkan_application::create_sync_objects()
 void
 vulkan_application::recreate_swap_chain()
 {
+    //using namespace std::chrono_literals;
+
+    //int width = 0;
+    //int height = 0;
+    //SDL_GetWindowSizeInPixels(window_, &width, &height);
+
+    //while (width == 0 || height == 0) {
+    //    std::this_thread::sleep_for(16ms);
+    //    SDL_GetWindowSizeInPixels(window_, &width, &height);
+    //}
+
     vkDeviceWaitIdle(device_);
 
     cleanup_swap_chain();

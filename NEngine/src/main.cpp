@@ -8,12 +8,32 @@
 SDL_Surface *win_surface = nullptr;
 SDL_Window *window = nullptr;
 nengine::vulkan_application *app = nullptr;
+bool is_window_visible = true;
 
 bool
 loop()
 {
     SDL_Event e = {};
     while (SDL_PollEvent(&e) != 0) {
+        if (e.type == SDL_WINDOWEVENT) {
+            switch (e.window.event) {
+                case SDL_WINDOWEVENT_RESIZED:
+                    app->on_window_resized();
+                    is_window_visible = true;
+                    break;
+                case SDL_WINDOWEVENT_MAXIMIZED:
+                {
+                    SDL_RestoreWindow(window);
+                    is_window_visible = true;
+                }
+                case SDL_WINDOWEVENT_MINIMIZED:
+                    is_window_visible = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         switch (e.type) {
             case SDL_QUIT:
                 return false;
@@ -22,15 +42,13 @@ loop()
                     return false;
                 }
                 break;
-            case SDL_WINDOWEVENT_RESIZED:
-                app->on_window_resized();
-                break;
             default:
                 break;
         }
     }
-
-    app->draw_frame();
+    if (is_window_visible) {
+        app->draw_frame();
+    }
 
     return true;
 }
