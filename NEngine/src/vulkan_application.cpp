@@ -424,6 +424,10 @@ vulkan_application::create_command_pool()
 
     VKRESULT(
         vkCreateCommandPool(device_, &create_info, nullptr, &command_pool_));
+
+    create_info.queueFamilyIndex = indices.transfer_family.value();
+    VKRESULT(vkCreateCommandPool(
+        device_, &create_info, nullptr, &transfer_command_pool_));
 }
 
 void
@@ -460,6 +464,7 @@ vulkan_application::cleanup() const
     }
 
     vkDestroyCommandPool(device_, command_pool_, nullptr);
+    vkDestroyCommandPool(device_, transfer_command_pool_, nullptr);
 
     vkDestroyPipeline(device_, graphics_pipeline_, nullptr);
     vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
@@ -902,7 +907,13 @@ vulkan_application::create_vertex_buffer()
     info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     info.size = sizeof(vertices[0]) * vertices.size();
     info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    info.sharingMode = VK_SHARING_MODE_CONCURRENT;
+    const queue_family_indices indices =
+        find_queue_families(physical_device_, surface_);
+    const uint32_t queue_indices[] = {indices.transfer_family.value(),
+                                      indices.graphics_family.value()};
+    info.queueFamilyIndexCount = 2;
+    info.pQueueFamilyIndices = queue_indices;
 
     VKRESULT(vkCreateBuffer(device_, &info, nullptr, &vertex_buffer_));
 

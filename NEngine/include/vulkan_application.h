@@ -66,6 +66,7 @@ private:
     VkBuffer vertex_buffer_;
     VkDeviceMemory vertex_buffer_memory_;
     VkQueue transfer_queue_;
+    VkCommandPool transfer_command_pool_{};
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
