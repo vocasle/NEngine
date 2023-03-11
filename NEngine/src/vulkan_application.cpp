@@ -316,7 +316,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
       graphics_pipeline_(),
       command_pool_(),
       vertex_buffer_(),
-      vertex_buffer_memory_()
+      vertex_buffer_memory_(),
+      transfer_queue_()
 {
     init_vulkan();
 }
@@ -1149,8 +1150,10 @@ vulkan_application::create_logical_device()
         find_queue_families(physical_device_, surface_);
 
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-    std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(),
-                                                indices.present_family.value()};
+    std::set<uint32_t> unique_queue_families = {
+        indices.graphics_family.value(),
+        indices.present_family.value(),
+        indices.transfer_family.value()};
     float queue_priority = 1;
 
     for (uint32_t queue_family : unique_queue_families) {
@@ -1189,6 +1192,8 @@ vulkan_application::create_logical_device()
     vkGetDeviceQueue(device_, indices.graphics_family.value(), 0, &queue_);
     vkGetDeviceQueue(
         device_, indices.present_family.value(), 0, &present_queue_);
+    vkGetDeviceQueue(
+        device_, indices.transfer_family.value(), 0, &transfer_queue_);
 }
 
 void

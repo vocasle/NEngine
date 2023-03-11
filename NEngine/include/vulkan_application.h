@@ -65,6 +65,7 @@ private:
     bool is_framebuffer_resized = false;
     VkBuffer vertex_buffer_;
     VkDeviceMemory vertex_buffer_memory_;
+    VkQueue transfer_queue_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
