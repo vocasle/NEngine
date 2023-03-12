@@ -4,6 +4,8 @@
 #include <vulkan/vulkan.hpp>
 
 namespace nengine {
+struct vertex;
+
 class vulkan_application
 {
 public:
@@ -111,6 +113,9 @@ private:
     VkImage depth_image_{};
     VkDeviceMemory depth_image_memory_{};
     VkImageView depth_image_view_{};
+
+    std::vector<vertex> vertices_;
+    std::vector<uint32_t> indices_;
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};

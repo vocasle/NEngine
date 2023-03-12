@@ -572,7 +572,7 @@ vulkan_application::copy_buffer(VkBuffer src_buffer,
 void
 vulkan_application::create_index_buffer()
 {
-    const VkDeviceSize buffer_size = sizeof(indices[0]) * indices.size();
+    const VkDeviceSize buffer_size = sizeof(indices_[0]) * indices_.size();
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
@@ -585,7 +585,7 @@ vulkan_application::create_index_buffer()
     void *data = nullptr;
     VKRESULT(
         vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0, &data));
-    memcpy(data, indices.data(), buffer_size);
+    memcpy(data, indices_.data(), buffer_size);
     vkUnmapMemory(device_, staging_buffer_memory);
 
     create_buffer(
@@ -1072,6 +1072,35 @@ vulkan_application::load_model(const std::string &path)
     create_texture_image(TEXTURE_PATH);
     create_texture_image_view();
     create_texture_sampler();
+
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn;
+    std::string err;
+
+    if (!tinyobj::LoadObj(
+            &attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+        throw std::runtime_error("Failed to load model. " + warn + err);
+    }
+
+    for (const auto &shape : shapes) {
+        for (const auto &index : shape.mesh.indices) {
+            vertex v{};
+
+            v.pos = {attrib.vertices[3 * index.vertex_index + 0],
+                     attrib.vertices[3 * index.vertex_index + 1],
+                     attrib.vertices[3 * index.vertex_index + 2]};
+
+            v.tex_coord = {attrib.texcoords[2 * index.texcoord_index + 0],
+                           attrib.texcoords[2 * index.texcoord_index + 1]};
+
+            v.color = {1.0f, 1.0f, 1.0f};
+
+            vertices_.push_back(v);
+            indices_.push_back(static_cast<uint32_t>(indices_.size()));
+        }
+    }
 }
 
 void
@@ -1556,7 +1585,7 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
                             0,
                             nullptr);
 
-    vkCmdDrawIndexed(cb, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+    vkCmdDrawIndexed(cb, static_cast<uint32_t>(indices_.size()), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(cb);
 
@@ -1624,7 +1653,7 @@ vulkan_application::cleanup_swap_chain() const
 void
 vulkan_application::create_vertex_buffer()
 {
-    const VkDeviceSize buffer_size = sizeof(vertices[0]) * vertices.size();
+    const VkDeviceSize buffer_size = sizeof(vertices_[0]) * vertices_.size();
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
@@ -1639,7 +1668,7 @@ vulkan_application::create_vertex_buffer()
     VKRESULT(
         vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0, &data));
 
-    memcpy(data, vertices.data(), buffer_size);
+    memcpy(data, vertices_.data(), buffer_size);
     vkUnmapMemory(device_, staging_buffer_memory);
 
     create_buffer(
