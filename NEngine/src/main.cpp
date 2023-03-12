@@ -1,10 +1,10 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-
-#include <iostream>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_vulkan.h>
+
+#include <iostream>
 
 #include "vulkan_application.h"
 
@@ -22,13 +22,13 @@ loop()
             switch (e.window.event) {
                 case SDL_WINDOWEVENT_RESIZED:
                     app->on_window_resized();
+                    break;
+                case SDL_WINDOWEVENT_SHOWN:
+                case SDL_WINDOWEVENT_RESTORED:
                     is_window_visible = true;
                     break;
-                case SDL_WINDOWEVENT_MAXIMIZED:
-                {
-                    SDL_RestoreWindow(window);
-                    is_window_visible = true;
-                }
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                case SDL_WINDOWEVENT_HIDDEN:
                 case SDL_WINDOWEVENT_MINIMIZED:
                     is_window_visible = false;
                     break;
@@ -36,19 +36,16 @@ loop()
                     break;
             }
         }
-
-        switch (e.type) {
-            case SDL_QUIT:
+        else if (e.type == SDL_QUIT) {
+            return false;
+        }
+        else if (e.type == SDL_KEYDOWN) {
+            if (e.key.keysym.sym == SDLK_ESCAPE) {
                 return false;
-            case SDL_KEYDOWN:
-                if (e.key.keysym.sym == SDLK_ESCAPE) {
-                    return false;
-                }
-                break;
-            default:
-                break;
+            }
         }
     }
+
     if (is_window_visible) {
         app->draw_frame();
     }
