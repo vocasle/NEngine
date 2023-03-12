@@ -85,8 +85,7 @@ const std::vector<vertex> vertices = {
     {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
     {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
     {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-};
+    {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
 
 const std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
 
@@ -452,6 +451,47 @@ copy_buffer_to_image(VkBuffer buffer,
         cb, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
     end_single_time_commands(cb, device, pool, queue);
+}
+
+static VkFormat
+find_supported_format(const std::vector<VkFormat> &candidates,
+                      VkImageTiling tiling,
+                      VkFormatFeatureFlags features,
+                      VkPhysicalDevice physical_device)
+{
+    for (const VkFormat format : candidates) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(physical_device, format, &props);
+
+        if (tiling == VK_IMAGE_TILING_LINEAR &&
+            (props.linearTilingFeatures & features) == features) {
+            return format;
+        }
+        if (tiling == VK_IMAGE_TILING_OPTIMAL &&
+            (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+
+    throw std::runtime_error("Failed to find supported format");
+}
+
+static VkFormat
+find_depth_format(VkPhysicalDevice physical_device)
+{
+    return find_supported_format({VK_FORMAT_D32_SFLOAT,
+                                  VK_FORMAT_D32_SFLOAT_S8_UINT,
+                                  VK_FORMAT_D24_UNORM_S8_UINT},
+                                 VK_IMAGE_TILING_OPTIMAL,
+                                 VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                                 physical_device);
+}
+
+static bool
+has_stencil_component(VkFormat format)
+{
+    return format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+           format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
 void
@@ -872,6 +912,11 @@ vulkan_application::create_texture_sampler()
         vkCreateSampler(device_, &sampler_info, nullptr, &texture_sampler_));
 }
 
+void
+vulkan_application::create_depth_resources()
+{
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
@@ -1004,6 +1049,7 @@ vulkan_application::init_vulkan()
     create_graphics_pipeline();
     create_framebuffers();
     create_command_pool();
+    create_depth_resources();
     create_texture_image();
     create_texture_image_view();
     create_texture_sampler();
