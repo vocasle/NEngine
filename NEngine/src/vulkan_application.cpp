@@ -856,12 +856,14 @@ vulkan_application::create_image(uint32_t width,
 void
 vulkan_application::create_texture_image_view()
 {
-    texture_image_view_ =
-        create_image_view(texture_image_, VK_FORMAT_R8G8B8A8_SRGB);
+    texture_image_view_ = create_image_view(
+        texture_image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 VkImageView
-vulkan_application::create_image_view(VkImage image, VkFormat format) const
+vulkan_application::create_image_view(VkImage image,
+                                      VkFormat format,
+                                      VkImageAspectFlags aspect_flags) const
 {
     VkImageViewCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -872,7 +874,7 @@ vulkan_application::create_image_view(VkImage image, VkFormat format) const
     create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
     create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
     create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    create_info.subresourceRange.aspectMask = aspect_flags;
     create_info.subresourceRange.baseMipLevel = 0;
     create_info.subresourceRange.levelCount = 1;
     create_info.subresourceRange.baseArrayLayer = 0;
@@ -915,6 +917,19 @@ vulkan_application::create_texture_sampler()
 void
 vulkan_application::create_depth_resources()
 {
+    const VkFormat depth_format = find_depth_format(physical_device_);
+
+    create_image(swap_chain_extent_.width,
+                 swap_chain_extent_.height,
+                 depth_format,
+                 VK_IMAGE_TILING_OPTIMAL,
+                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                 depth_image_,
+                 depth_image_memory_);
+
+    depth_image_view_ = create_image_view(
+        depth_image_, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
 vulkan_application::vulkan_application(SDL_Window *window)
@@ -1313,7 +1328,9 @@ vulkan_application::create_image_views()
     swap_chain_image_views_.resize(swap_chain_images_.size());
     for (size_t i = 0; i < swap_chain_images_.size(); ++i) {
         swap_chain_image_views_[i] =
-            create_image_view(swap_chain_images_[i], swap_chain_image_format_);
+            create_image_view(swap_chain_images_[i],
+                              swap_chain_image_format_,
+                              VK_IMAGE_ASPECT_COLOR_BIT);
     }
 }
 

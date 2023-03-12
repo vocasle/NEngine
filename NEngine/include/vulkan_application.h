@@ -61,7 +61,7 @@ private:
                       VkImage &image,
                       VkDeviceMemory &image_memory) const;
     void create_texture_image_view();
-    VkImageView create_image_view(VkImage image, VkFormat format) const;
+    VkImageView create_image_view(VkImage image, VkFormat format, VkImageAspectFlags aspect_flags) const;
     void create_texture_sampler();
     void create_depth_resources();
 
