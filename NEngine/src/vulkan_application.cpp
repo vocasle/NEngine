@@ -797,6 +797,34 @@ vulkan_application::create_image_view(VkImage image, VkFormat format) const
     return image_view;
 }
 
+void
+vulkan_application::create_texture_sampler()
+{
+    VkSamplerCreateInfo sampler_info{};
+    sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    sampler_info.magFilter = VK_FILTER_LINEAR;
+    sampler_info.minFilter = VK_FILTER_LINEAR;
+    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.anisotropyEnable = VK_TRUE;
+
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(physical_device_, &properties);
+    sampler_info.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+
+    sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    sampler_info.unnormalizedCoordinates = VK_FALSE;
+    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    sampler_info.mipLodBias = 0.0f;
+    sampler_info.minLod = 0.0f;
+    sampler_info.maxLod = 0.0f;
+
+    VKRESULT(
+        vkCreateSampler(device_, &sampler_info, nullptr, &texture_sampler_));
+}
+
 vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
@@ -931,6 +959,7 @@ vulkan_application::init_vulkan()
     create_command_pool();
     create_texture_image();
     create_texture_image_view();
+    create_texture_sampler();
     create_vertex_buffer();
     create_index_buffer();
     create_uniform_buffers();
@@ -944,6 +973,8 @@ void
 vulkan_application::cleanup() const
 {
     cleanup_swap_chain();
+
+    vkDestroySampler(device_, texture_sampler_, nullptr);
 
     vkDestroyImageView(device_, texture_image_view_, nullptr);
 
@@ -1600,8 +1631,8 @@ vulkan_application::is_device_suitable(VkPhysicalDevice device) const
     // VkPhysicalDeviceProperties device_properties;
     // vkGetPhysicalDeviceProperties(device, &device_properties);
 
-    // VkPhysicalDeviceFeatures device_features;
-    // vkGetPhysicalDeviceFeatures(device, &device_features);
+    VkPhysicalDeviceFeatures device_features;
+    vkGetPhysicalDeviceFeatures(device, &device_features);
 
     // return device_properties.deviceType ==
     //            VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
@@ -1618,7 +1649,8 @@ vulkan_application::is_device_suitable(VkPhysicalDevice device) const
             !details.formats.empty() && !details.present_modes.empty();
     }
 
-    return indices.is_complete() && extensions_supported && is_swap_chain_valid;
+    return indices.is_complete() && extensions_supported &&
+           is_swap_chain_valid && device_features.samplerAnisotropy;
 }
 
 void
@@ -1671,7 +1703,8 @@ vulkan_application::create_logical_device()
         queue_create_infos.push_back(queue_create_info);
     }
 
-    const VkPhysicalDeviceFeatures device_features{};
+    VkPhysicalDeviceFeatures device_features{};
+    device_features.samplerAnisotropy = VK_TRUE;
 
     VkDeviceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

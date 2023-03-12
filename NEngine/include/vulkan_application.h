@@ -62,6 +62,7 @@ private:
                       VkDeviceMemory &image_memory) const;
     void create_texture_image_view();
     VkImageView create_image_view(VkImage image, VkFormat format) const;
+    void create_texture_sampler();
 
     SDL_Window *window_;
     VkInstance instance_{};
@@ -102,6 +103,7 @@ private:
     VkImage texture_image_{};
     VkDeviceMemory texture_image_memory_{};
     VkImageView texture_image_view_{};
+    VkSampler texture_sampler_{};
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
