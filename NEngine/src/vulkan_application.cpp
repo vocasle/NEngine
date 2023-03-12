@@ -1,40 +1,26 @@
 ﻿#include "vulkan_application.h"
 
 #include <SDL_vulkan.h>
+#include <stb_image.h>
 
+#include <chrono>
 #include <format>
 #include <fstream>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <stb_image.h>
-
-#include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <iostream>
 #include <optional>
 #include <set>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-namespace nengine {
+#include <unordered_map>
 
-#ifdef NDEBUG
-constexpr bool enable_validation_layers = false;
-#else
-constexpr bool enable_validation_layers = true;
-#endif
-
-constexpr int MAX_FRAMES_IN_FLIGHT = 2;
-
-struct uniform_buffer_object
-{
-    alignas(16) glm::mat4 model;
-    alignas(16) glm::mat4 view;
-    alignas(16) glm::mat4 proj;
-};
-
-struct vertex
+struct nengine::vertex
 {
     glm::vec3 pos;
     glm::vec3 color;
@@ -76,6 +62,42 @@ struct vertex
 
         return attribute_descriptions;
     }
+
+    bool
+    operator==(const vertex &other) const
+    {
+        return pos == other.pos && color == other.color &&
+               tex_coord == other.tex_coord;
+    }
+};
+
+template <>
+struct std::hash<nengine::vertex>
+{
+    size_t
+    operator()(const nengine::vertex &v) const noexcept
+    {
+        return ((hash<glm::vec3>()(v.pos) ^
+                 (hash<glm::vec3>()(v.color) << 1)) >>
+                1) ^
+               (hash<glm::vec2>()(v.tex_coord) << 1);
+    }
+};
+
+namespace nengine {
+#ifdef NDEBUG
+constexpr bool enable_validation_layers = false;
+#else
+constexpr bool enable_validation_layers = true;
+#endif
+
+constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+
+struct uniform_buffer_object
+{
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
 };
 
 const std::vector<vertex> vertices = {
@@ -670,9 +692,10 @@ vulkan_application::update_uniform_buffer() const
             .count();
 
     uniform_buffer_object ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f),
-                            time * glm::radians(90.0f),
-                            glm::vec3(0.0f, 0.0f, 1.0f));
+    // ubo.model = glm::rotate(glm::mat4(1.0f),
+    //                         time * glm::radians(90.0f),
+    //                         glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.model = glm::mat4(1.0f);
 
     ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
                            glm::vec3(0.0f, 0.0f, 0.0f),
@@ -1084,6 +1107,8 @@ vulkan_application::load_model(const std::string &path)
         throw std::runtime_error("Failed to load model. " + warn + err);
     }
 
+    std::unordered_map<vertex, uint32_t> unique_vertices{};
+
     for (const auto &shape : shapes) {
         for (const auto &index : shape.mesh.indices) {
             vertex v{};
@@ -1092,13 +1117,19 @@ vulkan_application::load_model(const std::string &path)
                      attrib.vertices[3 * index.vertex_index + 1],
                      attrib.vertices[3 * index.vertex_index + 2]};
 
-            v.tex_coord = {attrib.texcoords[2 * index.texcoord_index + 0],
-                           attrib.texcoords[2 * index.texcoord_index + 1]};
+            v.tex_coord = {
+                attrib.texcoords[2 * index.texcoord_index + 0],
+                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
 
             v.color = {1.0f, 1.0f, 1.0f};
 
-            vertices_.push_back(v);
-            indices_.push_back(static_cast<uint32_t>(indices_.size()));
+            if (!unique_vertices.contains(v)) {
+                unique_vertices.insert(
+                    std::make_pair(v, static_cast<uint32_t>(vertices_.size())));
+                vertices_.push_back(v);
+            }
+
+            indices_.push_back(unique_vertices[v]);
         }
     }
 }
