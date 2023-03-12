@@ -11,7 +11,7 @@ public:
     void draw_frame();
     void on_window_resized();
     ~vulkan_application();
-    void load_mesh(const std::string &path);
+    void load_model(const std::string &path);
 
 private:
     void create_command_pool();

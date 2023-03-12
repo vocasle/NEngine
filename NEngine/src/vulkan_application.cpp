@@ -14,6 +14,8 @@
 #include <iostream>
 #include <optional>
 #include <set>
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 
 namespace nengine {
 
@@ -1059,7 +1061,7 @@ vulkan_application::~vulkan_application()
 }
 
 void
-vulkan_application::load_mesh(const std::string &path)
+vulkan_application::load_model(const std::string &path)
 {
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
@@ -1067,7 +1069,9 @@ vulkan_application::load_mesh(const std::string &path)
     const std::string MODEL_PATH = "res/models/viking_room.obj";
     const std::string TEXTURE_PATH = "res/textures/viking_room.png";
 
-    //create_texture_image();
+    create_texture_image(TEXTURE_PATH);
+    create_texture_image_view();
+    create_texture_sampler();
 }
 
 void
@@ -1106,9 +1110,7 @@ vulkan_application::init_vulkan()
     create_command_pool();
     create_depth_resources();
     create_framebuffers();
-    create_texture_image("res/textures/texture.jpg");
-    create_texture_image_view();
-    create_texture_sampler();
+    load_model("");
     create_vertex_buffer();
     create_index_buffer();
     create_uniform_buffers();
