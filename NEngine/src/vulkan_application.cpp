@@ -35,6 +35,7 @@ struct vertex
 {
     glm::vec2 pos;
     glm::vec3 color;
+    glm::vec2 tex_coord;
 
     static constexpr VkVertexInputBindingDescription
     get_binding_description()
@@ -47,10 +48,10 @@ struct vertex
         return description;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 2>
+    static std::array<VkVertexInputAttributeDescription, 3>
     get_attribute_descriptions()
     {
-        std::array<VkVertexInputAttributeDescription, 2>
+        std::array<VkVertexInputAttributeDescription, 3>
             attribute_descriptions{};
         attribute_descriptions[0].offset =
             static_cast<uint32_t>(offsetof(vertex, pos));
@@ -64,14 +65,21 @@ struct vertex
         attribute_descriptions[1].location = 1;
         attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 
+        attribute_descriptions[2].offset =
+            static_cast<uint32_t>(offsetof(vertex, tex_coord));
+        attribute_descriptions[2].binding = 0;
+        attribute_descriptions[2].location = 2;
+        attribute_descriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+
         return attribute_descriptions;
     }
 };
 
-const std::vector<vertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                                      {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-                                      {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-                                      {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+const std::vector<vertex> vertices = {
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
 
 const std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
 
@@ -653,15 +661,34 @@ vulkan_application::create_descriptor_sets()
         buffer_info.buffer = uniform_buffers_[i];
         buffer_info.range = sizeof(uniform_buffer_object);
 
-        VkWriteDescriptorSet descriptor_write{};
-        descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptor_write.dstSet = descriptor_sets_[i];
-        descriptor_write.dstBinding = 0;
-        descriptor_write.dstArrayElement = 0;
-        descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptor_write.descriptorCount = 1;
-        descriptor_write.pBufferInfo = &buffer_info;
-        vkUpdateDescriptorSets(device_, 1, &descriptor_write, 0, nullptr);
+        VkDescriptorImageInfo image_info{};
+        image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        image_info.imageView = texture_image_view_;
+        image_info.sampler = texture_sampler_;
+
+        std::array<VkWriteDescriptorSet, 2> descriptor_writes{};
+        descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptor_writes[0].dstSet = descriptor_sets_[i];
+        descriptor_writes[0].dstBinding = 0;
+        descriptor_writes[0].dstArrayElement = 0;
+        descriptor_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptor_writes[0].descriptorCount = 1;
+        descriptor_writes[0].pBufferInfo = &buffer_info;
+
+        descriptor_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptor_writes[1].dstSet = descriptor_sets_[i];
+        descriptor_writes[1].dstBinding = 1;
+        descriptor_writes[1].dstArrayElement = 0;
+        descriptor_writes[1].descriptorType =
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptor_writes[1].descriptorCount = 1;
+        descriptor_writes[1].pImageInfo = &image_info;
+
+        vkUpdateDescriptorSets(device_,
+                               descriptor_writes.size(),
+                               descriptor_writes.data(),
+                               0,
+                               nullptr);
     }
 }
 
