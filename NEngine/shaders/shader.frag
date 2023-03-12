@@ -9,5 +9,5 @@ layout(binding = 1) uniform sampler2D tex_sampler;
 
 
 void main() {
-    out_color = texture(tex_sampler, tex_coords);
+    out_color = vec4(texture(tex_sampler, tex_coords).rgb * frag_color, 1.0);
 }
