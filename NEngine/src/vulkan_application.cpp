@@ -844,8 +844,8 @@ vulkan_application::create_image(uint32_t width,
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image_info.imageType = VK_IMAGE_TYPE_2D;
-    image_info.extent.width = height;
-    image_info.extent.height = width;
+    image_info.extent.width = width;
+    image_info.extent.height = height;
     image_info.extent.depth = 1;
     image_info.mipLevels = 1;
     image_info.arrayLayers = 1;
@@ -1091,9 +1091,9 @@ vulkan_application::init_vulkan()
     create_render_pass();
     create_descriptor_set_layout();
     create_graphics_pipeline();
-    create_framebuffers();
     create_command_pool();
     create_depth_resources();
+    create_framebuffers();
     create_texture_image();
     create_texture_image_view();
     create_texture_sampler();
@@ -1110,6 +1110,10 @@ void
 vulkan_application::cleanup() const
 {
     cleanup_swap_chain();
+
+    vkDestroyImageView(device_, depth_image_view_, nullptr);
+    vkDestroyImage(device_, depth_image_, nullptr);
+    vkFreeMemory(device_, depth_image_memory_, nullptr);
 
     vkDestroySampler(device_, texture_sampler_, nullptr);
 
@@ -1395,26 +1399,48 @@ vulkan_application::create_render_pass()
     color_attachment_ref.attachment = 0;
     color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentDescription depth_attachment{};
+    depth_attachment.format = find_depth_format(physical_device_);
+    depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depth_attachment.finalLayout =
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depth_attachment_ref{};
+    depth_attachment_ref.attachment = 1;
+    depth_attachment_ref.layout =
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_attachment_ref;
-
-    VkRenderPassCreateInfo render_pass_info{};
-    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    render_pass_info.attachmentCount = 1;
-    render_pass_info.pAttachments = &color_attachment;
-    render_pass_info.subpassCount = 1;
-    render_pass_info.pSubpasses = &subpass;
+    subpass.pDepthStencilAttachment = &depth_attachment_ref;
 
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                               VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
+    const std::array<VkAttachmentDescription, 2> attachments = {
+        color_attachment, depth_attachment};
+    VkRenderPassCreateInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_info.attachmentCount =
+        static_cast<uint32_t>(attachments.size());
+    render_pass_info.pAttachments = attachments.data();
+    render_pass_info.subpassCount = 1;
+    render_pass_info.pSubpasses = &subpass;
     render_pass_info.dependencyCount = 1;
     render_pass_info.pDependencies = &dependency;
 
@@ -1428,13 +1454,14 @@ vulkan_application::create_framebuffers()
     swap_chain_framebuffers_.resize(swap_chain_image_views_.size());
 
     for (size_t i = 0; i < swap_chain_image_views_.size(); ++i) {
-        VkImageView attachments[] = {swap_chain_image_views_[i]};
+        std::array<VkImageView, 2> attachments = {swap_chain_image_views_[i],
+                                                  depth_image_view_};
 
         VkFramebufferCreateInfo create_info{};
         create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         create_info.renderPass = render_pass_;
-        create_info.attachmentCount = 1;
-        create_info.pAttachments = attachments;
+        create_info.attachmentCount = static_cast<uint32_t>(attachments.size());
+        create_info.pAttachments = attachments.data();
         create_info.width = swap_chain_extent_.width;
         create_info.height = swap_chain_extent_.height;
         create_info.layers = 1;
@@ -1478,9 +1505,13 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
     render_pass_info.renderArea.offset = {0, 0};
     render_pass_info.renderArea.extent = swap_chain_extent_;
 
-    const VkClearValue clear_color = {{{0, 0, 0, 1}}};
-    render_pass_info.clearValueCount = 1;
-    render_pass_info.pClearValues = &clear_color;
+    std::array<VkClearValue, 2> clear_values{};
+    clear_values[0].color = {{0, 0, 0, 1}};
+    clear_values[1].depthStencil = {1.0f, 0};
+
+    render_pass_info.clearValueCount =
+        static_cast<uint32_t>(clear_values.size());
+    render_pass_info.pClearValues = clear_values.data();
 
     vkCmdBeginRenderPass(cb, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -1724,6 +1755,17 @@ vulkan_application::create_graphics_pipeline()
     color_blending.attachmentCount = 1;
     color_blending.pAttachments = &color_blend_attachment;
 
+    VkPipelineDepthStencilStateCreateInfo depth_stencil{};
+    depth_stencil.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depth_stencil.depthTestEnable = VK_TRUE;
+    depth_stencil.depthWriteEnable = VK_TRUE;
+    depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    depth_stencil.depthBoundsTestEnable = VK_FALSE;
+    depth_stencil.minDepthBounds = 0.0f;
+    depth_stencil.maxDepthBounds = 1.0f;
+    depth_stencil.stencilTestEnable = VK_FALSE;
+
     VkPipelineLayoutCreateInfo pipeline_layout_info{};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipeline_layout_info.setLayoutCount = 1;
@@ -1744,7 +1786,7 @@ vulkan_application::create_graphics_pipeline()
     pipeline_create_info.pViewportState = &viewport_state;
     pipeline_create_info.pRasterizationState = &rasterizer;
     pipeline_create_info.pMultisampleState = &multisampling;
-    pipeline_create_info.pDepthStencilState = nullptr;
+    pipeline_create_info.pDepthStencilState = &depth_stencil;
     pipeline_create_info.pColorBlendState = &color_blending;
     pipeline_create_info.pDynamicState = &dynamic_state;
     pipeline_create_info.layout = pipeline_layout_;
