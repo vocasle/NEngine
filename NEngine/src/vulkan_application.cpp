@@ -761,12 +761,12 @@ vulkan_application::create_descriptor_sets()
 }
 
 void
-vulkan_application::create_texture_image()
+vulkan_application::create_texture_image(const std::string &texture_path)
 {
     int tex_width = 0;
     int tex_height = 0;
     int tex_channels = 0;
-    stbi_uc *pixels = stbi_load("res/textures/texture.jpg",
+    stbi_uc *pixels = stbi_load(texture_path.c_str(),
                                 &tex_width,
                                 &tex_height,
                                 &tex_channels,
@@ -1059,6 +1059,18 @@ vulkan_application::~vulkan_application()
 }
 
 void
+vulkan_application::load_mesh(const std::string &path)
+{
+    const uint32_t WIDTH = 800;
+    const uint32_t HEIGHT = 600;
+
+    const std::string MODEL_PATH = "res/models/viking_room.obj";
+    const std::string TEXTURE_PATH = "res/textures/viking_room.png";
+
+    //create_texture_image();
+}
+
+void
 vulkan_application::create_command_pool()
 {
     const queue_family_indices indices =
@@ -1094,7 +1106,7 @@ vulkan_application::init_vulkan()
     create_command_pool();
     create_depth_resources();
     create_framebuffers();
-    create_texture_image();
+    create_texture_image("res/textures/texture.jpg");
     create_texture_image_view();
     create_texture_sampler();
     create_vertex_buffer();

@@ -11,6 +11,7 @@ public:
     void draw_frame();
     void on_window_resized();
     ~vulkan_application();
+    void load_mesh(const std::string &path);
 
 private:
     void create_command_pool();
@@ -51,7 +52,7 @@ private:
     void update_uniform_buffer() const;
     void create_descriptor_pool();
     void create_descriptor_sets();
-    void create_texture_image();
+    void create_texture_image(const std::string &texture_path);
     void create_image(uint32_t width,
                       uint32_t height,
                       VkFormat format,
@@ -61,7 +62,9 @@ private:
                       VkImage &image,
                       VkDeviceMemory &image_memory) const;
     void create_texture_image_view();
-    VkImageView create_image_view(VkImage image, VkFormat format, VkImageAspectFlags aspect_flags) const;
+    VkImageView create_image_view(VkImage image,
+                                  VkFormat format,
+                                  VkImageAspectFlags aspect_flags) const;
     void create_texture_sampler();
     void create_depth_resources();
 
