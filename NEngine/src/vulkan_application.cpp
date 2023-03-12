@@ -745,8 +745,7 @@ vulkan_application::create_image(uint32_t width,
     image_info.tiling = tiling;
     image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     image_info.usage = usage;
-    image_info.sharingMode =
-        VK_SHARING_MODE_EXCLUSIVE;
+    image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     image_info.samples = VK_SAMPLE_COUNT_1_BIT;
 
     VKRESULT(vkCreateImage(device_, &image_info, nullptr, &image));
@@ -765,6 +764,37 @@ vulkan_application::create_image(uint32_t width,
     VKRESULT(vkAllocateMemory(device_, &allocate_info, nullptr, &image_memory));
 
     VKRESULT(vkBindImageMemory(device_, image, image_memory, 0));
+}
+
+void
+vulkan_application::create_texture_image_view()
+{
+    texture_image_view_ =
+        create_image_view(texture_image_, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+VkImageView
+vulkan_application::create_image_view(VkImage image, VkFormat format) const
+{
+    VkImageViewCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    create_info.image = image;
+    create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    create_info.format = format;
+    create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    create_info.subresourceRange.baseMipLevel = 0;
+    create_info.subresourceRange.levelCount = 1;
+    create_info.subresourceRange.baseArrayLayer = 0;
+    create_info.subresourceRange.layerCount = 1;
+
+    VkImageView image_view;
+    VKRESULT(vkCreateImageView(device_, &create_info, nullptr, &image_view));
+
+    return image_view;
 }
 
 vulkan_application::vulkan_application(SDL_Window *window)
@@ -900,6 +930,7 @@ vulkan_application::init_vulkan()
     create_framebuffers();
     create_command_pool();
     create_texture_image();
+    create_texture_image_view();
     create_vertex_buffer();
     create_index_buffer();
     create_uniform_buffers();
@@ -913,6 +944,8 @@ void
 vulkan_application::cleanup() const
 {
     cleanup_swap_chain();
+
+    vkDestroyImageView(device_, texture_image_view_, nullptr);
 
     vkDestroyImage(device_, texture_image_, nullptr);
     vkFreeMemory(device_, texture_image_memory_, nullptr);
@@ -1155,22 +1188,8 @@ vulkan_application::create_image_views()
 {
     swap_chain_image_views_.resize(swap_chain_images_.size());
     for (size_t i = 0; i < swap_chain_images_.size(); ++i) {
-        VkImageViewCreateInfo create_info{};
-        create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        create_info.image = swap_chain_images_[i];
-        create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        create_info.format = swap_chain_image_format_;
-        create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        create_info.subresourceRange.baseMipLevel = 0;
-        create_info.subresourceRange.levelCount = 1;
-        create_info.subresourceRange.baseArrayLayer = 0;
-        create_info.subresourceRange.layerCount = 1;
-        VKRESULT(vkCreateImageView(
-            device_, &create_info, nullptr, &swap_chain_image_views_[i]));
+        swap_chain_image_views_[i] =
+            create_image_view(swap_chain_images_[i], swap_chain_image_format_);
     }
 }
 

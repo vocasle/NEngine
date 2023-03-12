@@ -60,6 +60,8 @@ private:
                       VkMemoryPropertyFlags properties,
                       VkImage &image,
                       VkDeviceMemory &image_memory) const;
+    void create_texture_image_view();
+    VkImageView create_image_view(VkImage image, VkFormat format) const;
 
     SDL_Window *window_;
     VkInstance instance_{};
@@ -99,6 +101,7 @@ private:
     std::vector<VkDescriptorSet> descriptor_sets_;
     VkImage texture_image_{};
     VkDeviceMemory texture_image_memory_{};
+    VkImageView texture_image_view_{};
 
     const std::vector<const char *> validation_layers = {
         "VK_LAYER_KHRONOS_validation"};
