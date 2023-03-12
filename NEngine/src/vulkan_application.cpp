@@ -1111,10 +1111,6 @@ vulkan_application::cleanup() const
 {
     cleanup_swap_chain();
 
-    vkDestroyImageView(device_, depth_image_view_, nullptr);
-    vkDestroyImage(device_, depth_image_, nullptr);
-    vkFreeMemory(device_, depth_image_memory_, nullptr);
-
     vkDestroySampler(device_, texture_sampler_, nullptr);
 
     vkDestroyImageView(device_, texture_image_view_, nullptr);
@@ -1590,12 +1586,17 @@ vulkan_application::recreate_swap_chain()
 
     create_swap_chain();
     create_image_views();
+    create_depth_resources();
     create_framebuffers();
 }
 
 void
 vulkan_application::cleanup_swap_chain() const
 {
+    vkDestroyImageView(device_, depth_image_view_, nullptr);
+    vkDestroyImage(device_, depth_image_, nullptr);
+    vkFreeMemory(device_, depth_image_memory_, nullptr);
+
     for (auto framebuffer : swap_chain_framebuffers_) {
         vkDestroyFramebuffer(device_, framebuffer, nullptr);
     }
