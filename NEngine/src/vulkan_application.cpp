@@ -369,6 +369,8 @@ end_single_time_commands(VkCommandBuffer cb,
     vkFreeCommandBuffers(device, pool, 1, &cb);
 }
 
+static bool has_stencil_component(VkFormat format);
+
 static void
 transition_image_layout(VkImage image,
                         VkFormat format,
@@ -388,11 +390,21 @@ transition_image_layout(VkImage image,
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.image = image;
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     barrier.subresourceRange.baseMipLevel = 0;
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
+
+    if (new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+        if (has_stencil_component(format)) {
+            barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        }
+    }
+    else {
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    }
 
     VkPipelineStageFlags source_stage;
     VkPipelineStageFlags dest_stage;
@@ -412,6 +424,15 @@ transition_image_layout(VkImage image,
 
         source_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         dest_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
+             new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+                                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        dest_stage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     }
     else {
         throw std::invalid_argument("Unsupported layout transition");
@@ -930,6 +951,14 @@ vulkan_application::create_depth_resources()
 
     depth_image_view_ = create_image_view(
         depth_image_, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+    transition_image_layout(depth_image_,
+                            depth_format,
+                            VK_IMAGE_LAYOUT_UNDEFINED,
+                            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                            device_,
+                            command_pool_,
+                            queue_);
 }
 
 vulkan_application::vulkan_application(SDL_Window *window)
