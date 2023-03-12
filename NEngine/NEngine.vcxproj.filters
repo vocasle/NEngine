@@ -45,6 +45,12 @@
     <ClCompile Include="src\vulkan_application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_sdl2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_vulkan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h">
@@ -366,6 +372,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vulkan_application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_sdl2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_vulkan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -167,6 +167,8 @@
     <ClCompile Include="src\vulkan_application.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_sdl2.cpp" />
+    <ClCompile Include="thirdparty\imgui\src\imgui_impl_vulkan.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_impl_win32.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_tables.cpp" />
     <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp" />
@@ -186,6 +188,8 @@
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx11.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_sdl2.h" />
+    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_vulkan.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_win32.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imgui_internal.h" />
     <ClInclude Include="thirdparty\imgui\include\imgui\imstb_rectpack.h" />
