@@ -982,13 +982,14 @@ vulkan_application::create_texture_image(const std::string &texture_path)
     create_image(tex_width,
                  tex_height,
                  VK_FORMAT_R8G8B8A8_SRGB,
+                 mip_levels_,
+                 VK_SAMPLE_COUNT_1_BIT,
                  VK_IMAGE_TILING_OPTIMAL,
                  VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
                      VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                  texture_image_,
-                 texture_image_memory_,
-                 mip_levels_);
+                 texture_image_memory_);
 
     transition_image_layout(texture_image_,
                             VK_FORMAT_R8G8B8A8_SRGB,
@@ -1025,12 +1026,13 @@ void
 vulkan_application::create_image(uint32_t width,
                                  uint32_t height,
                                  VkFormat format,
+                                 uint32_t mip_levels,
+                                 VkSampleCountFlagBits num_samples,
                                  VkImageTiling tiling,
                                  VkImageUsageFlags usage,
                                  VkMemoryPropertyFlags properties,
                                  VkImage &image,
-                                 VkDeviceMemory &image_memory,
-                                 uint32_t mip_levels) const
+                                 VkDeviceMemory &image_memory) const
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1137,12 +1139,13 @@ vulkan_application::create_depth_resources()
     create_image(swap_chain_extent_.width,
                  swap_chain_extent_.height,
                  depth_format,
+                 1,
+                 msaa_samples_,
                  VK_IMAGE_TILING_OPTIMAL,
                  VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                  depth_image_,
-                 depth_image_memory_,
-                 1);
+                 depth_image_memory_);
 
     depth_image_view_ = create_image_view(
         depth_image_, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
@@ -1155,6 +1158,25 @@ vulkan_application::create_depth_resources()
                             command_pool_,
                             queue_,
                             1);
+}
+
+void
+vulkan_application::create_color_resources()
+{
+    const VkFormat color_format = swap_chain_image_format_;
+    create_image(swap_chain_extent_.width,
+                 swap_chain_extent_.height,
+                 color_format,
+                 1,
+                 msaa_samples_,
+                 VK_IMAGE_TILING_OPTIMAL,
+                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
+                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                 color_image_,
+                 color_image_memory_);
+    color_image_view_ = create_image_view(
+        color_image_, color_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
 vulkan_application::vulkan_application(SDL_Window *window)
@@ -1339,6 +1361,7 @@ vulkan_application::init_vulkan()
     create_descriptor_set_layout();
     create_graphics_pipeline();
     create_command_pool();
+    create_color_resources();
     create_depth_resources();
     create_framebuffers();
     load_model("");
@@ -1832,6 +1855,7 @@ vulkan_application::recreate_swap_chain()
 
     create_swap_chain();
     create_image_views();
+    create_color_resources();
     create_depth_resources();
     create_framebuffers();
 }
@@ -1839,6 +1863,10 @@ vulkan_application::recreate_swap_chain()
 void
 vulkan_application::cleanup_swap_chain() const
 {
+    vkDestroyImageView(device_, color_image_view_, nullptr);
+    vkDestroyImage(device_, color_image_, nullptr);
+    vkFreeMemory(device_, color_image_memory_, nullptr);
+
     vkDestroyImageView(device_, depth_image_view_, nullptr);
     vkDestroyImage(device_, depth_image_, nullptr);
     vkFreeMemory(device_, depth_image_memory_, nullptr);

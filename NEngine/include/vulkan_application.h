@@ -60,12 +60,13 @@ private:
     void create_image(uint32_t width,
                       uint32_t height,
                       VkFormat format,
+                      uint32_t mip_levels,
+                      VkSampleCountFlagBits num_samples,
                       VkImageTiling tiling,
                       VkImageUsageFlags usage,
                       VkMemoryPropertyFlags properties,
                       VkImage &image,
-                      VkDeviceMemory &image_memory,
-                      uint32_t mip_levels) const;
+                      VkDeviceMemory &image_memory) const;
     void create_texture_image_view();
     VkImageView create_image_view(VkImage image,
                                   VkFormat format,
@@ -73,6 +74,7 @@ private:
                                   uint32_t mip_levels) const;
     void create_texture_sampler();
     void create_depth_resources();
+    void create_color_resources();
 
     SDL_Window *window_;
     VkInstance instance_{};
@@ -119,6 +121,9 @@ private:
     VkDeviceMemory depth_image_memory_{};
     VkImageView depth_image_view_{};
     VkSampleCountFlagBits msaa_samples_ = VK_SAMPLE_COUNT_1_BIT;
+    VkImage color_image_{};
+    VkDeviceMemory color_image_memory_{};
+    VkImageView color_image_view_{};
 
     std::vector<vertex> vertices_;
     std::vector<uint32_t> indices_;
