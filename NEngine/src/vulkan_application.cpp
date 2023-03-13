@@ -542,13 +542,25 @@ has_stencil_component(VkFormat format)
 
 static void
 generate_mipmaps(VkImage image,
+                 VkFormat image_format,
                  uint32_t tex_width,
                  uint32_t tex_height,
                  uint32_t mip_levels,
                  VkDevice device,
                  VkCommandPool pool,
-                 VkQueue queue)
+                 VkQueue queue,
+                 VkPhysicalDevice physical_device)
 {
+    VkFormatProperties format_props;
+    vkGetPhysicalDeviceFormatProperties(
+        physical_device, image_format, &format_props);
+
+    if (!(format_props.optimalTilingFeatures &
+          VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
+        throw std::runtime_error(
+            "Texture image format does not support linear blitting");
+    }
+
     const VkCommandBuffer cb = begin_single_time_commands(device, pool);
 
     VkImageMemoryBarrier barrier{};
@@ -965,12 +977,14 @@ vulkan_application::create_texture_image(const std::string &texture_path)
                          transfer_queue_);
 
     generate_mipmaps(texture_image_,
+                     VK_FORMAT_R8G8B8A8_SRGB,
                      tex_width,
                      tex_height,
                      mip_levels_,
                      device_,
                      command_pool_,
-                     queue_);
+                     queue_,
+                     physical_device_);
 
     vkDestroyBuffer(device_, staging_buffer, nullptr);
     vkFreeMemory(device_, staging_buffer_memory, nullptr);
