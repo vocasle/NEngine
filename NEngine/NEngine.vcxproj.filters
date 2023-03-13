@@ -15,19 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="thirdparty\imgui\src\imgui.cpp">
+    <ClCompile Include="thirdparty\imgui\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\imgui\src\imgui_draw.cpp">
+    <ClCompile Include="thirdparty\imgui\imgui_draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\imgui\src\imgui_impl_win32.cpp">
+    <ClCompile Include="thirdparty\imgui\imgui_tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\imgui\src\imgui_tables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\imgui\src\imgui_widgets.cpp">
+    <ClCompile Include="thirdparty\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\mikktspace\src\mikktspace.c">
@@ -45,39 +42,33 @@
     <ClCompile Include="src\vulkan_application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\imgui\src\imgui_impl_sdl2.cpp">
+    <ClCompile Include="thirdparty\imgui\imgui_demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\imgui\src\imgui_impl_vulkan.cpp">
+    <ClCompile Include="thirdparty\imgui\backends\imgui_impl_sdl2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imconfig.h">
+    <ClInclude Include="thirdparty\imgui\imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imgui.h">
+    <ClInclude Include="thirdparty\imgui\imgui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx11.h">
+    <ClInclude Include="thirdparty\imgui\imgui_internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_dx12.h">
+    <ClInclude Include="thirdparty\imgui\imstb_rectpack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_win32.h">
+    <ClInclude Include="thirdparty\imgui\imstb_textedit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_internal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_rectpack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_textedit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imstb_truetype.h">
+    <ClInclude Include="thirdparty\imgui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\mikktspace\include\mikktspace\mikktspace.h">
@@ -374,10 +365,10 @@
     <ClInclude Include="include\vulkan_application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_sdl2.h">
+    <ClInclude Include="thirdparty\imgui\backends\imgui_impl_sdl2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\imgui\include\imgui\imgui_impl_vulkan.h">
+    <ClInclude Include="thirdparty\imgui\backends\imgui_impl_vulkan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
