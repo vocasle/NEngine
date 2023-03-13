@@ -2017,7 +2017,8 @@ vulkan_application::create_graphics_pipeline()
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
     multisampling.rasterizationSamples = msaa_samples_;
-    multisampling.minSampleShading = 1;
+    multisampling.sampleShadingEnable = VK_TRUE;
+    multisampling.minSampleShading = 0.2f;
     multisampling.pSampleMask = nullptr;
     multisampling.alphaToCoverageEnable = VK_FALSE;
     multisampling.alphaToOneEnable = VK_FALSE;
@@ -2178,6 +2179,7 @@ vulkan_application::create_logical_device()
 
     VkPhysicalDeviceFeatures device_features{};
     device_features.samplerAnisotropy = VK_TRUE;
+    device_features.sampleRateShading = VK_TRUE;
 
     VkDeviceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
