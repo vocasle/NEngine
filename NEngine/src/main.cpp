@@ -1,6 +1,5 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-#include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_vulkan.h>
 
@@ -18,6 +17,10 @@ loop()
 {
     SDL_Event e = {};
     while (SDL_PollEvent(&e) != 0) {
+        // TODO Do not process mouse and keyboard input if ImGui already
+        // processed it
+        ImGui_ImplSDL2_ProcessEvent(&e);
+
         if (e.type == SDL_WINDOWEVENT) {
             switch (e.window.event) {
                 case SDL_WINDOWEVENT_RESIZED:
@@ -47,6 +50,12 @@ loop()
     }
 
     if (is_window_visible) {
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplSDL2_NewFrame(window);
+        ImGui::NewFrame();
+
+        ImGui::ShowDemoWindow();
+
         app->draw_frame();
     }
 

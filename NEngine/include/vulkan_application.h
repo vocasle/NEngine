@@ -75,6 +75,8 @@ private:
     void create_texture_sampler();
     void create_depth_resources();
     void create_color_resources();
+    void init_imgui();
+    void destroy_imgui() const;
 
     SDL_Window *window_;
     VkInstance instance_{};
@@ -124,6 +126,7 @@ private:
     VkImage color_image_{};
     VkDeviceMemory color_image_memory_{};
     VkImageView color_image_view_{};
+    VkDescriptorPool imgui_pool_{};
 
     std::vector<vertex> vertices_;
     std::vector<uint32_t> indices_;
