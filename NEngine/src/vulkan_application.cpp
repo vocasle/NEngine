@@ -663,6 +663,37 @@ generate_mipmaps(VkImage image,
     end_single_time_commands(cb, device, pool, queue);
 }
 
+static VkSampleCountFlagBits
+get_max_usable_sample_count(VkPhysicalDevice physical_device)
+{
+    VkPhysicalDeviceProperties props{};
+    vkGetPhysicalDeviceProperties(physical_device, &props);
+
+    const VkSampleCountFlags counts =
+        props.limits.framebufferColorSampleCounts &
+        props.limits.framebufferDepthSampleCounts;
+    if (counts & VK_SAMPLE_COUNT_64_BIT) {
+        return VK_SAMPLE_COUNT_64_BIT;
+    }
+    if (counts & VK_SAMPLE_COUNT_32_BIT) {
+        return VK_SAMPLE_COUNT_32_BIT;
+    }
+    if (counts & VK_SAMPLE_COUNT_16_BIT) {
+        return VK_SAMPLE_COUNT_16_BIT;
+    }
+    if (counts & VK_SAMPLE_COUNT_8_BIT) {
+        return VK_SAMPLE_COUNT_8_BIT;
+    }
+    if (counts & VK_SAMPLE_COUNT_4_BIT) {
+        return VK_SAMPLE_COUNT_4_BIT;
+    }
+    if (counts & VK_SAMPLE_COUNT_2_BIT) {
+        return VK_SAMPLE_COUNT_2_BIT;
+    }
+
+    return VK_SAMPLE_COUNT_1_BIT;
+}
+
 void
 vulkan_application::create_buffer(VkDeviceSize size,
                                   VkBufferUsageFlags usage,
@@ -2069,6 +2100,7 @@ vulkan_application::pick_physical_device()
     for (const VkPhysicalDevice &device : devices) {
         if (is_device_suitable(device)) {
             physical_device_ = device;
+            msaa_samples_ = get_max_usable_sample_count(device);
             break;
         }
     }

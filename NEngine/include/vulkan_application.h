@@ -118,6 +118,7 @@ private:
     VkImage depth_image_{};
     VkDeviceMemory depth_image_memory_{};
     VkImageView depth_image_view_{};
+    VkSampleCountFlagBits msaa_samples_ = VK_SAMPLE_COUNT_1_BIT;
 
     std::vector<vertex> vertices_;
     std::vector<uint32_t> indices_;
