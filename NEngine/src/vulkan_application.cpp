@@ -1092,7 +1092,7 @@ vulkan_application::create_texture_sampler()
     sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     sampler_info.mipLodBias = 0.0f;
     sampler_info.minLod = 0.0f;
-    sampler_info.maxLod = 0.0f;
+    sampler_info.maxLod = static_cast<float>(mip_levels_);
 
     VKRESULT(
         vkCreateSampler(device_, &sampler_info, nullptr, &texture_sampler_));
