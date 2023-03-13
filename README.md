@@ -52,6 +52,17 @@ From now on only `vulkan` branch will be supported.
 5. Add bloom.
 6. Add particles.
 
+#### Vulkan
+Find out how those concepts work:
+* Push constants
+* Instanced rendering
+* Dynamic uniforms
+* Separate images and sampler descriptors
+* Pipeline cache
+* Multi-threaded command buffer generation
+* Multiple subpasses
+* Compute shaders
+
 ### Editor
 1. Support scene saving/loading.
 2. Support moving of the objects in the scene via CLI or GUI.
