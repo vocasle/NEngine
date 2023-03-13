@@ -402,7 +402,8 @@ transition_image_layout(VkImage image,
                         VkImageLayout new_layout,
                         VkDevice device,
                         VkCommandPool pool,
-                        VkQueue queue)
+                        VkQueue queue,
+                        uint32_t mip_levels)
 {
     const VkCommandBuffer cb = begin_single_time_commands(device, pool);
 
@@ -415,7 +416,7 @@ transition_image_layout(VkImage image,
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.image = image;
     barrier.subresourceRange.baseMipLevel = 0;
-    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.levelCount = mip_levels;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
 
@@ -796,6 +797,11 @@ vulkan_application::create_texture_image(const std::string &texture_path)
                                 &tex_height,
                                 &tex_channels,
                                 STBI_rgb_alpha);
+
+    mip_levels_ = static_cast<uint32_t>(
+                      std::floor(std::log2(std::max(tex_width, tex_height)))) +
+                  1;
+
     const VkDeviceSize image_size = tex_width * tex_height * 4;
 
     if (!pixels) {
@@ -826,7 +832,8 @@ vulkan_application::create_texture_image(const std::string &texture_path)
                  VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                  texture_image_,
-                 texture_image_memory_);
+                 texture_image_memory_,
+                 mip_levels_);
 
     transition_image_layout(texture_image_,
                             VK_FORMAT_R8G8B8A8_SRGB,
@@ -834,7 +841,8 @@ vulkan_application::create_texture_image(const std::string &texture_path)
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                             device_,
                             command_pool_,
-                            queue_);
+                            queue_,
+                            mip_levels_);
 
     copy_buffer_to_image(staging_buffer,
                          texture_image_,
@@ -850,7 +858,8 @@ vulkan_application::create_texture_image(const std::string &texture_path)
                             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                             device_,
                             command_pool_,
-                            queue_);
+                            queue_,
+                            mip_levels_);
 
     vkDestroyBuffer(device_, staging_buffer, nullptr);
     vkFreeMemory(device_, staging_buffer_memory, nullptr);
@@ -864,7 +873,8 @@ vulkan_application::create_image(uint32_t width,
                                  VkImageUsageFlags usage,
                                  VkMemoryPropertyFlags properties,
                                  VkImage &image,
-                                 VkDeviceMemory &image_memory) const
+                                 VkDeviceMemory &image_memory,
+                                 uint32_t mip_levels) const
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -872,7 +882,7 @@ vulkan_application::create_image(uint32_t width,
     image_info.extent.width = width;
     image_info.extent.height = height;
     image_info.extent.depth = 1;
-    image_info.mipLevels = 1;
+    image_info.mipLevels = mip_levels;
     image_info.arrayLayers = 1;
     image_info.format = format;
     image_info.tiling = tiling;
@@ -902,14 +912,17 @@ vulkan_application::create_image(uint32_t width,
 void
 vulkan_application::create_texture_image_view()
 {
-    texture_image_view_ = create_image_view(
-        texture_image_, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+    texture_image_view_ = create_image_view(texture_image_,
+                                            VK_FORMAT_R8G8B8A8_SRGB,
+                                            VK_IMAGE_ASPECT_COLOR_BIT,
+                                            mip_levels_);
 }
 
 VkImageView
 vulkan_application::create_image_view(VkImage image,
                                       VkFormat format,
-                                      VkImageAspectFlags aspect_flags) const
+                                      VkImageAspectFlags aspect_flags,
+                                      uint32_t mip_levels) const
 {
     VkImageViewCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -922,7 +935,7 @@ vulkan_application::create_image_view(VkImage image,
     create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
     create_info.subresourceRange.aspectMask = aspect_flags;
     create_info.subresourceRange.baseMipLevel = 0;
-    create_info.subresourceRange.levelCount = 1;
+    create_info.subresourceRange.levelCount = mip_levels;
     create_info.subresourceRange.baseArrayLayer = 0;
     create_info.subresourceRange.layerCount = 1;
 
@@ -972,10 +985,11 @@ vulkan_application::create_depth_resources()
                  VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                  depth_image_,
-                 depth_image_memory_);
+                 depth_image_memory_,
+                 1);
 
     depth_image_view_ = create_image_view(
-        depth_image_, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT);
+        depth_image_, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
     transition_image_layout(depth_image_,
                             depth_format,
@@ -983,7 +997,8 @@ vulkan_application::create_depth_resources()
                             VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
                             device_,
                             command_pool_,
-                            queue_);
+                            queue_,
+                            1);
 }
 
 vulkan_application::vulkan_application(SDL_Window *window)
@@ -1433,7 +1448,8 @@ vulkan_application::create_image_views()
         swap_chain_image_views_[i] =
             create_image_view(swap_chain_images_[i],
                               swap_chain_image_format_,
-                              VK_IMAGE_ASPECT_COLOR_BIT);
+                              VK_IMAGE_ASPECT_COLOR_BIT,
+                              1);
     }
 }
 

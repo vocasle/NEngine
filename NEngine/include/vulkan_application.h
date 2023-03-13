@@ -9,6 +9,8 @@ struct vertex;
 class vulkan_application
 {
 public:
+    vulkan_application(vulkan_application &&) = delete;
+    vulkan_application(const vulkan_application &) = delete;
     explicit vulkan_application(SDL_Window *window);
     void draw_frame();
     void on_window_resized();
@@ -62,11 +64,13 @@ private:
                       VkImageUsageFlags usage,
                       VkMemoryPropertyFlags properties,
                       VkImage &image,
-                      VkDeviceMemory &image_memory) const;
+                      VkDeviceMemory &image_memory,
+                      uint32_t mip_levels) const;
     void create_texture_image_view();
     VkImageView create_image_view(VkImage image,
                                   VkFormat format,
-                                  VkImageAspectFlags aspect_flags) const;
+                                  VkImageAspectFlags aspect_flags,
+                                  uint32_t mip_levels) const;
     void create_texture_sampler();
     void create_depth_resources();
 
@@ -106,6 +110,7 @@ private:
     std::vector<void *> uniform_buffers_mapped_;
     VkDescriptorPool descriptor_pool_{};
     std::vector<VkDescriptorSet> descriptor_sets_;
+    uint32_t mip_levels_ = 0;
     VkImage texture_image_{};
     VkDeviceMemory texture_image_memory_{};
     VkImageView texture_image_view_{};
