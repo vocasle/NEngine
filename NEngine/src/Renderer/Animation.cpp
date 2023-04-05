@@ -75,14 +75,28 @@ Interpolator::Interpolate(const Channel &ch, float t, float max_time)
 }
 
 static RenderNode *
+find_node_by_id2(int id, RenderNode &render_node)
+{
+    if (id == render_node.id) {
+        return &render_node;
+    }
+
+    for (auto &child_node : render_node.children) {
+        auto found = find_node_by_id2(id, child_node);
+        if (found) {
+            return found;
+        }
+    }
+    return nullptr;
+}
+
+static RenderNode *
 find_node_by_id(int id, std::vector<RenderNode> &render_nodes)
 {
     for (auto &node : render_nodes) {
-        if (node.id == id) {
-            return &node;
-        }
-        if (!node.children.empty()) {
-            return find_node_by_id(id, node.children);
+        auto found = find_node_by_id2(id, node);
+        if (found) {
+            return found;
         }
     }
     return nullptr;
@@ -121,7 +135,7 @@ Animation::Advance(float dt, std::vector<RenderNode> &render_nodes)
             {
                 const auto r =
                     interpolator.InterpolateVec4(ch, cur_time, max_time);
-                transform.anim_rotation = r;
+                transform.anim_rotation = r;\
                 transform.updated = true;
             } break;
             case Channel::Path::Scale:
