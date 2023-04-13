@@ -163,6 +163,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vulkan_application.cpp" />
     <ClCompile Include="thirdparty\imgui\backends\imgui_impl_sdl2.cpp" />
@@ -177,6 +178,7 @@
     <ClCompile Include="thirdparty\stb_image_write\src\stb_image_write.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\NEngine\Config.h" />
     <ClInclude Include="include\vulkan_application.h" />
     <ClInclude Include="thirdparty\DirectXMath\Inc\DirectXCollision.h" />
