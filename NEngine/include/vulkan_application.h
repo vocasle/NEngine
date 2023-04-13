@@ -3,6 +3,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "camera.h"
+
 namespace nengine {
 struct vertex;
 
@@ -16,6 +18,7 @@ public:
     void on_window_resized();
     ~vulkan_application();
     void load_model(const std::string &path);
+    void on_mouse_move(uint32_t mouse_state, int x, int y);
 
 private:
     void create_command_pool();
@@ -135,6 +138,8 @@ private:
         "VK_LAYER_KHRONOS_validation"};
     const std::vector<const char *> device_extensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+    std::unique_ptr<Camera> camera_;
 };
 
 }  // namespace nengine

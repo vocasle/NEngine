@@ -48,6 +48,9 @@ poll_events()
                 running = false;
             }
         }
+        else if (e.type == SDL_MOUSEMOTION) {
+            app->on_mouse_move(e.motion.state, e.motion.x, e.motion.y);
+        }
     }
 }
 

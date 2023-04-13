@@ -855,9 +855,7 @@ vulkan_application::update_uniform_buffer() const
     //                         glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.model = glm::mat4(1.0f);
 
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
-                           glm::vec3(0.0f, 0.0f, 0.0f),
-                           glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = camera_->view;
 
     ubo.proj =
         glm::perspective(glm::radians(45.0f),
@@ -1252,6 +1250,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
     init_vulkan();
+    camera_ = std::make_unique<Camera>(swap_chain_extent_.width,
+                                       swap_chain_extent_.height);
 }
 
 void
@@ -1278,6 +1278,8 @@ vulkan_application::draw_frame()
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("Failed to acquire swap chain image");
     }
+
+    camera_->Update();
 
     update_uniform_buffer();
 
@@ -1396,6 +1398,12 @@ vulkan_application::load_model(const std::string &path)
             indices_.push_back(unique_vertices[v]);
         }
     }
+}
+
+void
+vulkan_application::on_mouse_move(uint32_t mouse_state, int x, int y)
+{
+    camera_->UpdateMousePos(mouse_state, glm::vec2(x, y));
 }
 
 void

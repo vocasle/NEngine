@@ -18,5 +18,6 @@ struct Camera
 
     Camera(uint32_t width, uint32_t height);
     void Update();
+    void UpdateMousePos(uint32_t state, const glm::vec2 &current_mouse_pos);
 };
 }  // namespace nengine
