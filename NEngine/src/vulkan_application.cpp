@@ -28,6 +28,7 @@ struct nengine::vertex
     glm::vec3 pos;
     glm::vec3 color;
     glm::vec2 tex_coord;
+    glm::vec3 normal;
 
     static constexpr VkVertexInputBindingDescription
     get_binding_description()
@@ -40,10 +41,10 @@ struct nengine::vertex
         return description;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 3>
+    static std::array<VkVertexInputAttributeDescription, 4>
     get_attribute_descriptions()
     {
-        std::array<VkVertexInputAttributeDescription, 3>
+        std::array<VkVertexInputAttributeDescription, 4>
             attribute_descriptions{};
         attribute_descriptions[0].offset =
             static_cast<uint32_t>(offsetof(vertex, pos));
@@ -62,6 +63,12 @@ struct nengine::vertex
         attribute_descriptions[2].binding = 0;
         attribute_descriptions[2].location = 2;
         attribute_descriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+
+        attribute_descriptions[3].offset =
+            static_cast<uint32_t>(offsetof(vertex, normal));
+        attribute_descriptions[3].binding = 0;
+        attribute_descriptions[3].location = 3;
+        attribute_descriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
 
         return attribute_descriptions;
     }
@@ -1387,6 +1394,12 @@ vulkan_application::load_model(const std::string &path)
                 v.tex_coord = {
                     attrib.texcoords[2 * index.texcoord_index + 0],
                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
+            }
+
+            if (!attrib.normals.empty()) {
+                v.normal = {attrib.normals[3 * index.normal_index + 0],
+                            attrib.normals[3 * index.normal_index + 1],
+                            attrib.normals[3 * index.normal_index + 2]};
             }
 
             v.color = {1.0f, 1.0f, 1.0f};
