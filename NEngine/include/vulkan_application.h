@@ -115,6 +115,9 @@ private:
     std::vector<VkBuffer> uniform_buffers_;
     std::vector<VkDeviceMemory> uniform_buffers_memory_;
     std::vector<void *> uniform_buffers_mapped_;
+    std::vector<VkBuffer> uniform_buffers_ps_;
+    std::vector<VkDeviceMemory> uniform_buffers_memory_ps_;
+    std::vector<void *> uniform_buffers_mapped_ps_;
     VkDescriptorPool descriptor_pool_{};
     std::vector<VkDescriptorSet> descriptor_sets_;
     uint32_t mip_levels_ = 0;

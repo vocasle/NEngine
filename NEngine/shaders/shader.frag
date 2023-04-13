@@ -8,6 +8,11 @@ layout(location = 0) out vec4 out_color;
 
 layout(binding = 1) uniform sampler2D tex_sampler;
 
+layout(binding = 2) uniform uniform_buffer_object_ps {
+    vec3 light_pos;
+	vec3 cam_pos;
+} ubo_ps;
+
 
 void main() {
 //    out_color = vec4(texture(tex_sampler, tex_coords).rgb * frag_color, 1.0);

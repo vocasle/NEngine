@@ -110,6 +110,12 @@ struct uniform_buffer_object
     alignas(16) glm::mat4 proj;
 };
 
+struct uniform_buffer_object_ps
+{
+    alignas(16) glm::vec3 light_pos;
+    alignas(16) glm::vec3 cam_pos;
+};
+
 const std::vector<vertex> vertices = {
     {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
     {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
@@ -806,8 +812,15 @@ vulkan_application::create_descriptor_set_layout()
     sampler_layout_binding.pImmutableSamplers = nullptr;
     sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    const std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
-        ubo_layout_binding, sampler_layout_binding};
+    VkDescriptorSetLayoutBinding ubo_ps_layout_binding{};
+    ubo_ps_layout_binding.binding = 2;
+    ubo_ps_layout_binding.descriptorCount = 1;
+    ubo_ps_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    ubo_ps_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    ubo_ps_layout_binding.pImmutableSamplers = nullptr;
+
+    const std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+        ubo_layout_binding, sampler_layout_binding, ubo_ps_layout_binding};
 
     VkDescriptorSetLayoutCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -821,26 +834,52 @@ vulkan_application::create_descriptor_set_layout()
 void
 vulkan_application::create_uniform_buffers()
 {
-    const VkDeviceSize buffer_size = sizeof(uniform_buffer_object);
+    {
+        const VkDeviceSize buffer_size = sizeof(uniform_buffer_object);
 
-    uniform_buffers_.resize(MAX_FRAMES_IN_FLIGHT);
-    uniform_buffers_mapped_.resize(MAX_FRAMES_IN_FLIGHT);
-    uniform_buffers_memory_.resize(MAX_FRAMES_IN_FLIGHT);
+        uniform_buffers_.resize(MAX_FRAMES_IN_FLIGHT);
+        uniform_buffers_mapped_.resize(MAX_FRAMES_IN_FLIGHT);
+        uniform_buffers_memory_.resize(MAX_FRAMES_IN_FLIGHT);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-        create_buffer(buffer_size,
-                      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                      uniform_buffers_[i],
-                      uniform_buffers_memory_[i]);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+            create_buffer(buffer_size,
+                          VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                          uniform_buffers_[i],
+                          uniform_buffers_memory_[i]);
 
-        vkMapMemory(device_,
-                    uniform_buffers_memory_[i],
-                    0,
-                    buffer_size,
-                    0,
-                    &uniform_buffers_mapped_[i]);
+            vkMapMemory(device_,
+                        uniform_buffers_memory_[i],
+                        0,
+                        buffer_size,
+                        0,
+                        &uniform_buffers_mapped_[i]);
+        }
+    }
+
+    {
+        const VkDeviceSize buffer_size = sizeof(uniform_buffer_object_ps);
+
+        uniform_buffers_ps_.resize(MAX_FRAMES_IN_FLIGHT);
+        uniform_buffers_mapped_ps_.resize(MAX_FRAMES_IN_FLIGHT);
+        uniform_buffers_memory_ps_.resize(MAX_FRAMES_IN_FLIGHT);
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+            create_buffer(buffer_size,
+                          VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                          uniform_buffers_ps_[i],
+                          uniform_buffers_memory_ps_[i]);
+
+            vkMapMemory(device_,
+                        uniform_buffers_memory_ps_[i],
+                        0,
+                        buffer_size,
+                        0,
+                        &uniform_buffers_mapped_ps_[i]);
+        }
     }
 }
 
@@ -856,34 +895,43 @@ vulkan_application::update_uniform_buffer() const
             current_time - start_time)
             .count();
 
-    uniform_buffer_object ubo{};
-    // ubo.model = glm::rotate(glm::mat4(1.0f),
-    //                         time * glm::radians(90.0f),
-    //                         glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.model = glm::mat4(1.0f);
+    {
+        uniform_buffer_object ubo{};
+        ubo.model = glm::mat4(1.0f);
 
-    ubo.view = camera_->view;
+        ubo.view = camera_->view;
 
-    ubo.proj =
-        glm::perspective(glm::radians(45.0f),
-                         swap_chain_extent_.width /
-                             static_cast<float>(swap_chain_extent_.height),
-                         0.1f,
-                         10.0f);
+        ubo.proj =
+            glm::perspective(glm::radians(45.0f),
+                             swap_chain_extent_.width /
+                                 static_cast<float>(swap_chain_extent_.height),
+                             0.1f,
+                             10.0f);
 
-    ubo.proj[1][1] *= -1;  // flip Y
+        ubo.proj[1][1] *= -1;  // flip Y
 
-    memcpy(uniform_buffers_mapped_[current_frame_], &ubo, sizeof(ubo));
+        memcpy(uniform_buffers_mapped_[current_frame_], &ubo, sizeof(ubo));
+    }
+
+    {
+        uniform_buffer_object_ps ubo{};
+        ubo.cam_pos = camera_->cam_pos;
+        ubo.light_pos = glm::vec3(2.0f);
+
+        memcpy(uniform_buffers_mapped_ps_[current_frame_], &ubo, sizeof(ubo));
+    }
 }
 
 void
 vulkan_application::create_descriptor_pool()
 {
-    std::array<VkDescriptorPoolSize, 2> pool_sizes{};
+    std::array<VkDescriptorPoolSize, 3> pool_sizes{};
     pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pool_sizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pool_sizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    pool_sizes[2].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pool_sizes[2].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -922,7 +970,12 @@ vulkan_application::create_descriptor_sets()
         image_info.imageView = texture_image_view_;
         image_info.sampler = texture_sampler_;
 
-        std::array<VkWriteDescriptorSet, 2> descriptor_writes{};
+        VkDescriptorBufferInfo buffer_info_ps{};
+        buffer_info_ps.offset = 0;
+        buffer_info_ps.buffer = uniform_buffers_ps_[i];
+        buffer_info_ps.range = sizeof(uniform_buffer_object_ps);
+
+        std::array<VkWriteDescriptorSet, 3> descriptor_writes{};
         descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptor_writes[0].dstSet = descriptor_sets_[i];
         descriptor_writes[0].dstBinding = 0;
@@ -939,6 +992,14 @@ vulkan_application::create_descriptor_sets()
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptor_writes[1].descriptorCount = 1;
         descriptor_writes[1].pImageInfo = &image_info;
+
+        descriptor_writes[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptor_writes[2].dstSet = descriptor_sets_[i];
+        descriptor_writes[2].dstBinding = 2;
+        descriptor_writes[2].dstArrayElement = 0;
+        descriptor_writes[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptor_writes[2].descriptorCount = 1;
+        descriptor_writes[2].pBufferInfo = &buffer_info_ps;
 
         vkUpdateDescriptorSets(device_,
                                descriptor_writes.size(),
@@ -1494,6 +1555,9 @@ vulkan_application::cleanup() const
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroyBuffer(device_, uniform_buffers_[i], nullptr);
         vkFreeMemory(device_, uniform_buffers_memory_[i], nullptr);
+        // TODO: Move to helper structure to handle this automatically
+        vkDestroyBuffer(device_, uniform_buffers_ps_[i], nullptr);
+        vkFreeMemory(device_, uniform_buffers_memory_ps_[i], nullptr);
     }
 
     vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
