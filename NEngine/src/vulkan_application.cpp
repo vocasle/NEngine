@@ -1355,7 +1355,7 @@ vulkan_application::load_model(const std::string &path)
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
 
-    const std::string MODEL_PATH = "res/models/viking_room.obj";
+    const std::string MODEL_PATH = "res/models/teapot.obj";
     const std::string TEXTURE_PATH = "res/textures/viking_room.png";
 
     create_texture_image(TEXTURE_PATH);
@@ -1383,9 +1383,11 @@ vulkan_application::load_model(const std::string &path)
                      attrib.vertices[3 * index.vertex_index + 1],
                      attrib.vertices[3 * index.vertex_index + 2]};
 
-            v.tex_coord = {
-                attrib.texcoords[2 * index.texcoord_index + 0],
-                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
+            if (!attrib.texcoords.empty()) {
+                v.tex_coord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
+            }
 
             v.color = {1.0f, 1.0f, 1.0f};
 
