@@ -11,9 +11,10 @@ SDL_Surface *win_surface = nullptr;
 SDL_Window *window = nullptr;
 nengine::vulkan_application *app = nullptr;
 bool is_window_visible = true;
+bool running = true;
 
-bool
-loop()
+void
+poll_events()
 {
     SDL_Event e = {};
     while (SDL_PollEvent(&e) != 0) {
@@ -40,26 +41,14 @@ loop()
             }
         }
         else if (e.type == SDL_QUIT) {
-            return false;
+            running = false;
         }
         else if (e.type == SDL_KEYDOWN) {
             if (e.key.keysym.sym == SDLK_ESCAPE) {
-                return false;
+                running = false;
             }
         }
     }
-
-    if (is_window_visible) {
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplSDL2_NewFrame(window);
-        ImGui::NewFrame();
-
-        ImGui::ShowDemoWindow();
-
-        app->draw_frame();
-    }
-
-    return true;
 }
 
 bool
@@ -70,7 +59,7 @@ init_sdl_context()
         return false;
     }
 
-    window = SDL_CreateWindow("Vulkan triangle",
+    window = SDL_CreateWindow("NEngine",
                               100,
                               100,
                               1280,
@@ -107,8 +96,26 @@ main(int argc, char **argv)
 
     app = new nengine::vulkan_application(window);
 
-    while (loop()) {
-        SDL_Delay(16);
+    while (running) {
+        const uint64_t start = SDL_GetPerformanceCounter();
+
+        poll_events();
+
+        if (is_window_visible) {
+            ImGui_ImplVulkan_NewFrame();
+            ImGui_ImplSDL2_NewFrame(window);
+            ImGui::NewFrame();
+
+            ImGui::ShowDemoWindow();
+
+            app->draw_frame();
+        }
+
+        const uint64_t end = SDL_GetPerformanceCounter();
+        const float elapsed =
+            (end - start) / (float)SDL_GetPerformanceFrequency();
+        SDL_SetWindowTitle(
+            window, std::format("NEngine - {} FPS", 1.0f / elapsed).c_str());
     }
 
     destroy_sdl2_context();
