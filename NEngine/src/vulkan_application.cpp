@@ -1356,6 +1356,9 @@ vulkan_application::~vulkan_application()
     cleanup();
 }
 
+static void generate_normals(std::vector<vertex> &vertices,
+                             const std::vector<uint32_t> &indices);
+
 void
 vulkan_application::load_model(const std::string &path)
 {
@@ -1412,6 +1415,10 @@ vulkan_application::load_model(const std::string &path)
 
             indices_.push_back(unique_vertices[v]);
         }
+    }
+
+    if (attrib.normals.empty()) {
+        generate_normals(vertices_, indices_);
     }
 }
 
@@ -2318,4 +2325,27 @@ vulkan_application::create_surface()
     }
 }
 
+static void
+generate_normals(std::vector<vertex> &vertices,
+                 const std::vector<uint32_t> &indices)
+{
+    for (uint32_t i = 0u; i < indices.size(); i += 3u) {
+        auto &v0 = vertices.at(indices.at(i));
+        auto &v1 = vertices.at(indices.at(i + 1));
+        auto &v2 = vertices.at(indices.at(i + 2));
+
+        const auto e0 = v1.pos - v0.pos;
+        const auto e1 = v2.pos - v1.pos;
+
+        const auto n0 = glm::cross(e0, e1);
+
+        v0.normal += n0;
+        v1.normal += n0;
+        v2.normal += n0;
+    }
+
+    for (vertex &v : vertices) {
+        v.normal = glm::normalize(v.normal);
+    }
+}
 }  // namespace nengine
