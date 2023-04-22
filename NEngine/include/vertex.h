@@ -6,7 +6,7 @@
 #include <glm/gtx/hash.hpp>
 #include <utility>
 
-namespace nengine {
+namespace NEngine {
 struct vertex
 {
     glm::vec3 pos;
@@ -65,13 +65,13 @@ struct vertex
     }
 };
 
-}  // namespace nengine
+}  // namespace NEngine
 
 template <>
-struct std::hash<nengine::vertex>
+struct std::hash<NEngine::vertex>
 {
     size_t
-    operator()(const nengine::vertex &v) const noexcept
+    operator()(const NEngine::vertex &v) const noexcept
     {
         return ((hash<glm::vec3>()(v.pos) ^
                  (hash<glm::vec3>()(v.color) << 1)) >>

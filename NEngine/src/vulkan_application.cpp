@@ -22,7 +22,7 @@
 #include <set>
 #include <unordered_map>
 
-namespace nengine {
+namespace NEngine {
 #ifdef NDEBUG
 constexpr bool enable_validation_layers = false;
 #else
@@ -2346,4 +2346,4 @@ generate_normals(std::vector<vertex> &vertices,
         v.normal = glm::normalize(v.normal);
     }
 }
-}  // namespace nengine
+}  // namespace NEngine

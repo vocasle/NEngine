@@ -9,7 +9,7 @@
 
 SDL_Surface *win_surface = nullptr;
 SDL_Window *window = nullptr;
-nengine::vulkan_application *app = nullptr;
+NEngine::vulkan_application *app = nullptr;
 bool is_window_visible = true;
 bool running = true;
 
@@ -97,7 +97,7 @@ main(int argc, char **argv)
         return 1;
     }
 
-    app = new nengine::vulkan_application(window);
+    app = new NEngine::vulkan_application(window);
 
     while (running) {
         const uint64_t start = SDL_GetPerformanceCounter();

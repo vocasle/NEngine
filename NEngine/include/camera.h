@@ -4,7 +4,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-namespace nengine {
+namespace NEngine {
 struct Camera
 {
     glm::mat4x4 view;
@@ -20,4 +20,4 @@ struct Camera
     void Update();
     void UpdateMousePos(uint32_t state, const glm::vec2 &current_mouse_pos);
 };
-}  // namespace nengine
+}  // namespace NEngine

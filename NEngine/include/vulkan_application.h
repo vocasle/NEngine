@@ -5,7 +5,7 @@
 
 #include "camera.h"
 
-namespace nengine {
+namespace NEngine {
 struct vertex;
 
 class vulkan_application
@@ -145,4 +145,4 @@ private:
     std::unique_ptr<Camera> camera_;
 };
 
-}  // namespace nengine
+}  // namespace NEngine

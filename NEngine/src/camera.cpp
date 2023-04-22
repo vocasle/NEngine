@@ -6,7 +6,7 @@
 #include <glm/ext.hpp>
 #include <numbers>
 
-namespace nengine {
+namespace NEngine {
 Camera::Camera(uint32_t width, uint32_t height, float radius)
     : view(1.0f),
       cam_pos(0.0f),
@@ -61,4 +61,4 @@ Camera::UpdateMousePos(uint32_t state, const glm::vec2 &current_mouse_pos)
     mouse_pos.x = current_mouse_pos.x;
     mouse_pos.y = current_mouse_pos.y;
 }
-}  // namespace nengine
+}  // namespace NEngine
