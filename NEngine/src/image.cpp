@@ -6,6 +6,7 @@ namespace NEngine {
 Image::Image(const ImageCreateInfo &createInfo,
              VkDevice device,
              VkPhysicalDevice physicalDevice)
+    : m_device(device)
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -38,5 +39,16 @@ Image::Image(const ImageCreateInfo &createInfo,
     VKRESULT(vkAllocateMemory(device, &allocate_info, nullptr, &m_imageMemory));
 
     VKRESULT(vkBindImageMemory(device, m_image, m_imageMemory, 0));
+}
+Image::~Image()
+{
+    Cleanup();
+}
+void
+Image::Cleanup() const
+{
+    vkDestroyImageView(m_device, m_imageView, nullptr);
+    vkDestroyImage(m_device, m_image, nullptr);
+    vkFreeMemory(m_device, m_imageMemory, nullptr);
 }
 }  // namespace NEngine

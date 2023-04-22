@@ -22,10 +22,13 @@ public:
     Image(const ImageCreateInfo &createInfo,
           VkDevice device,
           VkPhysicalDevice physicalDevice);
+    ~Image();
+    void Cleanup() const;
 
 private:
     VkImage m_image{};
     VkDeviceMemory m_imageMemory{};
     VkImageView m_imageView{};
+    VkDevice m_device{};
 };
 }  // namespace NEngine
