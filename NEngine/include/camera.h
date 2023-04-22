@@ -16,7 +16,7 @@ struct Camera
 
     static constexpr float DEFAULT_RADIUS = 3.0f;
 
-    Camera(uint32_t width, uint32_t height);
+    Camera(uint32_t width, uint32_t height, float radius = DEFAULT_RADIUS);
     void Update();
     void UpdateMousePos(uint32_t state, const glm::vec2 &current_mouse_pos);
 };

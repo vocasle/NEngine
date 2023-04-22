@@ -14,12 +14,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
+#include <tiny_obj_loader.h>
+
 #include <glm/gtx/hash.hpp>
 #include <iostream>
 #include <optional>
 #include <set>
-#include <tiny_obj_loader.h>
-
 #include <unordered_map>
 
 struct nengine::vertex
@@ -1317,8 +1317,8 @@ vulkan_application::vulkan_application(SDL_Window *window)
     : window_(window)
 {
     init_vulkan();
-    camera_ = std::make_unique<Camera>(swap_chain_extent_.width,
-                                       swap_chain_extent_.height);
+    camera_ = std::make_unique<Camera>(
+        swap_chain_extent_.width, swap_chain_extent_.height, 10);
 }
 
 void
@@ -1419,7 +1419,8 @@ vulkan_application::~vulkan_application()
 static void generate_normals(std::vector<vertex> &vertices,
                              const std::vector<uint32_t> &indices);
 
-static std::string resolve_resource_path(const char *resource_path)
+static std::string
+resolve_resource_path(const char *resource_path)
 {
     std::ostringstream out;
     out << RES_HOME_DIR << "/" << resource_path;
@@ -1433,7 +1434,8 @@ vulkan_application::load_model(const std::string &path)
     const uint32_t HEIGHT = 600;
 
     const std::string MODEL_PATH = resolve_resource_path("models/teapot.obj");
-    const std::string TEXTURE_PATH = resolve_resource_path("textures/viking_room.png");
+    const std::string TEXTURE_PATH =
+        resolve_resource_path("textures/viking_room.png");
 
     create_texture_image(TEXTURE_PATH);
     create_texture_image_view();
@@ -2108,7 +2110,8 @@ vulkan_application::create_vertex_buffer()
     vkFreeMemory(device_, staging_buffer_memory, nullptr);
 }
 
-static std::string resolve_shader_path(const char *path)
+static std::string
+resolve_shader_path(const char *path)
 {
     std::ostringstream out;
     out << SHADERS_HOME_DIR << "/" << path;
@@ -2118,8 +2121,10 @@ static std::string resolve_shader_path(const char *path)
 void
 vulkan_application::create_graphics_pipeline()
 {
-    const std::vector<char> vs_code = read_file(resolve_shader_path("phong_vs.spv"));
-    const std::vector<char> ps_code = read_file(resolve_shader_path("phong_fs.spv"));
+    const std::vector<char> vs_code =
+        read_file(resolve_shader_path("phong_vs.spv"));
+    const std::vector<char> ps_code =
+        read_file(resolve_shader_path("phong_fs.spv"));
 
     const VkShaderModule vsm = create_shader_module(vs_code);
     const VkShaderModule psm = create_shader_module(ps_code);
