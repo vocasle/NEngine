@@ -11,8 +11,8 @@
 #include <format>
 #include <fstream>
 
-#include "vertex.h"
 #include "misc.h"
+#include "vertex.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -598,10 +598,10 @@ get_max_usable_sample_count(VkPhysicalDevice physical_device)
 
 void
 VulkanApplication::CreateBuffer(VkDeviceSize size,
-                                  VkBufferUsageFlags usage,
-                                  VkMemoryPropertyFlags properties,
-                                  VkBuffer &buffer,
-                                  VkDeviceMemory &buffer_memory) const
+                                VkBufferUsageFlags usage,
+                                VkMemoryPropertyFlags properties,
+                                VkBuffer &buffer,
+                                VkDeviceMemory &buffer_memory) const
 {
     const queue_family_indices indices =
         find_queue_families(physical_device_, surface_);
@@ -634,8 +634,8 @@ VulkanApplication::CreateBuffer(VkDeviceSize size,
 
 void
 VulkanApplication::CopyBuffer(VkBuffer src_buffer,
-                                VkBuffer dst_buffer,
-                                VkDeviceSize size)
+                              VkBuffer dst_buffer,
+                              VkDeviceSize size)
 {
     const VkCommandBuffer cb =
         begin_single_time_commands(device_, transfer_command_pool_);
@@ -656,11 +656,11 @@ VulkanApplication::CreateIndexBuffer()
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateBuffer(buffer_size,
-                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                  staging_buffer,
-                  staging_buffer_memory);
+                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 staging_buffer,
+                 staging_buffer_memory);
     void *data = nullptr;
     VKRESULT(
         vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0, &data));
@@ -729,11 +729,11 @@ VulkanApplication::CreateUniformBuffers()
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             CreateBuffer(buffer_size,
-                          VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                          uniform_buffers_[i],
-                          uniform_buffers_memory_[i]);
+                         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                         uniform_buffers_[i],
+                         uniform_buffers_memory_[i]);
 
             vkMapMemory(device_,
                         uniform_buffers_memory_[i],
@@ -753,11 +753,11 @@ VulkanApplication::CreateUniformBuffers()
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             CreateBuffer(buffer_size,
-                          VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                          uniform_buffers_ps_[i],
-                          uniform_buffers_memory_ps_[i]);
+                         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                         uniform_buffers_ps_[i],
+                         uniform_buffers_memory_ps_[i]);
 
             vkMapMemory(device_,
                         uniform_buffers_memory_ps_[i],
@@ -853,7 +853,7 @@ VulkanApplication::CreateDescriptorSets()
 
         VkDescriptorImageInfo image_info{};
         image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView = texture_image_view_;
+        image_info.imageView = m_textureImage->GetImageView();
         image_info.sampler = texture_sampler_;
 
         VkDescriptorBufferInfo buffer_info_ps{};
@@ -920,11 +920,11 @@ VulkanApplication::CreateTextureImage(const std::string &texture_path)
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateBuffer(image_size,
-                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                  staging_buffer,
-                  staging_buffer_memory);
+                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 staging_buffer,
+                 staging_buffer_memory);
 
     void *data = nullptr;
     VKRESULT(
@@ -934,19 +934,21 @@ VulkanApplication::CreateTextureImage(const std::string &texture_path)
 
     stbi_image_free(pixels);
 
-    CreateImage(tex_width,
-                 tex_height,
-                 VK_FORMAT_R8G8B8A8_SRGB,
-                 mip_levels_,
-                 VK_SAMPLE_COUNT_1_BIT,
-                 VK_IMAGE_TILING_OPTIMAL,
-                 VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
-                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                 texture_image_,
-                 texture_image_memory_);
+    ImageCreateInfo createInfo = {};
+    createInfo.width = tex_width;
+    createInfo.height = tex_height;
+    createInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    createInfo.mipLevels = mip_levels_;
+    createInfo.numSamples = VK_SAMPLE_COUNT_1_BIT;
+    createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    createInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                       VK_IMAGE_USAGE_SAMPLED_BIT |
+                       VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    createInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    m_textureImage =
+        std::make_unique<Image>(createInfo, device_, physical_device_);
 
-    transition_image_layout(texture_image_,
+    transition_image_layout(m_textureImage->GetImage(),
                             VK_FORMAT_R8G8B8A8_SRGB,
                             VK_IMAGE_LAYOUT_UNDEFINED,
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -956,14 +958,14 @@ VulkanApplication::CreateTextureImage(const std::string &texture_path)
                             mip_levels_);
 
     copy_buffer_to_image(staging_buffer,
-                         texture_image_,
+                         m_textureImage->GetImage(),
                          tex_width,
                          tex_height,
                          device_,
                          transfer_command_pool_,
                          transfer_queue_);
 
-    generate_mipmaps(texture_image_,
+    generate_mipmaps(m_textureImage->GetImage(),
                      VK_FORMAT_R8G8B8A8_SRGB,
                      tex_width,
                      tex_height,
@@ -979,15 +981,15 @@ VulkanApplication::CreateTextureImage(const std::string &texture_path)
 
 void
 VulkanApplication::CreateImage(uint32_t width,
-                                 uint32_t height,
-                                 VkFormat format,
-                                 uint32_t mip_levels,
-                                 VkSampleCountFlagBits num_samples,
-                                 VkImageTiling tiling,
-                                 VkImageUsageFlags usage,
-                                 VkMemoryPropertyFlags properties,
-                                 VkImage &image,
-                                 VkDeviceMemory &image_memory) const
+                               uint32_t height,
+                               VkFormat format,
+                               uint32_t mip_levels,
+                               VkSampleCountFlagBits num_samples,
+                               VkImageTiling tiling,
+                               VkImageUsageFlags usage,
+                               VkMemoryPropertyFlags properties,
+                               VkImage &image,
+                               VkDeviceMemory &image_memory) const
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1025,17 +1027,14 @@ VulkanApplication::CreateImage(uint32_t width,
 void
 VulkanApplication::CreateTextureImageView()
 {
-    texture_image_view_ = CreateImageView(texture_image_,
-                                            VK_FORMAT_R8G8B8A8_SRGB,
-                                            VK_IMAGE_ASPECT_COLOR_BIT,
-                                            mip_levels_);
+    m_textureImage->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT, mip_levels_);
 }
 
 VkImageView
 VulkanApplication::CreateImageView(VkImage image,
-                                      VkFormat format,
-                                      VkImageAspectFlags aspect_flags,
-                                      uint32_t mip_levels) const
+                                   VkFormat format,
+                                   VkImageAspectFlags aspect_flags,
+                                   uint32_t mip_levels) const
 {
     VkImageViewCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1101,7 +1100,8 @@ VulkanApplication::CreateDepthResources()
     createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     createInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 
-    m_depthImage = std::make_unique<Image>(createInfo, device_, physical_device_);
+    m_depthImage =
+        std::make_unique<Image>(createInfo, device_, physical_device_);
     m_depthImage->CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
     transition_image_layout(m_depthImage->GetImage(),
@@ -1119,16 +1119,16 @@ VulkanApplication::CreateColorResources()
 {
     const VkFormat color_format = swap_chain_image_format_;
     CreateImage(swap_chain_extent_.width,
-                 swap_chain_extent_.height,
-                 color_format,
-                 1,
-                 msaa_samples_,
-                 VK_IMAGE_TILING_OPTIMAL,
-                 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
-                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                 color_image_,
-                 color_image_memory_);
+                swap_chain_extent_.height,
+                color_format,
+                1,
+                msaa_samples_,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
+                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                color_image_,
+                color_image_memory_);
     color_image_view_ = CreateImageView(
         color_image_, color_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
@@ -1441,10 +1441,7 @@ VulkanApplication::Cleanup() const
 
     vkDestroySampler(device_, texture_sampler_, nullptr);
 
-    vkDestroyImageView(device_, texture_image_view_, nullptr);
-
-    vkDestroyImage(device_, texture_image_, nullptr);
-    vkFreeMemory(device_, texture_image_memory_, nullptr);
+    m_textureImage->Cleanup();
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroyBuffer(device_, uniform_buffers_[i], nullptr);
@@ -1600,8 +1597,7 @@ VulkanApplication::CreateInstance()
 }
 
 bool
-VulkanApplication::CheckDeviceExtensionSupport(
-    VkPhysicalDevice device) const
+VulkanApplication::CheckDeviceExtensionSupport(VkPhysicalDevice device) const
 {
     uint32_t extensions_count = 0;
     VKRESULT(vkEnumerateDeviceExtensionProperties(
@@ -1687,11 +1683,10 @@ VulkanApplication::CreateImageView()
 {
     swap_chain_image_views_.resize(swap_chain_images_.size());
     for (size_t i = 0; i < swap_chain_images_.size(); ++i) {
-        swap_chain_image_views_[i] =
-            CreateImageView(swap_chain_images_[i],
-                              swap_chain_image_format_,
-                              VK_IMAGE_ASPECT_COLOR_BIT,
-                              1);
+        swap_chain_image_views_[i] = CreateImageView(swap_chain_images_[i],
+                                                     swap_chain_image_format_,
+                                                     VK_IMAGE_ASPECT_COLOR_BIT,
+                                                     1);
     }
 }
 
@@ -1798,8 +1793,9 @@ VulkanApplication::CreateFramebuffers()
     swap_chain_framebuffers_.resize(swap_chain_image_views_.size());
 
     for (size_t i = 0; i < swap_chain_image_views_.size(); ++i) {
-        std::array<VkImageView, 3> attachments = {
-            color_image_view_, m_depthImage->GetImageView(), swap_chain_image_views_[i]};
+        std::array<VkImageView, 3> attachments = {color_image_view_,
+                                                  m_depthImage->GetImageView(),
+                                                  swap_chain_image_views_[i]};
 
         VkFramebufferCreateInfo create_info{};
         create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -1833,7 +1829,7 @@ VulkanApplication::CreateCommandBuffers()
 
 void
 VulkanApplication::RecordCommandBuffer(VkCommandBuffer cb,
-                                          uint32_t image_idx) const
+                                       uint32_t image_idx) const
 {
     VkCommandBufferBeginInfo begin_info{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1968,11 +1964,11 @@ VulkanApplication::CreateVertexBuffer()
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateBuffer(buffer_size,
-                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                  staging_buffer,
-                  staging_buffer_memory);
+                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 staging_buffer,
+                 staging_buffer_memory);
 
     void *data = nullptr;
     VKRESULT(

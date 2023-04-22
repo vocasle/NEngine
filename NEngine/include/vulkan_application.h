@@ -122,9 +122,6 @@ private:
     VkDescriptorPool descriptor_pool_{};
     std::vector<VkDescriptorSet> descriptor_sets_;
     uint32_t mip_levels_ = 0;
-    VkImage texture_image_{};
-    VkDeviceMemory texture_image_memory_{};
-    VkImageView texture_image_view_{};
     VkSampler texture_sampler_{};
     VkSampleCountFlagBits msaa_samples_ = VK_SAMPLE_COUNT_1_BIT;
     VkImage color_image_{};
@@ -142,6 +139,7 @@ private:
 
     std::unique_ptr<Camera> camera_;
     std::unique_ptr<Image> m_depthImage;
+    std::unique_ptr<Image> m_textureImage;
 };
 
 }  // namespace NEngine
