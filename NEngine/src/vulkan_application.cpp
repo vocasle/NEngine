@@ -626,7 +626,7 @@ get_max_usable_sample_count(VkPhysicalDevice physical_device)
 }
 
 void
-vulkan_application::create_buffer(VkDeviceSize size,
+VulkanApplication::create_buffer(VkDeviceSize size,
                                   VkBufferUsageFlags usage,
                                   VkMemoryPropertyFlags properties,
                                   VkBuffer &buffer,
@@ -662,7 +662,7 @@ vulkan_application::create_buffer(VkDeviceSize size,
 }
 
 void
-vulkan_application::copy_buffer(VkBuffer src_buffer,
+VulkanApplication::copy_buffer(VkBuffer src_buffer,
                                 VkBuffer dst_buffer,
                                 VkDeviceSize size)
 {
@@ -678,7 +678,7 @@ vulkan_application::copy_buffer(VkBuffer src_buffer,
 }
 
 void
-vulkan_application::create_index_buffer()
+VulkanApplication::create_index_buffer()
 {
     const VkDeviceSize buffer_size = sizeof(indices_[0]) * indices_.size();
 
@@ -710,7 +710,7 @@ vulkan_application::create_index_buffer()
 }
 
 void
-vulkan_application::create_descriptor_set_layout()
+VulkanApplication::create_descriptor_set_layout()
 {
     VkDescriptorSetLayoutBinding ubo_layout_binding{};
     ubo_layout_binding.binding = 0;
@@ -747,7 +747,7 @@ vulkan_application::create_descriptor_set_layout()
 }
 
 void
-vulkan_application::create_uniform_buffers()
+VulkanApplication::create_uniform_buffers()
 {
     {
         const VkDeviceSize buffer_size = sizeof(uniform_buffer_object);
@@ -799,7 +799,7 @@ vulkan_application::create_uniform_buffers()
 }
 
 void
-vulkan_application::update_uniform_buffer() const
+VulkanApplication::update_uniform_buffer() const
 {
     static const auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -838,7 +838,7 @@ vulkan_application::update_uniform_buffer() const
 }
 
 void
-vulkan_application::create_descriptor_pool()
+VulkanApplication::create_descriptor_pool()
 {
     std::array<VkDescriptorPoolSize, 3> pool_sizes{};
     pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -859,7 +859,7 @@ vulkan_application::create_descriptor_pool()
 }
 
 void
-vulkan_application::create_descriptor_sets()
+VulkanApplication::create_descriptor_sets()
 {
     const std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT,
                                                      descriptor_set_layout_);
@@ -925,7 +925,7 @@ vulkan_application::create_descriptor_sets()
 }
 
 void
-vulkan_application::create_texture_image(const std::string &texture_path)
+VulkanApplication::create_texture_image(const std::string &texture_path)
 {
     int tex_width = 0;
     int tex_height = 0;
@@ -1007,7 +1007,7 @@ vulkan_application::create_texture_image(const std::string &texture_path)
 }
 
 void
-vulkan_application::create_image(uint32_t width,
+VulkanApplication::create_image(uint32_t width,
                                  uint32_t height,
                                  VkFormat format,
                                  uint32_t mip_levels,
@@ -1052,7 +1052,7 @@ vulkan_application::create_image(uint32_t width,
 }
 
 void
-vulkan_application::create_texture_image_view()
+VulkanApplication::create_texture_image_view()
 {
     texture_image_view_ = create_image_view(texture_image_,
                                             VK_FORMAT_R8G8B8A8_SRGB,
@@ -1061,7 +1061,7 @@ vulkan_application::create_texture_image_view()
 }
 
 VkImageView
-vulkan_application::create_image_view(VkImage image,
+VulkanApplication::create_image_view(VkImage image,
                                       VkFormat format,
                                       VkImageAspectFlags aspect_flags,
                                       uint32_t mip_levels) const
@@ -1088,7 +1088,7 @@ vulkan_application::create_image_view(VkImage image,
 }
 
 void
-vulkan_application::create_texture_sampler()
+VulkanApplication::create_texture_sampler()
 {
     VkSamplerCreateInfo sampler_info{};
     sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -1116,7 +1116,7 @@ vulkan_application::create_texture_sampler()
 }
 
 void
-vulkan_application::create_depth_resources()
+VulkanApplication::create_depth_resources()
 {
     const VkFormat depth_format = find_depth_format(physical_device_);
 
@@ -1145,7 +1145,7 @@ vulkan_application::create_depth_resources()
 }
 
 void
-vulkan_application::create_color_resources()
+VulkanApplication::create_color_resources()
 {
     const VkFormat color_format = swap_chain_image_format_;
     create_image(swap_chain_extent_.width,
@@ -1164,7 +1164,7 @@ vulkan_application::create_color_resources()
 }
 
 void
-vulkan_application::init_imgui()
+VulkanApplication::init_imgui()
 {
     const VkDescriptorPoolSize pool_sizes[] = {
         {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
@@ -1223,13 +1223,13 @@ vulkan_application::init_imgui()
 }
 
 void
-vulkan_application::destroy_imgui() const
+VulkanApplication::destroy_imgui() const
 {
     vkDestroyDescriptorPool(device_, imgui_pool_, nullptr);
     ImGui_ImplVulkan_Shutdown();
 }
 
-vulkan_application::vulkan_application(SDL_Window *window)
+VulkanApplication::VulkanApplication(SDL_Window *window)
     : window_(window)
 {
     init_vulkan();
@@ -1238,7 +1238,7 @@ vulkan_application::vulkan_application(SDL_Window *window)
 }
 
 void
-vulkan_application::draw_frame()
+VulkanApplication::draw_frame()
 {
     ImGui::Render();
 
@@ -1320,12 +1320,12 @@ vulkan_application::draw_frame()
 }
 
 void
-vulkan_application::on_window_resized()
+VulkanApplication::on_window_resized()
 {
     is_framebuffer_resized = true;
 }
 
-vulkan_application::~vulkan_application()
+VulkanApplication::~VulkanApplication()
 {
     VKRESULT(vkDeviceWaitIdle(device_));
 
@@ -1344,7 +1344,7 @@ resolve_resource_path(const char *resource_path)
 }
 
 void
-vulkan_application::load_model(const std::string &path)
+VulkanApplication::load_model(const std::string &path)
 {
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
@@ -1408,13 +1408,13 @@ vulkan_application::load_model(const std::string &path)
 }
 
 void
-vulkan_application::on_mouse_move(uint32_t mouse_state, int x, int y)
+VulkanApplication::on_mouse_move(uint32_t mouse_state, int x, int y)
 {
     camera_->UpdateMousePos(mouse_state, glm::vec2(x, y));
 }
 
 void
-vulkan_application::create_command_pool()
+VulkanApplication::create_command_pool()
 {
     const queue_family_indices indices =
         find_queue_families(physical_device_, surface_);
@@ -1434,7 +1434,7 @@ vulkan_application::create_command_pool()
 }
 
 void
-vulkan_application::init_vulkan()
+VulkanApplication::init_vulkan()
 {
     create_instance();
     setup_debug_messenger();
@@ -1463,7 +1463,7 @@ vulkan_application::init_vulkan()
 }
 
 void
-vulkan_application::cleanup() const
+VulkanApplication::cleanup() const
 {
     destroy_imgui();
 
@@ -1517,7 +1517,7 @@ vulkan_application::cleanup() const
 }
 
 void
-vulkan_application::setup_debug_messenger()
+VulkanApplication::setup_debug_messenger()
 {
     if constexpr (!enable_validation_layers) {
         return;
@@ -1585,7 +1585,7 @@ get_required_extensions(SDL_Window *window)
 }
 
 void
-vulkan_application::create_instance()
+VulkanApplication::create_instance()
 {
     if (enable_validation_layers &&
         !check_validation_layer_support(validation_layers)) {
@@ -1630,7 +1630,7 @@ vulkan_application::create_instance()
 }
 
 bool
-vulkan_application::check_device_extension_support(
+VulkanApplication::check_device_extension_support(
     VkPhysicalDevice device) const
 {
     uint32_t extensions_count = 0;
@@ -1651,7 +1651,7 @@ vulkan_application::check_device_extension_support(
 }
 
 void
-vulkan_application::create_swap_chain()
+VulkanApplication::create_swap_chain()
 {
     const swap_chain_support_details details =
         query_swap_chain_support(physical_device_, surface_);
@@ -1713,7 +1713,7 @@ vulkan_application::create_swap_chain()
 }
 
 void
-vulkan_application::create_image_views()
+VulkanApplication::create_image_views()
 {
     swap_chain_image_views_.resize(swap_chain_images_.size());
     for (size_t i = 0; i < swap_chain_images_.size(); ++i) {
@@ -1726,7 +1726,7 @@ vulkan_application::create_image_views()
 }
 
 VkShaderModule
-vulkan_application::create_shader_module(const std::vector<char> &code) const
+VulkanApplication::create_shader_module(const std::vector<char> &code) const
 {
     VkShaderModuleCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -1741,7 +1741,7 @@ vulkan_application::create_shader_module(const std::vector<char> &code) const
 }
 
 void
-vulkan_application::create_render_pass()
+VulkanApplication::create_render_pass()
 {
     VkAttachmentDescription color_attachment{};
     color_attachment.format = swap_chain_image_format_;
@@ -1823,7 +1823,7 @@ vulkan_application::create_render_pass()
 }
 
 void
-vulkan_application::create_framebuffers()
+VulkanApplication::create_framebuffers()
 {
     swap_chain_framebuffers_.resize(swap_chain_image_views_.size());
 
@@ -1846,7 +1846,7 @@ vulkan_application::create_framebuffers()
 }
 
 void
-vulkan_application::create_command_buffers()
+VulkanApplication::create_command_buffers()
 {
     command_buffers_.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -1862,7 +1862,7 @@ vulkan_application::create_command_buffers()
 }
 
 void
-vulkan_application::record_command_buffer(VkCommandBuffer cb,
+VulkanApplication::record_command_buffer(VkCommandBuffer cb,
                                           uint32_t image_idx) const
 {
     VkCommandBufferBeginInfo begin_info{};
@@ -1930,7 +1930,7 @@ vulkan_application::record_command_buffer(VkCommandBuffer cb,
 }
 
 void
-vulkan_application::create_sync_objects()
+VulkanApplication::create_sync_objects()
 {
     image_available_semaphores_.resize(MAX_FRAMES_IN_FLIGHT);
     render_finished_semaphores_.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1958,7 +1958,7 @@ vulkan_application::create_sync_objects()
 }
 
 void
-vulkan_application::recreate_swap_chain()
+VulkanApplication::recreate_swap_chain()
 {
     vkDeviceWaitIdle(device_);
 
@@ -1972,7 +1972,7 @@ vulkan_application::recreate_swap_chain()
 }
 
 void
-vulkan_application::cleanup_swap_chain() const
+VulkanApplication::cleanup_swap_chain() const
 {
     vkDestroyImageView(device_, color_image_view_, nullptr);
     vkDestroyImage(device_, color_image_, nullptr);
@@ -1993,7 +1993,7 @@ vulkan_application::cleanup_swap_chain() const
 }
 
 void
-vulkan_application::create_vertex_buffer()
+VulkanApplication::create_vertex_buffer()
 {
     const VkDeviceSize buffer_size = sizeof(vertices_[0]) * vertices_.size();
 
@@ -2035,7 +2035,7 @@ resolve_shader_path(const char *path)
 }
 
 void
-vulkan_application::create_graphics_pipeline()
+VulkanApplication::create_graphics_pipeline()
 {
     const std::vector<char> vs_code =
         read_file(resolve_shader_path("phong_vs.spv"));
@@ -2204,7 +2204,7 @@ vulkan_application::create_graphics_pipeline()
 }
 
 bool
-vulkan_application::is_device_suitable(VkPhysicalDevice device) const
+VulkanApplication::is_device_suitable(VkPhysicalDevice device) const
 {
     // VkPhysicalDeviceProperties device_properties;
     // vkGetPhysicalDeviceProperties(device, &device_properties);
@@ -2232,7 +2232,7 @@ vulkan_application::is_device_suitable(VkPhysicalDevice device) const
 }
 
 void
-vulkan_application::pick_physical_device()
+VulkanApplication::pick_physical_device()
 {
     physical_device_ = VK_NULL_HANDLE;
 
@@ -2261,7 +2261,7 @@ vulkan_application::pick_physical_device()
 }
 
 void
-vulkan_application::create_logical_device()
+VulkanApplication::create_logical_device()
 {
     const queue_family_indices indices =
         find_queue_families(physical_device_, surface_);
@@ -2316,7 +2316,7 @@ vulkan_application::create_logical_device()
 }
 
 void
-vulkan_application::create_surface()
+VulkanApplication::create_surface()
 {
     if (SDL_Vulkan_CreateSurface(window_, instance_, &surface_) == SDL_FALSE) {
         throw std::runtime_error("Failed to create surface");

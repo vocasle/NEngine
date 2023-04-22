@@ -8,15 +8,15 @@
 namespace NEngine {
 struct vertex;
 
-class vulkan_application
+class VulkanApplication
 {
 public:
-    vulkan_application(vulkan_application &&) = delete;
-    vulkan_application(const vulkan_application &) = delete;
-    explicit vulkan_application(SDL_Window *window);
+    VulkanApplication(VulkanApplication &&) = delete;
+    VulkanApplication(const VulkanApplication &) = delete;
+    explicit VulkanApplication(SDL_Window *window);
     void draw_frame();
     void on_window_resized();
-    ~vulkan_application();
+    ~VulkanApplication();
     void load_model(const std::string &path);
     void on_mouse_move(uint32_t mouse_state, int x, int y);
 
