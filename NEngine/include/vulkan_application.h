@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "camera.h"
+#include "image.h"
 
 namespace NEngine {
 struct vertex;
@@ -125,9 +126,6 @@ private:
     VkDeviceMemory texture_image_memory_{};
     VkImageView texture_image_view_{};
     VkSampler texture_sampler_{};
-    VkImage depth_image_{};
-    VkDeviceMemory depth_image_memory_{};
-    VkImageView depth_image_view_{};
     VkSampleCountFlagBits msaa_samples_ = VK_SAMPLE_COUNT_1_BIT;
     VkImage color_image_{};
     VkDeviceMemory color_image_memory_{};
@@ -143,6 +141,7 @@ private:
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     std::unique_ptr<Camera> camera_;
+    std::unique_ptr<Image> m_depthImage;
 };
 
 }  // namespace NEngine

@@ -23,9 +23,12 @@ public:
           VkDevice device,
           VkPhysicalDevice physicalDevice);
     ~Image();
-    void Cleanup() const;
+    void Cleanup();
 
     void CreateImageView(VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+
+    VkImage GetImage() const;
+    VkImageView GetImageView() const;
 
 private:
     VkImage m_image{};

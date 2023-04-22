@@ -46,11 +46,20 @@ Image::~Image()
     Cleanup();
 }
 void
-Image::Cleanup() const
+Image::Cleanup()
 {
-    vkDestroyImageView(m_device, m_imageView, nullptr);
-    vkDestroyImage(m_device, m_image, nullptr);
-    vkFreeMemory(m_device, m_imageMemory, nullptr);
+    if (m_imageView) {
+        vkDestroyImageView(m_device, m_imageView, nullptr);
+        m_imageView = nullptr;
+    }
+    if (m_image) {
+        vkDestroyImage(m_device, m_image, nullptr);
+        m_image = nullptr;
+    }
+    if (m_imageMemory) {
+        vkFreeMemory(m_device, m_imageMemory, nullptr);
+        m_imageMemory = nullptr;
+    }
 }
 void
 Image::CreateImageView(VkImageAspectFlags aspectFlags, uint32_t mipLevels)
@@ -72,5 +81,15 @@ Image::CreateImageView(VkImageAspectFlags aspectFlags, uint32_t mipLevels)
 
     VkImageView image_view;
     VKRESULT(vkCreateImageView(m_device, &create_info, nullptr, &m_imageView));
+}
+VkImage
+Image::GetImage() const
+{
+    return m_image;
+}
+VkImageView
+Image::GetImageView() const
+{
+    return m_imageView;
 }
 }  // namespace NEngine

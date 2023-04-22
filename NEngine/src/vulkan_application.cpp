@@ -1091,21 +1091,20 @@ VulkanApplication::CreateDepthResources()
 {
     const VkFormat depth_format = find_depth_format(physical_device_);
 
-    CreateImage(swap_chain_extent_.width,
-                 swap_chain_extent_.height,
-                 depth_format,
-                 1,
-                 msaa_samples_,
-                 VK_IMAGE_TILING_OPTIMAL,
-                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                 depth_image_,
-                 depth_image_memory_);
+    ImageCreateInfo createInfo = {};
+    createInfo.format = depth_format;
+    createInfo.height = swap_chain_extent_.height;
+    createInfo.width = swap_chain_extent_.width;
+    createInfo.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    createInfo.numSamples = msaa_samples_;
+    createInfo.mipLevels = 1;
+    createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    createInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 
-    depth_image_view_ = CreateImageView(
-        depth_image_, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+    m_depthImage = std::make_unique<Image>(createInfo, device_, physical_device_);
+    m_depthImage->CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
-    transition_image_layout(depth_image_,
+    transition_image_layout(m_depthImage->GetImage(),
                             depth_format,
                             VK_IMAGE_LAYOUT_UNDEFINED,
                             VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
@@ -1800,7 +1799,7 @@ VulkanApplication::CreateFramebuffers()
 
     for (size_t i = 0; i < swap_chain_image_views_.size(); ++i) {
         std::array<VkImageView, 3> attachments = {
-            color_image_view_, depth_image_view_, swap_chain_image_views_[i]};
+            color_image_view_, m_depthImage->GetImageView(), swap_chain_image_views_[i]};
 
         VkFramebufferCreateInfo create_info{};
         create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -1949,9 +1948,7 @@ VulkanApplication::CleanupSwapChain() const
     vkDestroyImage(device_, color_image_, nullptr);
     vkFreeMemory(device_, color_image_memory_, nullptr);
 
-    vkDestroyImageView(device_, depth_image_view_, nullptr);
-    vkDestroyImage(device_, depth_image_, nullptr);
-    vkFreeMemory(device_, depth_image_memory_, nullptr);
+    m_depthImage->Cleanup();
 
     for (auto framebuffer : swap_chain_framebuffers_) {
         vkDestroyFramebuffer(device_, framebuffer, nullptr);
