@@ -10,7 +10,8 @@ set(NENGINE_SOURCE_LIST
 
 set(NENGINE_HEADER_LIST
     NEngine/include/camera.h
-    NEngine/include/vulkan_application.h)
+    NEngine/include/vulkan_application.h
+    NEngine/include/vertex.h)
 
 add_executable(nengine ${NENGINE_SOURCE_LIST} ${NENGINE_HEADER_LIST})
 
