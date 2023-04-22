@@ -60,4 +60,11 @@ set(SHADER_LIST NEngine/shaders/phong_fs.frag NEngine/shaders/phong_vs.vert)
 
 compile_shaders(nengine ${SHADER_LIST})
 
-target_compile_definitions(nengine PRIVATE SHADERSHOME_DIR="${CMAKE_CURRENT_BINARY_DIR}/shaders")
+target_compile_definitions(nengine PRIVATE 
+    SHADERS_HOME_DIR="${CMAKE_CURRENT_BINARY_DIR}/shaders"
+    RES_HOME_DIR="${CMAKE_SOURCE_DIR}/NEngine/res")
+
+add_custom_command(TARGET nengine POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_SOURCE_DIR}/NEngine/thirdparty/sdl2/lib/x64/SDL2.dll"              
+    $<TARGET_FILE_DIR:nengine>)
