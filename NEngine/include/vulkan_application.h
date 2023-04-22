@@ -14,53 +14,53 @@ public:
     VulkanApplication(VulkanApplication &&) = delete;
     VulkanApplication(const VulkanApplication &) = delete;
     explicit VulkanApplication(SDL_Window *window);
-    void draw_frame();
-    void on_window_resized();
+    void DrawFrame();
+    void OnWindowResized();
     ~VulkanApplication();
-    void load_model(const std::string &path);
-    void on_mouse_move(uint32_t mouse_state, int x, int y);
+    void LoadModel(const std::string &path);
+    void OnMouseMove(uint32_t mouse_state, int x, int y);
 
 private:
-    void create_command_pool();
-    void init_vulkan();
-    void cleanup() const;
-    void setup_debug_messenger();
-    void create_instance();
-    void pick_physical_device();
-    void create_logical_device();
-    void create_surface();
-    [[nodiscard]] bool is_device_suitable(VkPhysicalDevice device) const;
-    [[nodiscard]] bool check_device_extension_support(
+    void CreateCommandPool();
+    void InitVulkan();
+    void Cleanup() const;
+    void SetupDebugMessenger();
+    void CreateInstance();
+    void PickPhysicalDevice();
+    void CreateLogicalDevice();
+    void CreateSurface();
+    [[nodiscard]] bool IsDeviceSuitable(VkPhysicalDevice device) const;
+    [[nodiscard]] bool CheckDeviceExtensionSupport(
         VkPhysicalDevice device) const;
-    void create_swap_chain();
-    void create_image_views();
-    void create_graphics_pipeline();
-    [[nodiscard]] VkShaderModule create_shader_module(
+    void CreateSwapchain();
+    void CreateImageView();
+    void CreateGraphicsPipeline();
+    [[nodiscard]] VkShaderModule CreateShaderModule(
         const std::vector<char> &code) const;
-    void create_render_pass();
-    void create_framebuffers();
-    void create_command_buffers();
-    void record_command_buffer(VkCommandBuffer cb, uint32_t image_idx) const;
-    void create_sync_objects();
-    void recreate_swap_chain();
-    void cleanup_swap_chain() const;
-    void create_vertex_buffer();
-    void create_buffer(VkDeviceSize size,
+    void CreateRenderPass();
+    void CreateFramebuffers();
+    void CreateCommandBuffers();
+    void RecordCommandBuffer(VkCommandBuffer cb, uint32_t image_idx) const;
+    void CreateSyncObjects();
+    void RecreateSwapChain();
+    void CleanupSwapChain() const;
+    void CreateVertexBuffer();
+    void CreateBuffer(VkDeviceSize size,
                        VkBufferUsageFlags usage,
                        VkMemoryPropertyFlags properties,
                        VkBuffer &buffer,
                        VkDeviceMemory &buffer_memory) const;
-    void copy_buffer(VkBuffer src_buffer,
+    void CopyBuffer(VkBuffer src_buffer,
                      VkBuffer dst_buffer,
                      VkDeviceSize size);
-    void create_index_buffer();
-    void create_descriptor_set_layout();
-    void create_uniform_buffers();
-    void update_uniform_buffer() const;
-    void create_descriptor_pool();
-    void create_descriptor_sets();
-    void create_texture_image(const std::string &texture_path);
-    void create_image(uint32_t width,
+    void CreateIndexBuffer();
+    void CreateDescriptorSetLayout();
+    void CreateUniformBuffers();
+    void UpdateUniformBuffer() const;
+    void CreateDescriptorPool();
+    void CreateDescriptorSets();
+    void CreateTextureImage(const std::string &texture_path);
+    void CreateImage(uint32_t width,
                       uint32_t height,
                       VkFormat format,
                       uint32_t mip_levels,
@@ -70,16 +70,16 @@ private:
                       VkMemoryPropertyFlags properties,
                       VkImage &image,
                       VkDeviceMemory &image_memory) const;
-    void create_texture_image_view();
-    VkImageView create_image_view(VkImage image,
+    void CreateTextureImageView();
+    VkImageView CreateImageView(VkImage image,
                                   VkFormat format,
                                   VkImageAspectFlags aspect_flags,
                                   uint32_t mip_levels) const;
-    void create_texture_sampler();
-    void create_depth_resources();
-    void create_color_resources();
-    void init_imgui();
-    void destroy_imgui() const;
+    void CreateTextureSampler();
+    void CreateDepthResources();
+    void CreateColorResources();
+    void InitImGui();
+    void DestroyImGui() const;
 
     SDL_Window *window_;
     VkInstance instance_{};

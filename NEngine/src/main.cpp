@@ -25,7 +25,7 @@ poll_events()
         if (e.type == SDL_WINDOWEVENT) {
             switch (e.window.event) {
                 case SDL_WINDOWEVENT_RESIZED:
-                    app->on_window_resized();
+                    app->OnWindowResized();
                     break;
                 case SDL_WINDOWEVENT_SHOWN:
                 case SDL_WINDOWEVENT_RESTORED:
@@ -49,7 +49,7 @@ poll_events()
             }
         }
         else if (e.type == SDL_MOUSEMOTION) {
-            app->on_mouse_move(e.motion.state, e.motion.x, e.motion.y);
+            app->OnMouseMove(e.motion.state, e.motion.x, e.motion.y);
         }
     }
 }
@@ -111,7 +111,7 @@ main(int argc, char **argv)
 
             ImGui::ShowDemoWindow();
 
-            app->draw_frame();
+            app->DrawFrame();
         }
 
         const uint64_t end = SDL_GetPerformanceCounter();
