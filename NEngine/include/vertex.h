@@ -1,5 +1,5 @@
 #define GLM_ENABLE_EXPERIMENTAL
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
 
 #include <array>
 #include <glm/glm.hpp>

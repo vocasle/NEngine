@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "vertex.h"
+#include "misc.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -64,17 +65,6 @@ struct swap_chain_support_details
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> present_modes;
 };
-
-static void
-vk_result(const VkResult &result, const char *filename, int line)
-{
-    if (result != VK_SUCCESS) {
-        throw std::runtime_error(std::format(
-            "{}:{} - ERROR: Vulkan API call failed.", filename, line));
-    }
-}
-
-#define VKRESULT(result) vk_result(result, __FILE__, __LINE__)
 
 static VkSurfaceFormatKHR
 choose_swap_surface_format(
@@ -263,25 +253,6 @@ find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
     }
 
     return indices;
-}
-
-static uint32_t
-find_memory_type(VkPhysicalDevice physical_device,
-                 uint32_t type_filter,
-                 VkMemoryPropertyFlags properties)
-{
-    VkPhysicalDeviceMemoryProperties memory_properties;
-    vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
-
-    for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i) {
-        if (type_filter & (1 << i) &&
-            (memory_properties.memoryTypes[i].propertyFlags & properties) ==
-                properties) {
-            return i;
-        }
-    }
-
-    throw std::runtime_error("Failed to find suitable memory type");
 }
 
 static VkCommandBuffer
