@@ -6,7 +6,8 @@ namespace NEngine {
 Image::Image(const ImageCreateInfo &createInfo,
              VkDevice device,
              VkPhysicalDevice physicalDevice)
-    : m_device(device)
+    : m_device(device),
+      m_format(createInfo.format)
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -50,5 +51,26 @@ Image::Cleanup() const
     vkDestroyImageView(m_device, m_imageView, nullptr);
     vkDestroyImage(m_device, m_image, nullptr);
     vkFreeMemory(m_device, m_imageMemory, nullptr);
+}
+void
+Image::CreateImageView(VkImageAspectFlags aspectFlags, uint32_t mipLevels)
+{
+    VkImageViewCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    create_info.image = m_image;
+    create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    create_info.format = m_format;
+    create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.subresourceRange.aspectMask = aspectFlags;
+    create_info.subresourceRange.baseMipLevel = 0;
+    create_info.subresourceRange.levelCount = mipLevels;
+    create_info.subresourceRange.baseArrayLayer = 0;
+    create_info.subresourceRange.layerCount = 1;
+
+    VkImageView image_view;
+    VKRESULT(vkCreateImageView(m_device, &create_info, nullptr, &m_imageView));
 }
 }  // namespace NEngine
