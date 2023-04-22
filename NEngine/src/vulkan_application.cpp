@@ -18,7 +18,6 @@
 #include <iostream>
 #include <optional>
 #include <set>
-#define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
 #include <unordered_map>
@@ -2102,11 +2101,18 @@ vulkan_application::create_vertex_buffer()
     vkFreeMemory(device_, staging_buffer_memory, nullptr);
 }
 
+static std::string resolve_shader_path(const char *path)
+{
+    std::ostringstream out;
+    out << SHADERSHOME_DIR << "/" << path;
+    return out.str();
+}
+
 void
 vulkan_application::create_graphics_pipeline()
 {
-    const std::vector<char> vs_code = read_file("shaders/vert.spv");
-    const std::vector<char> ps_code = read_file("shaders/frag.spv");
+    const std::vector<char> vs_code = read_file(resolve_shader_path("phong_vs.spv"));
+    const std::vector<char> ps_code = read_file(resolve_shader_path("phong_fs.spv"));
 
     const VkShaderModule vsm = create_shader_module(vs_code);
     const VkShaderModule psm = create_shader_module(ps_code);
