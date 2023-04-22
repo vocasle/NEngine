@@ -1,9 +1,0 @@
-[submodule "NEngine/thirdparty/fx-gltf"]
-	path = NEngine/thirdparty/fx-gltf
-	url = https://github.com/jessey-git/fx-gltf.git
-[submodule "NEngine/thirdparty/glm"]
-	path = NEngine/thirdparty/glm
-	url = https://github.com/g-truc/glm.git
-[submodule "NEngine/thirdparty/tinyobjloader"]
-	path = NEngine/thirdparty/tinyobjloader
-	url = https://github.com/tinyobjloader/tinyobjloader.git
