@@ -1419,14 +1419,21 @@ vulkan_application::~vulkan_application()
 static void generate_normals(std::vector<vertex> &vertices,
                              const std::vector<uint32_t> &indices);
 
+static std::string resolve_resource_path(const char *resource_path)
+{
+    std::ostringstream out;
+    out << RES_HOME_DIR << "/" << resource_path;
+    return out.str();
+}
+
 void
 vulkan_application::load_model(const std::string &path)
 {
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
 
-    const std::string MODEL_PATH = "res/models/teapot.obj";
-    const std::string TEXTURE_PATH = "res/textures/viking_room.png";
+    const std::string MODEL_PATH = resolve_resource_path("models/teapot.obj");
+    const std::string TEXTURE_PATH = resolve_resource_path("textures/viking_room.png");
 
     create_texture_image(TEXTURE_PATH);
     create_texture_image_view();
@@ -2104,7 +2111,7 @@ vulkan_application::create_vertex_buffer()
 static std::string resolve_shader_path(const char *path)
 {
     std::ostringstream out;
-    out << SHADERSHOME_DIR << "/" << path;
+    out << SHADERS_HOME_DIR << "/" << path;
     return out.str();
 }
 
