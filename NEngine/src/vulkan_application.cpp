@@ -8,7 +8,6 @@
 #include <tiny_obj_loader.h>
 
 #include <chrono>
-#include <format>
 #include <fstream>
 
 #include "misc.h"

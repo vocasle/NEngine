@@ -21,9 +21,9 @@ void
 Camera::Update()
 {
     // Convert Spherical to Cartesian coordinates.
-    float x = radius * std::sinf(pitch) * std::cosf(yaw);
-    float z = radius * std::sinf(pitch) * std::sinf(yaw);
-    const float y = radius * std::cosf(pitch);
+    float x = radius * sinf(pitch) * cosf(yaw);
+    float z = radius * sinf(pitch) * sinf(yaw);
+    const float y = radius * cosf(pitch);
     cam_pos = {x, y, z};
     // Build the view matrix.
     const glm::vec3 pos = glm::vec3(x, y, z);

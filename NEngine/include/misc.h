@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cassert>
-#include <format>
 #include <string>
+#include <sstream>
 #include <vulkan/vulkan.hpp>
 
 namespace NEngine {
@@ -11,9 +11,9 @@ inline std::string
 vk_result(const VkResult &result, const char *filename, int line)
 {
     if (result != VK_SUCCESS) {
-        const std::string errMsg = std::format(
-            "{}:{} - ERROR: Vulkan API call failed.", filename, line);
-        return errMsg.c_str();
+	    std::stringstream out;
+	    out << filename << ":" << line << " - ERROR: Vulkan API call failed.";
+         return out.str();
     }
     return "";
 }

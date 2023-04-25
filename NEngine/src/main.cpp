@@ -90,6 +90,15 @@ destroy_sdl2_context()
     delete app;
 }
 
+void update_title_fps(float elapsed)
+{
+	std::stringstream out;
+	out << "NEngine - " << (1.0f / elapsed) << " FPS";
+        SDL_SetWindowTitle(
+            window, out.str().c_str());
+
+}
+
 int
 main(int argc, char **argv)
 {
@@ -117,8 +126,7 @@ main(int argc, char **argv)
         const uint64_t end = SDL_GetPerformanceCounter();
         const float elapsed =
             (end - start) / (float)SDL_GetPerformanceFrequency();
-        SDL_SetWindowTitle(
-            window, std::format("NEngine - {} FPS", 1.0f / elapsed).c_str());
+	update_title_fps(elapsed);
     }
 
     destroy_sdl2_context();
