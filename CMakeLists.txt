@@ -40,7 +40,7 @@ add_subdirectory(NEngine/thirdparty/tinyobjloader)
 if(WIN32)
 	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader SDL2.lib vulkan-1.lib)
 else()
-	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader sdl2 vulkan-1)
+	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader ${SDL2_LIBRARIES} ${Vulkan_LIBRARIES})
 endif()
 
 find_program(GLSLC_EXE NAMES glslc REQUIRED)
