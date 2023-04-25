@@ -21,6 +21,11 @@ set(header_file_list
 
 add_library(${library_name} STATIC ${source_file_list} ${header_file_list})
 
-target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} backends
-    PRIVATE ${CMAKE_SOURCE_DIR}/NEngine/thirdparty/sdl2/include
-    PRIVATE $ENV{VK_SDK_PATH}/include)
+if(WIN32)
+	target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} backends
+	    PRIVATE ${CMAKE_SOURCE_DIR}/NEngine/thirdparty/sdl2/include
+	    PRIVATE $ENV{VK_SDK_PATH}/include)
+else()
+	target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} backends
+		PRIVATE ${Vulkan_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
+endif()

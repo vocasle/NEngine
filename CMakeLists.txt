@@ -18,18 +18,30 @@ set(NENGINE_HEADER_LIST
 
 add_executable(nengine ${NENGINE_SOURCE_LIST} ${NENGINE_HEADER_LIST})
 
+if (UNIX)
+	find_package(SDL2 REQUIRED)
+	find_package(Vulkan REQUIRED)
+endif()
+
 target_include_directories(nengine PRIVATE NEngine/include)
 
-
-target_link_directories(nengine PRIVATE NEngine/thirdparty/sdl2/lib/x64 $ENV{VK_SDK_PATH}/Lib)
-target_include_directories(nengine PRIVATE NEngine/thirdparty/sdl2/include $ENV{VK_SDK_PATH}/include)
+if (WIN32)
+	target_link_directories(nengine PRIVATE NEngine/thirdparty/sdl2/lib/x64 $ENV{VK_SDK_PATH}/Lib)
+	target_include_directories(nengine PRIVATE NEngine/thirdparty/sdl2/include $ENV{VK_SDK_PATH}/include)
+else()
+	target_include_directories(nengine PRIVATE ${Vulkan_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
+endif()
 
 add_subdirectory(NEngine/thirdparty/glm)
 add_subdirectory(NEngine/thirdparty/imgui)
 add_subdirectory(NEngine/thirdparty/stb_image)
 add_subdirectory(NEngine/thirdparty/tinyobjloader)
 
-target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader SDL2.lib vulkan-1.lib)
+if(WIN32)
+	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader SDL2.lib vulkan-1.lib)
+else()
+	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader sdl2 vulkan-1)
+endif()
 
 find_program(GLSLC_EXE NAMES glslc REQUIRED)
 
@@ -68,7 +80,9 @@ target_compile_definitions(nengine PRIVATE
     SHADERS_HOME_DIR="${CMAKE_CURRENT_BINARY_DIR}/shaders"
     RES_HOME_DIR="${CMAKE_SOURCE_DIR}/NEngine/res")
 
-add_custom_command(TARGET nengine POST_BUILD 
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/NEngine/thirdparty/sdl2/lib/x64/SDL2.dll"              
-    $<TARGET_FILE_DIR:nengine>)
+if(WIN32)
+	add_custom_command(TARGET nengine POST_BUILD 
+	    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	    "${CMAKE_SOURCE_DIR}/NEngine/thirdparty/sdl2/lib/x64/SDL2.dll"              
+	    $<TARGET_FILE_DIR:nengine>)
+endif()
