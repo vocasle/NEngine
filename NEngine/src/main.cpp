@@ -7,7 +7,6 @@
 
 #include "vulkan_application.h"
 
-SDL_Surface *win_surface = nullptr;
 SDL_Window *window = nullptr;
 NEngine::VulkanApplication *app = nullptr;
 bool is_window_visible = true;
@@ -73,12 +72,6 @@ init_sdl_context()
         return false;
     }
 
-    win_surface = SDL_GetWindowSurface(window);
-
-    if (!win_surface) {
-        std::cerr << "Failed to get surface" << std::endl;
-        return false;
-    }
     return true;
 }
 
