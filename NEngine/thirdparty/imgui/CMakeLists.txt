@@ -28,5 +28,5 @@ if(WIN32)
 else()
     target_link_libraries(imgui PUBLIC SDL2)
 	target_include_directories(${library_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} backends
-		PRIVATE ${Vulkan_INCLUDE_DIRS})
+		PRIVATE ${Vulkan_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
 endif()
