@@ -19,7 +19,8 @@ set(NENGINE_HEADER_LIST
 add_executable(nengine ${NENGINE_SOURCE_LIST} ${NENGINE_HEADER_LIST})
 
 if (UNIX)
-	find_package(SDL2 REQUIRED)
+	add_subdirectory(NEngine/thirdparty/SDL2-2.26.5)
+	#	find_package(SDL2 REQUIRED)
 	find_package(Vulkan REQUIRED)
 endif()
 
@@ -40,7 +41,7 @@ add_subdirectory(NEngine/thirdparty/tinyobjloader)
 if(WIN32)
 	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader SDL2.lib vulkan-1.lib)
 else()
-	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader ${SDL2_LIBRARIES} ${Vulkan_LIBRARIES})
+	target_link_libraries(nengine PRIVATE glm::glm imgui stb_image tinyobjloader SDL2 ${Vulkan_LIBRARIES})
 endif()
 
 find_program(GLSLC_EXE NAMES glslc REQUIRED)
