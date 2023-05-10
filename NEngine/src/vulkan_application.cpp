@@ -56,6 +56,14 @@ struct queue_family_indices
         return graphics_family.has_value() && present_family.has_value() &&
                transfer_family.has_value();
     }
+
+	[[nodiscard]] VkSharingMode
+	get_sharing_mode() const
+	{
+		return graphics_family.value() == transfer_family.value()
+			? VK_SHARING_MODE_EXCLUSIVE
+			: VK_SHARING_MODE_CONCURRENT;
+	}
 };
 
 struct swap_chain_support_details
@@ -237,6 +245,8 @@ find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
 
         if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphics_family = i;
+	    // On some devices there might be no transfer queue
+	    indices.transfer_family = i;
         }
         else if (queue_family.queueFlags & VK_QUEUE_TRANSFER_BIT) {
             indices.transfer_family = i;
@@ -604,16 +614,18 @@ VulkanApplication::CreateBuffer(VkDeviceSize size,
 {
     const queue_family_indices indices =
         find_queue_families(physical_device_, surface_);
-    const uint32_t queue_indices[] = {indices.transfer_family.value(),
+    const std::set<uint32_t> unique_queue_indices = {indices.transfer_family.value(),
                                       indices.graphics_family.value()};
+    std::vector<uint32_t> queue_indices(unique_queue_indices.size());
+    std::copy(unique_queue_indices.begin(), unique_queue_indices.end(), queue_indices.begin());
 
     VkBufferCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     info.size = size;
     info.usage = usage;
-    info.sharingMode = VK_SHARING_MODE_CONCURRENT;
-    info.queueFamilyIndexCount = 2;
-    info.pQueueFamilyIndices = queue_indices;
+    info.sharingMode = indices.get_sharing_mode();
+    info.queueFamilyIndexCount = std::size(queue_indices);
+    info.pQueueFamilyIndices = queue_indices.data();
 
     VKRESULT(vkCreateBuffer(device_, &info, nullptr, &buffer));
 
