@@ -16,11 +16,11 @@ Game engine is written for Windows and utilizes Vulkan.
 
 List of third party libs:
 1. ImGui
-3. mikktspace
-4. stb_image
-5. stb_image_write
-6. fx-gltf
-7. SDL2
+2. mikktspace
+3. stb_image
+4. SDL2
+5. tinyobjloader
+6. glm
 
 **How to build**
 
@@ -32,7 +32,9 @@ Open CMake project in Visual Studio and build nengine executable.
 
 **Linux**
 
-Install Vulkan SDL, SDL2.
+Install Vulkan SDK, SDL2.
+
+CMake will assume that it is possible to find Vulkan and SDL2 with `find_package`.
 
 Execute:
 
