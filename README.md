@@ -24,13 +24,20 @@ List of third party libs:
 
 **How to build**
 
-Do checkout with git submodules. Please note that `fx-gltf` will pull gLTF sample models which are quite heavy.
+**Windows**
 
 Install Vulkan SDK.
 
-Compile shaders in `NEngine/shaders` directory with `glslc.exe`.
+Open CMake project in Visual Studio and build nengine executable.
 
-For now I use Visual Studio 2022 to build the project. Just open NEngine.sln and build. 
+**Linux**
+
+Install Vulkan SDL, SDL2.
+
+Execute:
+
+    cmake -S . -B build-debug -DCMAKE_BUILD_TYPE=Debug
+    cmake --build build-debug
 
 There is an old brach `dx11` that is not supported by me. It uses DirecX 11 and contains
 enough facilities to start a simple 3D game development.
