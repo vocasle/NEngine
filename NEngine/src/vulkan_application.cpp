@@ -152,7 +152,11 @@ debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
                const VkDebugUtilsMessengerCallbackDataEXT *p_callback_data,
                void *p_user_data)
 {
-    std::cerr << "validation layer: " << p_callback_data->pMessage << std::endl;
+    if (message_severity > VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
+    {
+        std::cerr << "validation layer: " << p_callback_data->pMessage
+                  << std::endl;
+    }
 
     return VK_FALSE;
 }
