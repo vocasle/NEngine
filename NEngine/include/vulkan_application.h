@@ -1,13 +1,11 @@
 #pragma once
 #include <SDL.h>
 
-#include <vulkan/vulkan.hpp>
-
 #include <memory>
+#include <vulkan/vulkan.hpp>
 
 #include "camera.h"
 #include "image.h"
-
 
 namespace NEngine {
 struct vertex;
@@ -39,8 +37,6 @@ private:
     void CreateSwapchain();
     void CreateImageView();
     void CreateGraphicsPipeline();
-    [[nodiscard]] VkShaderModule CreateShaderModule(
-        const std::vector<char> &code) const;
     void CreateRenderPass();
     void CreateFramebuffers();
     void CreateCommandBuffers();
@@ -50,13 +46,13 @@ private:
     void CleanupSwapChain() const;
     void CreateVertexBuffer();
     void CreateBuffer(VkDeviceSize size,
-                       VkBufferUsageFlags usage,
-                       VkMemoryPropertyFlags properties,
-                       VkBuffer &buffer,
-                       VkDeviceMemory &buffer_memory) const;
+                      VkBufferUsageFlags usage,
+                      VkMemoryPropertyFlags properties,
+                      VkBuffer &buffer,
+                      VkDeviceMemory &buffer_memory) const;
     void CopyBuffer(VkBuffer src_buffer,
-                     VkBuffer dst_buffer,
-                     VkDeviceSize size);
+                    VkBuffer dst_buffer,
+                    VkDeviceSize size);
     void CreateIndexBuffer();
     void CreateDescriptorSetLayout();
     void CreateUniformBuffers();
@@ -65,20 +61,20 @@ private:
     void CreateDescriptorSets();
     void CreateTextureImage(const std::string &texture_path);
     void CreateImage(uint32_t width,
-                      uint32_t height,
-                      VkFormat format,
-                      uint32_t mip_levels,
-                      VkSampleCountFlagBits num_samples,
-                      VkImageTiling tiling,
-                      VkImageUsageFlags usage,
-                      VkMemoryPropertyFlags properties,
-                      VkImage &image,
-                      VkDeviceMemory &image_memory) const;
+                     uint32_t height,
+                     VkFormat format,
+                     uint32_t mip_levels,
+                     VkSampleCountFlagBits num_samples,
+                     VkImageTiling tiling,
+                     VkImageUsageFlags usage,
+                     VkMemoryPropertyFlags properties,
+                     VkImage &image,
+                     VkDeviceMemory &image_memory) const;
     void CreateTextureImageView();
     VkImageView CreateImageView(VkImage image,
-                                  VkFormat format,
-                                  VkImageAspectFlags aspect_flags,
-                                  uint32_t mip_levels) const;
+                                VkFormat format,
+                                VkImageAspectFlags aspect_flags,
+                                uint32_t mip_levels) const;
     void CreateTextureSampler();
     void CreateDepthResources();
     void CreateColorResources();

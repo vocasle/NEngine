@@ -11,8 +11,9 @@
 #include <fstream>
 
 #include "misc.h"
-#include "vertex.h"
 #include "utils.h"
+#include "vertex.h"
+#include "vulkan_utils.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -58,13 +59,13 @@ struct queue_family_indices
                transfer_family.has_value();
     }
 
-	[[nodiscard]] VkSharingMode
-	get_sharing_mode() const
-	{
-		return graphics_family.value() == transfer_family.value()
-			? VK_SHARING_MODE_EXCLUSIVE
-			: VK_SHARING_MODE_CONCURRENT;
-	}
+    [[nodiscard]] VkSharingMode
+    get_sharing_mode() const
+    {
+        return graphics_family.value() == transfer_family.value()
+                   ? VK_SHARING_MODE_EXCLUSIVE
+                   : VK_SHARING_MODE_CONCURRENT;
+    }
 };
 
 struct swap_chain_support_details
@@ -134,8 +135,7 @@ debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
                const VkDebugUtilsMessengerCallbackDataEXT *p_callback_data,
                void *p_user_data)
 {
-    if (message_severity > VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
-    {
+    if (message_severity > VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
         std::cerr << "validation layer: " << p_callback_data->pMessage
                   << std::endl;
     }
@@ -231,8 +231,8 @@ find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
 
         if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphics_family = i;
-	    // On some devices there might be no transfer queue
-	    indices.transfer_family = i;
+            // On some devices there might be no transfer queue
+            indices.transfer_family = i;
         }
         else if (queue_family.queueFlags & VK_QUEUE_TRANSFER_BIT) {
             indices.transfer_family = i;
@@ -600,10 +600,12 @@ VulkanApplication::CreateBuffer(VkDeviceSize size,
 {
     const queue_family_indices indices =
         find_queue_families(physical_device_, surface_);
-    const std::set<uint32_t> unique_queue_indices = {indices.transfer_family.value(),
-                                      indices.graphics_family.value()};
+    const std::set<uint32_t> unique_queue_indices = {
+        indices.transfer_family.value(), indices.graphics_family.value()};
     std::vector<uint32_t> queue_indices(unique_queue_indices.size());
-    std::copy(unique_queue_indices.begin(), unique_queue_indices.end(), queue_indices.begin());
+    std::copy(unique_queue_indices.begin(),
+              unique_queue_indices.end(),
+              queue_indices.begin());
 
     VkBufferCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1687,21 +1689,6 @@ VulkanApplication::CreateImageView()
     }
 }
 
-VkShaderModule
-VulkanApplication::CreateShaderModule(const std::vector<char> &code) const
-{
-    VkShaderModuleCreateInfo create_info{};
-    create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    create_info.codeSize = code.size();
-    create_info.pCode = reinterpret_cast<const uint32_t *>(code.data());
-
-    VkShaderModule shader_module;
-    VKRESULT(
-        vkCreateShaderModule(device_, &create_info, nullptr, &shader_module));
-
-    return shader_module;
-}
-
 void
 VulkanApplication::CreateRenderPass()
 {
@@ -1995,8 +1982,10 @@ VulkanApplication::CreateGraphicsPipeline()
     const std::vector<char> ps_code =
         Utils::ReadFile(Utils::ResolveShaderPath("phong_fs.spv"));
 
-    const VkShaderModule vsm = CreateShaderModule(vs_code);
-    const VkShaderModule psm = CreateShaderModule(ps_code);
+    const VkShaderModule vsm =
+        VulkanUtils::CreateShaderModule(device_, vs_code);
+    const VkShaderModule psm =
+        VulkanUtils::CreateShaderModule(device_, ps_code);
 
     VkPipelineShaderStageCreateInfo vs_stage_info{};
     vs_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
