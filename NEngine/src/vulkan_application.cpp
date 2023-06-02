@@ -12,6 +12,7 @@
 
 #include "misc.h"
 #include "vertex.h"
+#include "utils.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -125,25 +126,6 @@ choose_swap_extent(SDL_Window *window,
                                       capabilities.maxImageExtent.height);
 
     return actual_extent;
-}
-
-static std::vector<char>
-read_file(const std::string &filename)
-{
-    std::ifstream file(filename, std::ios_base::ate | std::ios_base::binary);
-
-    if (!file.is_open()) {
-        throw std::runtime_error("Failed to open file");
-    }
-
-    const size_t file_size = file.tellg();
-    std::vector<char> buffer(file_size);
-
-    file.seekg(0);
-    file.read(buffer.data(), static_cast<long long>(file_size));
-    file.close();
-
-    return buffer;
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
@@ -2005,21 +1987,13 @@ VulkanApplication::CreateVertexBuffer()
     vkFreeMemory(device_, staging_buffer_memory, nullptr);
 }
 
-static std::string
-resolve_shader_path(const char *path)
-{
-    std::ostringstream out;
-    out << SHADERS_HOME_DIR << "/" << path;
-    return out.str();
-}
-
 void
 VulkanApplication::CreateGraphicsPipeline()
 {
     const std::vector<char> vs_code =
-        read_file(resolve_shader_path("phong_vs.spv"));
+        Utils::ReadFile(Utils::ResolveShaderPath("phong_vs.spv"));
     const std::vector<char> ps_code =
-        read_file(resolve_shader_path("phong_fs.spv"));
+        Utils::ReadFile(Utils::ResolveShaderPath("phong_fs.spv"));
 
     const VkShaderModule vsm = CreateShaderModule(vs_code);
     const VkShaderModule psm = CreateShaderModule(ps_code);
