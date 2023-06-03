@@ -9,7 +9,8 @@ set(NENGINE_SOURCE_LIST
     NEngine/src/vulkan_application.cpp
     NEngine/src/image.cpp 
     NEngine/src/pipeline_state.cpp 
-    NEngine/src/utils.cpp "NEngine/src/vulkan_utils.cpp")
+    NEngine/src/utils.cpp 
+    NEngine/src/vulkan_utils.cpp "NEngine/src/shader_binding.cpp")
 
 set(NENGINE_HEADER_LIST
     NEngine/include/camera.h
@@ -18,7 +19,9 @@ set(NENGINE_HEADER_LIST
     NEngine/include/image.h
     NEngine/include/misc.h 
     NEngine/include/pipeline_state.h 
-    NEngine/include/utils.h "NEngine/include/vulkan_utils.h")
+    NEngine/include/utils.h 
+    NEngine/include/vulkan_utils.h
+    NEngine/include/shader_binding.h)
 
 add_executable(nengine ${NENGINE_SOURCE_LIST} ${NENGINE_HEADER_LIST})
 
