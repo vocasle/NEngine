@@ -492,90 +492,18 @@ get_max_usable_sample_count(VkPhysicalDevice physical_device)
 }
 
 void
-VulkanApplication::CreateBuffer(VkDeviceSize          size,
-                                VkBufferUsageFlags    usage,
-                                VkMemoryPropertyFlags properties,
-                                VkBuffer             &buffer,
-                                VkDeviceMemory       &buffer_memory) const
-{
-    const QueueFamilyIndices indices =
-        FindQueueFamilies(physical_device_, surface_);
-    const std::set<uint32_t> unique_queue_indices = {
-        indices.transfer_family.value(), indices.graphics_family.value()};
-    std::vector<uint32_t> queue_indices(unique_queue_indices.size());
-    std::copy(unique_queue_indices.begin(),
-              unique_queue_indices.end(),
-              queue_indices.begin());
-
-    VkBufferCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    info.size = size;
-    info.usage = usage;
-    info.sharingMode = indices.GetSharingMode();
-    info.queueFamilyIndexCount = std::size(queue_indices);
-    info.pQueueFamilyIndices = queue_indices.data();
-
-    VKRESULT(vkCreateBuffer(device_, &info, nullptr, &buffer));
-
-    VkMemoryRequirements memory_requirements;
-    vkGetBufferMemoryRequirements(device_, buffer, &memory_requirements);
-
-    VkMemoryAllocateInfo alloc_info{};
-    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    alloc_info.allocationSize = memory_requirements.size;
-    alloc_info.memoryTypeIndex = find_memory_type(
-        physical_device_, memory_requirements.memoryTypeBits, properties);
-
-    VKRESULT(vkAllocateMemory(device_, &alloc_info, nullptr, &buffer_memory));
-
-    VKRESULT(vkBindBufferMemory(device_, buffer, buffer_memory, 0));
-}
-
-void
-VulkanApplication::CopyBuffer(VkBuffer     src_buffer,
-                              VkBuffer     dst_buffer,
-                              VkDeviceSize size)
-{
-    const VkCommandBuffer cb =
-        BeginSingleTimeCommands(device_, transfer_command_pool_);
-
-    VkBufferCopy copy_region{};
-    copy_region.size = size;
-    vkCmdCopyBuffer(cb, src_buffer, dst_buffer, 1, &copy_region);
-
-    EndSingleTimeCommands(cb, device_, transfer_command_pool_, transfer_queue_);
-}
-
-void
 VulkanApplication::CreateIndexBuffer()
 {
-    const VkDeviceSize buffer_size = sizeof(indices_[0]) * indices_.size();
+    BufferCreateInfo<uint32_t> createInfo = {};
+    createInfo.data = indices_;
+    createInfo.device = device_;
+    createInfo.physicalDevice = physical_device_;
+    createInfo.transferCmdPool = transfer_command_pool_;
+    createInfo.transferQueue = transfer_queue_;
+    createInfo.usageFlags =
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-    VkBuffer       staging_buffer;
-    VkDeviceMemory staging_buffer_memory;
-    CreateBuffer(buffer_size,
-                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 staging_buffer,
-                 staging_buffer_memory);
-    void *data = nullptr;
-    VKRESULT(
-        vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0, &data));
-    memcpy(data, indices_.data(), buffer_size);
-    vkUnmapMemory(device_, staging_buffer_memory);
-
-    CreateBuffer(
-        buffer_size,
-        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        index_buffer_,
-        index_buffer_memory_);
-
-    CopyBuffer(staging_buffer, index_buffer_, buffer_size);
-
-    vkDestroyBuffer(device_, staging_buffer, nullptr);
-    vkFreeMemory(device_, staging_buffer_memory, nullptr);
+    m_indexBuffer = std::make_unique<Buffer<uint32_t>>(createInfo);
 }
 
 void
@@ -626,12 +554,14 @@ VulkanApplication::CreateUniformBuffers()
         uniform_buffers_memory_.resize(MAX_FRAMES_IN_FLIGHT);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            CreateBuffer(buffer_size,
-                         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                         uniform_buffers_[i],
-                         uniform_buffers_memory_[i]);
+            BufferUtils::CreateBuffer(device_,
+                                      physical_device_,
+                                      buffer_size,
+                                      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                      uniform_buffers_[i],
+                                      uniform_buffers_memory_[i]);
 
             vkMapMemory(device_,
                         uniform_buffers_memory_[i],
@@ -650,12 +580,14 @@ VulkanApplication::CreateUniformBuffers()
         uniform_buffers_memory_ps_.resize(MAX_FRAMES_IN_FLIGHT);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            CreateBuffer(buffer_size,
-                         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                         uniform_buffers_ps_[i],
-                         uniform_buffers_memory_ps_[i]);
+            BufferUtils::CreateBuffer(device_,
+                                      physical_device_,
+                                      buffer_size,
+                                      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                      uniform_buffers_ps_[i],
+                                      uniform_buffers_memory_ps_[i]);
 
             vkMapMemory(device_,
                         uniform_buffers_memory_ps_[i],
@@ -817,12 +749,14 @@ VulkanApplication::CreateTextureImage(const std::string &texture_path)
 
     VkBuffer       staging_buffer;
     VkDeviceMemory staging_buffer_memory;
-    CreateBuffer(image_size,
-                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 staging_buffer,
-                 staging_buffer_memory);
+    BufferUtils::CreateBuffer(device_,
+                              physical_device_,
+                              image_size,
+                              VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                              staging_buffer,
+                              staging_buffer_memory);
 
     void *data = nullptr;
     VKRESULT(
@@ -1352,11 +1286,8 @@ VulkanApplication::Cleanup() const
 
     vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
 
-    vkDestroyBuffer(device_, vertex_buffer_, nullptr);
-    vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
-
-    vkDestroyBuffer(device_, index_buffer_, nullptr);
-    vkFreeMemory(device_, index_buffer_memory_, nullptr);
+    m_vertexBuffer->Destroy();
+    m_indexBuffer->Destroy();
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroySemaphore(device_, image_available_semaphores_[i], nullptr);
@@ -1739,11 +1670,11 @@ VulkanApplication::RecordCommandBuffer(VkCommandBuffer cb,
 
     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
 
-    const VkBuffer     vertex_buffers[] = {vertex_buffer_};
+    const VkBuffer     vertex_buffers[] = {m_vertexBuffer->Get()};
     const VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(cb, 0, 1, vertex_buffers, offsets);
 
-    vkCmdBindIndexBuffer(cb, index_buffer_, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(cb, m_indexBuffer->Get(), 0, VK_INDEX_TYPE_UINT32);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -1841,35 +1772,16 @@ VulkanApplication::CleanupSwapChain() const
 void
 VulkanApplication::CreateVertexBuffer()
 {
-    const VkDeviceSize buffer_size = sizeof(vertices_[0]) * vertices_.size();
+    BufferCreateInfo<vertex> createInfo = {};
+    createInfo.data = vertices_;
+    createInfo.device = device_;
+    createInfo.physicalDevice = physical_device_;
+    createInfo.transferCmdPool = transfer_command_pool_;
+    createInfo.transferQueue = transfer_queue_;
+    createInfo.usageFlags =
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
-    VkBuffer       staging_buffer;
-    VkDeviceMemory staging_buffer_memory;
-    CreateBuffer(buffer_size,
-                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 staging_buffer,
-                 staging_buffer_memory);
-
-    void *data = nullptr;
-    VKRESULT(
-        vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0, &data));
-
-    memcpy(data, vertices_.data(), buffer_size);
-    vkUnmapMemory(device_, staging_buffer_memory);
-
-    CreateBuffer(
-        buffer_size,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        vertex_buffer_,
-        vertex_buffer_memory_);
-
-    CopyBuffer(staging_buffer, vertex_buffer_, buffer_size);
-
-    vkDestroyBuffer(device_, staging_buffer, nullptr);
-    vkFreeMemory(device_, staging_buffer_memory, nullptr);
+    m_vertexBuffer = std::make_unique<Buffer<vertex>>(createInfo);
 }
 
 void
