@@ -38,3 +38,4 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 #BreakAfterAttributes: ABS_Always
+AlignConsecutiveDeclarations: true
