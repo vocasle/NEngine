@@ -1,26 +1,32 @@
 #pragma once
 
 #include <cassert>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vulkan/vulkan.hpp>
 
 namespace NEngine {
+
+enum class Axis : uint8_t {
+    X,
+    Y,
+    Z
+};
 
 inline std::string
 vk_result(const VkResult &result, const char *filename, int line)
 {
     if (result != VK_SUCCESS) {
-	    std::stringstream out;
-	    out << filename << ":" << line << " - ERROR: Vulkan API call failed.";
-         return out.str();
+        std::stringstream out;
+        out << filename << ":" << line << " - ERROR: Vulkan API call failed.";
+        return out.str();
     }
     return "";
 }
 
 inline uint32_t
-find_memory_type(VkPhysicalDevice physical_device,
-                 uint32_t type_filter,
+find_memory_type(VkPhysicalDevice      physical_device,
+                 uint32_t              type_filter,
                  VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memory_properties;

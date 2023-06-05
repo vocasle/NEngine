@@ -6,6 +6,7 @@
 
 #include "camera.h"
 #include "image.h"
+#include "shader_binding.h"
 
 namespace NEngine {
 struct vertex;

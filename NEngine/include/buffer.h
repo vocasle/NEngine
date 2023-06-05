@@ -30,7 +30,7 @@ public:
                  VkBuffer             &buffer,
                  VkDeviceMemory       &buffer_memory)
     {
-        const VulkanUtils::queue_family_indices indices =
+        const VulkanUtils::QueueFamilyIndices indices =
             VulkanUtils::FindQueueFamilies(physicalDevice, nullptr);
         const std::set<uint32_t> unique_queue_indices = {
             indices.transfer_family.value(), indices.graphics_family.value()};
@@ -43,7 +43,7 @@ public:
         info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         info.size = size;
         info.usage = usage;
-        info.sharingMode = indices.get_sharing_mode();
+        info.sharingMode = indices.GetSharingMode();
         info.queueFamilyIndexCount = std::size(queue_indices);
         info.pQueueFamilyIndices = queue_indices.data();
 
@@ -65,17 +65,22 @@ public:
     }
 
     void
-    CopyBuffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size)
+    CopyBuffer(VkDevice      device,
+               VkCommandPool transferCmdPool,
+               VkQueue       transferQueue,
+               VkBuffer      src_buffer,
+               VkBuffer      dst_buffer,
+               VkDeviceSize  size)
     {
-        //const VkCommandBuffer cb =
-        //    begin_single_time_commands(device, transfer_command_pool_);
+        const VkCommandBuffer cb =
+            VulkanUtils::BeginSingleTimeCommands(device, transferCmdPool);
 
-        //VkBufferCopy copy_region{};
-        //copy_region.size = size;
-        //vkCmdCopyBuffer(cb, src_buffer, dst_buffer, 1, &copy_region);
+        VkBufferCopy copy_region{};
+        copy_region.size = size;
+        vkCmdCopyBuffer(cb, src_buffer, dst_buffer, 1, &copy_region);
 
-        //end_single_time_commands(
-        //    cb, device, transfer_command_pool_, transfer_queue_);
+        VulkanUtils::EndSingleTimeCommands(
+            cb, device, transferCmdPool, transferQueue);
     }
 
 private:

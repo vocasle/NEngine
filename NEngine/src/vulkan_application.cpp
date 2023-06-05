@@ -31,6 +31,8 @@ constexpr bool enable_validation_layers = false;
 constexpr bool enable_validation_layers = true;
 #endif
 
+using namespace VulkanUtils;
+
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 struct uniform_buffer_object
@@ -46,33 +48,11 @@ struct uniform_buffer_object_ps
     alignas(16) glm::vec3 cam_pos;
 };
 
-struct queue_family_indices
-{
-    std::optional<uint32_t> graphics_family;
-    std::optional<uint32_t> present_family;
-    std::optional<uint32_t> transfer_family;
-
-    [[nodiscard]] bool
-    is_complete() const
-    {
-        return graphics_family.has_value() && present_family.has_value() &&
-               transfer_family.has_value();
-    }
-
-    [[nodiscard]] VkSharingMode
-    get_sharing_mode() const
-    {
-        return graphics_family.value() == transfer_family.value()
-                   ? VK_SHARING_MODE_EXCLUSIVE
-                   : VK_SHARING_MODE_CONCURRENT;
-    }
-};
-
 struct swap_chain_support_details
 {
-    VkSurfaceCapabilitiesKHR capabilities{};
+    VkSurfaceCapabilitiesKHR        capabilities{};
     std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> present_modes;
+    std::vector<VkPresentModeKHR>   present_modes;
 };
 
 static VkSurfaceFormatKHR
@@ -103,7 +83,7 @@ choose_swap_present_mode(
 }
 
 static VkExtent2D
-choose_swap_extent(SDL_Window *window,
+choose_swap_extent(SDL_Window                     *window,
                    const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if (capabilities.currentExtent.width !=
@@ -130,10 +110,10 @@ choose_swap_extent(SDL_Window *window,
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
-debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-               VkDebugUtilsMessageTypeFlagsEXT message_type,
+debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT      message_severity,
+               VkDebugUtilsMessageTypeFlagsEXT             message_type,
                const VkDebugUtilsMessengerCallbackDataEXT *p_callback_data,
-               void *p_user_data)
+               void                                       *p_user_data)
 {
     if (message_severity > VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
         std::cerr << "validation layer: " << p_callback_data->pMessage
@@ -145,10 +125,10 @@ debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
 
 static VkResult
 create_debug_utils_messenger_ext(
-    VkInstance instance,
+    VkInstance                                instance,
     const VkDebugUtilsMessengerCreateInfoEXT *p_create_info,
-    const VkAllocationCallbacks *p_allocator,
-    VkDebugUtilsMessengerEXT *p_debug_messenger)
+    const VkAllocationCallbacks              *p_allocator,
+    VkDebugUtilsMessengerEXT                 *p_debug_messenger)
 {
     auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
         vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
@@ -159,8 +139,8 @@ create_debug_utils_messenger_ext(
 }
 
 static void
-destroy_debug_utils_messenger_ext(VkInstance instance,
-                                  VkDebugUtilsMessengerEXT debug_messenger,
+destroy_debug_utils_messenger_ext(VkInstance                   instance,
+                                  VkDebugUtilsMessengerEXT     debug_messenger,
                                   const VkAllocationCallbacks *p_allocator)
 {
     auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
@@ -210,99 +190,19 @@ query_swap_chain_support(VkPhysicalDevice device, VkSurfaceKHR surface)
     return details;
 }
 
-static queue_family_indices
-find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
-{
-    queue_family_indices indices;
-
-    uint32_t queue_family_count = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(
-        device, &queue_family_count, nullptr);
-
-    std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
-    vkGetPhysicalDeviceQueueFamilyProperties(
-        device, &queue_family_count, queue_families.data());
-
-    int i = 0;
-    for (const auto &queue_family : queue_families) {
-        if (indices.is_complete()) {
-            break;
-        }
-
-        if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-            indices.graphics_family = i;
-            // On some devices there might be no transfer queue
-            indices.transfer_family = i;
-        }
-        else if (queue_family.queueFlags & VK_QUEUE_TRANSFER_BIT) {
-            indices.transfer_family = i;
-        }
-
-        VkBool32 present_support = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(
-            device, i, surface, &present_support);
-        if (present_support) {
-            indices.present_family = i;
-        }
-        ++i;
-    }
-
-    return indices;
-}
-
-static VkCommandBuffer
-begin_single_time_commands(VkDevice device, VkCommandPool pool)
-{
-    VkCommandBufferAllocateInfo alloc_info{};
-    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info.commandPool = pool;
-    alloc_info.commandBufferCount = 1;
-
-    VkCommandBuffer cb;
-    VKRESULT(vkAllocateCommandBuffers(device, &alloc_info, &cb));
-
-    VkCommandBufferBeginInfo begin_info{};
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    VKRESULT(vkBeginCommandBuffer(cb, &begin_info));
-
-    return cb;
-}
-
-static void
-end_single_time_commands(VkCommandBuffer cb,
-                         VkDevice device,
-                         VkCommandPool pool,
-                         VkQueue queue)
-{
-    VKRESULT(vkEndCommandBuffer(cb));
-
-    VkSubmitInfo submit_info{};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &cb;
-
-    VKRESULT(vkQueueSubmit(queue, 1, &submit_info, VK_NULL_HANDLE));
-    VKRESULT(vkQueueWaitIdle(queue));
-
-    vkFreeCommandBuffers(device, pool, 1, &cb);
-}
-
 static bool has_stencil_component(VkFormat format);
 
 static void
-transition_image_layout(VkImage image,
-                        VkFormat format,
+transition_image_layout(VkImage       image,
+                        VkFormat      format,
                         VkImageLayout old_layout,
                         VkImageLayout new_layout,
-                        VkDevice device,
+                        VkDevice      device,
                         VkCommandPool pool,
-                        VkQueue queue,
-                        uint32_t mip_levels)
+                        VkQueue       queue,
+                        uint32_t      mip_levels)
 {
-    const VkCommandBuffer cb = begin_single_time_commands(device, pool);
+    const VkCommandBuffer cb = BeginSingleTimeCommands(device, pool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -363,19 +263,19 @@ transition_image_layout(VkImage image,
     vkCmdPipelineBarrier(
         cb, source_stage, dest_stage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-    end_single_time_commands(cb, device, pool, queue);
+    EndSingleTimeCommands(cb, device, pool, queue);
 }
 
 static void
-copy_buffer_to_image(VkBuffer buffer,
-                     VkImage image,
-                     uint32_t width,
-                     uint32_t height,
-                     VkDevice device,
+copy_buffer_to_image(VkBuffer      buffer,
+                     VkImage       image,
+                     uint32_t      width,
+                     uint32_t      height,
+                     VkDevice      device,
                      VkCommandPool pool,
-                     VkQueue queue)
+                     VkQueue       queue)
 {
-    const VkCommandBuffer cb = begin_single_time_commands(device, pool);
+    const VkCommandBuffer cb = BeginSingleTimeCommands(device, pool);
 
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
@@ -393,14 +293,14 @@ copy_buffer_to_image(VkBuffer buffer,
     vkCmdCopyBufferToImage(
         cb, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-    end_single_time_commands(cb, device, pool, queue);
+    EndSingleTimeCommands(cb, device, pool, queue);
 }
 
 static VkFormat
 find_supported_format(const std::vector<VkFormat> &candidates,
-                      VkImageTiling tiling,
-                      VkFormatFeatureFlags features,
-                      VkPhysicalDevice physical_device)
+                      VkImageTiling                tiling,
+                      VkFormatFeatureFlags         features,
+                      VkPhysicalDevice             physical_device)
 {
     for (const VkFormat format : candidates) {
         VkFormatProperties props;
@@ -438,14 +338,14 @@ has_stencil_component(VkFormat format)
 }
 
 static void
-generate_mipmaps(VkImage image,
-                 VkFormat image_format,
-                 uint32_t tex_width,
-                 uint32_t tex_height,
-                 uint32_t mip_levels,
-                 VkDevice device,
-                 VkCommandPool pool,
-                 VkQueue queue,
+generate_mipmaps(VkImage          image,
+                 VkFormat         image_format,
+                 uint32_t         tex_width,
+                 uint32_t         tex_height,
+                 uint32_t         mip_levels,
+                 VkDevice         device,
+                 VkCommandPool    pool,
+                 VkQueue          queue,
                  VkPhysicalDevice physical_device)
 {
     VkFormatProperties format_props;
@@ -458,7 +358,7 @@ generate_mipmaps(VkImage image,
             "Texture image format does not support linear blitting");
     }
 
-    const VkCommandBuffer cb = begin_single_time_commands(device, pool);
+    const VkCommandBuffer cb = BeginSingleTimeCommands(device, pool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -557,7 +457,7 @@ generate_mipmaps(VkImage image,
                          1,
                          &barrier);
 
-    end_single_time_commands(cb, device, pool, queue);
+    EndSingleTimeCommands(cb, device, pool, queue);
 }
 
 static VkSampleCountFlagBits
@@ -592,14 +492,14 @@ get_max_usable_sample_count(VkPhysicalDevice physical_device)
 }
 
 void
-VulkanApplication::CreateBuffer(VkDeviceSize size,
-                                VkBufferUsageFlags usage,
+VulkanApplication::CreateBuffer(VkDeviceSize          size,
+                                VkBufferUsageFlags    usage,
                                 VkMemoryPropertyFlags properties,
-                                VkBuffer &buffer,
-                                VkDeviceMemory &buffer_memory) const
+                                VkBuffer             &buffer,
+                                VkDeviceMemory       &buffer_memory) const
 {
-    const queue_family_indices indices =
-        find_queue_families(physical_device_, surface_);
+    const QueueFamilyIndices indices =
+        FindQueueFamilies(physical_device_, surface_);
     const std::set<uint32_t> unique_queue_indices = {
         indices.transfer_family.value(), indices.graphics_family.value()};
     std::vector<uint32_t> queue_indices(unique_queue_indices.size());
@@ -611,7 +511,7 @@ VulkanApplication::CreateBuffer(VkDeviceSize size,
     info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     info.size = size;
     info.usage = usage;
-    info.sharingMode = indices.get_sharing_mode();
+    info.sharingMode = indices.GetSharingMode();
     info.queueFamilyIndexCount = std::size(queue_indices);
     info.pQueueFamilyIndices = queue_indices.data();
 
@@ -632,19 +532,18 @@ VulkanApplication::CreateBuffer(VkDeviceSize size,
 }
 
 void
-VulkanApplication::CopyBuffer(VkBuffer src_buffer,
-                              VkBuffer dst_buffer,
+VulkanApplication::CopyBuffer(VkBuffer     src_buffer,
+                              VkBuffer     dst_buffer,
                               VkDeviceSize size)
 {
     const VkCommandBuffer cb =
-        begin_single_time_commands(device_, transfer_command_pool_);
+        BeginSingleTimeCommands(device_, transfer_command_pool_);
 
     VkBufferCopy copy_region{};
     copy_region.size = size;
     vkCmdCopyBuffer(cb, src_buffer, dst_buffer, 1, &copy_region);
 
-    end_single_time_commands(
-        cb, device_, transfer_command_pool_, transfer_queue_);
+    EndSingleTimeCommands(cb, device_, transfer_command_pool_, transfer_queue_);
 }
 
 void
@@ -652,7 +551,7 @@ VulkanApplication::CreateIndexBuffer()
 {
     const VkDeviceSize buffer_size = sizeof(indices_[0]) * indices_.size();
 
-    VkBuffer staging_buffer;
+    VkBuffer       staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateBuffer(buffer_size,
                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -897,9 +796,9 @@ VulkanApplication::CreateDescriptorSets()
 void
 VulkanApplication::CreateTextureImage(const std::string &texture_path)
 {
-    int tex_width = 0;
-    int tex_height = 0;
-    int tex_channels = 0;
+    int      tex_width = 0;
+    int      tex_height = 0;
+    int      tex_channels = 0;
     stbi_uc *pixels = stbi_load(texture_path.c_str(),
                                 &tex_width,
                                 &tex_height,
@@ -916,7 +815,7 @@ VulkanApplication::CreateTextureImage(const std::string &texture_path)
         throw std::runtime_error("Failed to load texture image");
     }
 
-    VkBuffer staging_buffer;
+    VkBuffer       staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateBuffer(image_size,
                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -979,16 +878,16 @@ VulkanApplication::CreateTextureImage(const std::string &texture_path)
 }
 
 void
-VulkanApplication::CreateImage(uint32_t width,
-                               uint32_t height,
-                               VkFormat format,
-                               uint32_t mip_levels,
+VulkanApplication::CreateImage(uint32_t              width,
+                               uint32_t              height,
+                               VkFormat              format,
+                               uint32_t              mip_levels,
                                VkSampleCountFlagBits num_samples,
-                               VkImageTiling tiling,
-                               VkImageUsageFlags usage,
+                               VkImageTiling         tiling,
+                               VkImageUsageFlags     usage,
                                VkMemoryPropertyFlags properties,
-                               VkImage &image,
-                               VkDeviceMemory &image_memory) const
+                               VkImage              &image,
+                               VkDeviceMemory       &image_memory) const
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1030,10 +929,10 @@ VulkanApplication::CreateTextureImageView()
 }
 
 VkImageView
-VulkanApplication::CreateImageView(VkImage image,
-                                   VkFormat format,
+VulkanApplication::CreateImageView(VkImage            image,
+                                   VkFormat           format,
                                    VkImageAspectFlags aspect_flags,
-                                   uint32_t mip_levels) const
+                                   uint32_t           mip_levels) const
 {
     VkImageViewCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1180,12 +1079,11 @@ VulkanApplication::InitImGui()
     ImGui_ImplVulkan_Init(&init_info, render_pass_);
 
     // execute a gpu command to upload imgui font textures
-    const VkCommandBuffer cb =
-        begin_single_time_commands(device_, command_pool_);
+    const VkCommandBuffer cb = BeginSingleTimeCommands(device_, command_pool_);
 
     ImGui_ImplVulkan_CreateFontsTexture(cb);
 
-    end_single_time_commands(cb, device_, command_pool_, queue_);
+    EndSingleTimeCommands(cb, device_, command_pool_, queue_);
 
     // clear font textures from cpu data
     ImGui_ImplVulkan_DestroyFontUploadObjects();
@@ -1301,7 +1199,7 @@ VulkanApplication::~VulkanApplication()
     Cleanup();
 }
 
-static void generate_normals(std::vector<vertex> &vertices,
+static void generate_normals(std::vector<vertex>         &vertices,
                              const std::vector<uint32_t> &indices);
 
 static std::string
@@ -1326,11 +1224,11 @@ VulkanApplication::LoadModel(const std::string &path)
     CreateTextureImageView();
     CreateTextureSampler();
 
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
+    tinyobj::attrib_t                attrib;
+    std::vector<tinyobj::shape_t>    shapes;
     std::vector<tinyobj::material_t> materials;
-    std::string warn;
-    std::string err;
+    std::string                      warn;
+    std::string                      err;
 
     if (!tinyobj::LoadObj(
             &attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
@@ -1385,8 +1283,8 @@ VulkanApplication::OnMouseMove(uint32_t mouse_state, int x, int y)
 void
 VulkanApplication::CreateCommandPool()
 {
-    const queue_family_indices indices =
-        find_queue_families(physical_device_, surface_);
+    const QueueFamilyIndices indices =
+        FindQueueFamilies(physical_device_, surface_);
 
     VkCommandPoolCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -1529,7 +1427,7 @@ check_validation_layer_support(const std::vector<const char *> &required_layers)
 static std::vector<const char *>
 get_required_extensions(SDL_Window *window)
 {
-    uint32_t extension_count = 0;
+    uint32_t                  extension_count = 0;
     std::vector<const char *> extensions;
 
     if (SDL_Vulkan_GetInstanceExtensions(window, &extension_count, nullptr) ==
@@ -1644,14 +1542,14 @@ VulkanApplication::CreateSwapchain()
     create_info.imageArrayLayers = 1;
     create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    const queue_family_indices indices =
-        find_queue_families(physical_device_, surface_);
-    const uint32_t queue_family_indices[] = {indices.graphics_family.value(),
-                                             indices.present_family.value()};
+    const QueueFamilyIndices indices =
+        FindQueueFamilies(physical_device_, surface_);
+    const uint32_t QueueFamilyIndices[] = {indices.graphics_family.value(),
+                                           indices.present_family.value()};
     if (indices.graphics_family != indices.present_family) {
         create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         create_info.queueFamilyIndexCount = 2;
-        create_info.pQueueFamilyIndices = queue_family_indices;
+        create_info.pQueueFamilyIndices = QueueFamilyIndices;
     }
     else {
         create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -1813,7 +1711,7 @@ VulkanApplication::CreateCommandBuffers()
 
 void
 VulkanApplication::RecordCommandBuffer(VkCommandBuffer cb,
-                                       uint32_t image_idx) const
+                                       uint32_t        image_idx) const
 {
     VkCommandBufferBeginInfo begin_info{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1841,7 +1739,7 @@ VulkanApplication::RecordCommandBuffer(VkCommandBuffer cb,
 
     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
 
-    const VkBuffer vertex_buffers[] = {vertex_buffer_};
+    const VkBuffer     vertex_buffers[] = {vertex_buffer_};
     const VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(cb, 0, 1, vertex_buffers, offsets);
 
@@ -1945,7 +1843,7 @@ VulkanApplication::CreateVertexBuffer()
 {
     const VkDeviceSize buffer_size = sizeof(vertices_[0]) * vertices_.size();
 
-    VkBuffer staging_buffer;
+    VkBuffer       staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateBuffer(buffer_size,
                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -2158,7 +2056,7 @@ VulkanApplication::IsDeviceSuitable(VkPhysicalDevice device) const
     //            VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
     //        device_features.geometryShader;
 
-    const queue_family_indices indices = find_queue_families(device, surface_);
+    const QueueFamilyIndices indices = FindQueueFamilies(device, surface_);
     const bool extensions_supported = CheckDeviceExtensionSupport(device);
 
     bool is_swap_chain_valid = false;
@@ -2169,7 +2067,7 @@ VulkanApplication::IsDeviceSuitable(VkPhysicalDevice device) const
             !details.formats.empty() && !details.present_modes.empty();
     }
 
-    return indices.is_complete() && extensions_supported &&
+    return indices.IsComplete() && extensions_supported &&
            is_swap_chain_valid && device_features.samplerAnisotropy;
 }
 
@@ -2205,11 +2103,11 @@ VulkanApplication::PickPhysicalDevice()
 void
 VulkanApplication::CreateLogicalDevice()
 {
-    const queue_family_indices indices =
-        find_queue_families(physical_device_, surface_);
+    const QueueFamilyIndices indices =
+        FindQueueFamilies(physical_device_, surface_);
 
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-    std::set<uint32_t> unique_queue_families = {
+    std::set<uint32_t>                   unique_queue_families = {
         indices.graphics_family.value(),
         indices.present_family.value(),
         indices.transfer_family.value()};
@@ -2266,7 +2164,7 @@ VulkanApplication::CreateSurface()
 }
 
 static void
-generate_normals(std::vector<vertex> &vertices,
+generate_normals(std::vector<vertex>         &vertices,
                  const std::vector<uint32_t> &indices)
 {
     for (uint32_t i = 0u; i < indices.size(); i += 3u) {
