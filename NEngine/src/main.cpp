@@ -84,13 +84,41 @@ destroy_sdl2_context()
     delete app;
 }
 
+static struct FPSCounter
+{
+    float total_time = 0.0f;
+    int fps = 0;
+
+    bool
+        IsSecondElapsed() const
+    {
+        return total_time > 1.0f;
+    }
+
+    void
+        Increment(float dt)
+    {
+        total_time += dt;
+        ++fps;
+    }
+    void
+        Reset()
+    {
+        total_time = 0.0f;
+        fps = 0;
+    }
+} s_fps_counter;
+
 void update_title_fps(float elapsed)
 {
+    s_fps_counter.Increment(elapsed);
 	std::stringstream out;
-	out << "NEngine - " << (1.0f / elapsed) << " FPS";
-        SDL_SetWindowTitle(
-            window, out.str().c_str());
 
+    if (s_fps_counter.IsSecondElapsed()) {
+        out << "NEngine - " << s_fps_counter.fps << " FPS";
+        SDL_SetWindowTitle(window, out.str().c_str());
+        s_fps_counter.Reset();
+    }
 }
 
 int
@@ -120,7 +148,7 @@ main(int argc, char **argv)
         const uint64_t end = SDL_GetPerformanceCounter();
         const float elapsed =
             (end - start) / (float)SDL_GetPerformanceFrequency();
-	update_title_fps(elapsed);
+	    update_title_fps(elapsed);
     }
 
     destroy_sdl2_context();
