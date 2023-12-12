@@ -13,6 +13,13 @@ NEngine::VulkanApplication *app = nullptr;
 bool is_window_visible = true;
 bool running = true;
 
+bool
+does_imgui_wants_capture_io()
+{
+    const ImGuiIO &io = ImGui::GetIO();
+    return io.WantCaptureKeyboard || io.WantCaptureMouse;
+}
+
 void
 poll_events()
 {
@@ -49,7 +56,9 @@ poll_events()
             }
         }
         else if (e.type == SDL_MOUSEMOTION) {
-            app->OnMouseMove(e.motion.state, e.motion.x, e.motion.y);
+            if (!does_imgui_wants_capture_io()) {
+                app->OnMouseMove(e.motion.state, e.motion.x, e.motion.y);
+            }
         }
     }
 }
