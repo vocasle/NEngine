@@ -2,7 +2,7 @@
 
 #include <stdio.h> // TODO: Replace with in-house print functionality
 
-DLLEXPORT void ne_print_version(void)
+NE_API void ne_print_version(void)
 {
-	printf("NEngine %d.\%d.%d\n", NENGINE_VERSION_MAJOR, NENGINE_VERSION_MINOR, NENGINE_VERSION_PATCH);
+	printf("NEngine %d.%d.%d\n", NE_VERSION_MAJOR, NE_VERSION_MINOR, NE_VERSION_PATCH);
 }
