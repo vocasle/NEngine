@@ -77,4 +77,31 @@ void ne_platform_pump_messages(struct NE_Window *w)
     }
 }
 
+
+void ne_platform_println(const i8 *msg, enum NE_LogLevel level)
+{
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	WORD old_color_attr = 0;
+	CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
+	GetConsoleScreenBufferInfo(h, &csbi);
+	old_color_attr = csbi.wAttributes;
+
+	if (level == NE_LOG_LEVEL_ERROR) {
+		SetConsoleTextAttribute(h, FOREGROUND_RED | FOREGROUND_INTENSITY);
+	}
+	else if (level == NE_LOG_LEVEL_DEBUG) {
+		SetConsoleTextAttribute(h, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+	}
+	else if (level == NE_LOG_LEVEL_WARNING) {
+		SetConsoleTextAttribute(h, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	}
+	else if (level == NE_LOG_LEVEL_INFO) {
+		SetConsoleTextAttribute(h, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	}
+
+	printf("%s\n", msg);
+
+	SetConsoleTextAttribute(h, old_color_attr);
+}
+
 #endif

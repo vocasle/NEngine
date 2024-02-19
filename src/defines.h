@@ -14,7 +14,7 @@ typedef _Bool b8;
 #define NE_TRUE 1
 #define NE_FALSE 0
 
- #ifdef NE_EXPORT
+ #if NE_EXPORT
     /*Enabled as "export" while compiling the dll project*/
     #define NE_API __declspec(dllexport)  
  #else
