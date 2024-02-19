@@ -3,7 +3,6 @@
 #if NE_PLATFORM_WIN32
 
 #include <Windows.h>
-#include <strsafe.h>
 
 struct NE_Window 
 {
@@ -14,11 +13,6 @@ struct NE_Window
 LRESULT win32_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch(message) {
-//	case WM_PAINT:
-//	{
-//		printf("WM_PAINT received...\n");
-//		return 0;
-//	}
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		return 0;
@@ -48,7 +42,7 @@ struct NE_Window *ne_platform_create_window(const i8 *title, i16 x, i16 y, u16 w
 	
 	HWND hwnd = CreateWindowExA(0, title, title, WS_OVERLAPPEDWINDOW, x, y, width, height, NULL, NULL, NULL, NULL);
 	if (!hwnd) {
-		fprintf(stderr, "FATAL ERROR: Failed to create window\n");
+		ne_platform_println("Failed to create window", NE_LOG_LEVEL_ERROR);
 		return NULL;
 	}
 
@@ -66,7 +60,6 @@ void ne_platform_destroy_window(struct NE_Window *w)
 	free(w);
 }
 
-
 void ne_platform_pump_messages(struct NE_Window *w)
 {
 	(void)w;
@@ -78,10 +71,9 @@ void ne_platform_pump_messages(struct NE_Window *w)
     }
 }
 
-
 void ne_platform_println(const i8 *msg, enum NE_LogLevel level)
 {
-	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE h = level == NE_LOG_LEVEL_ERROR ? GetStdHandle(STD_ERROR_HANDLE) : GetStdHandle(STD_OUTPUT_HANDLE);
 	WORD old_color_attr = 0;
 	CONSOLE_SCREEN_BUFFER_INFO csbi = { 0 };
 	GetConsoleScreenBufferInfo(h, &csbi);
@@ -100,11 +92,11 @@ void ne_platform_println(const i8 *msg, enum NE_LogLevel level)
 		SetConsoleTextAttribute(h, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 	}
 
-	printf("%s\n", msg);
-
+	OutputDebugStringA(msg);
+	u64 num_written = 0;
+	WriteConsoleA(h, msg, strlen(msg), (LPDWORD)&num_written, NULL);
 	SetConsoleTextAttribute(h, old_color_attr);
 }
-
 
 void ne_platform_terminate(void)
 {
