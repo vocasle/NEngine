@@ -1,11 +1,14 @@
-#include "nengine.h"
-#include "platform.h"
+#include "app.h"
 
 int main(void)
 {
-	ne_print_version();
-	struct NE_Window *w = ne_platform_create_window("NEngine", 0, 0, 1280, 720);
-  ne_platform_pump_messages(w);
-	ne_platform_destroy_window(w);
+	const struct NE_AppConfig app_config = {
+		.app_name = "TestApp",
+		.win_width = 1280,
+		.win_height = 720
+	};
+	struct NE_App *app = ne_app_new(&app_config);
+	ne_app_run(app);
+	ne_app_destroy(app);
 	return 0;
 }

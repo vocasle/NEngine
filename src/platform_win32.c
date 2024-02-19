@@ -11,74 +11,70 @@ struct NE_Window
 	HINSTANCE handle;
 };
 
-LRESULT window_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+LRESULT win32_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
-  (void)hwnd;
-  (void)message;
-  (void)wparam;
-  (void)lparam;
-  switch(message) {
-    case WM_CLOSE:
-    DestroyWindow(hwnd);
-      return 0;
-    case WM_DESTROY:
-      PostQuitMessage(0);
-      return 0;
-  }
-  return DefWindowProc(hwnd, message, wparam, lparam);
+	switch(message) {
+//	case WM_PAINT:
+//	{
+//		printf("WM_PAINT received...\n");
+//		return 0;
+//	}
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		return 0;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	case WM_KEYDOWN:
+	{
+		if (wparam == VK_ESCAPE) {
+			PostQuitMessage(0);
+			return 0;
+		}
+		break;
+	}
+	}
+	return DefWindowProcA(hwnd, message, wparam, lparam);
 }
 
-NE_API struct NE_Window *ne_platform_create_window(const i8 *title, i16 x, i16 y, u16 width, u16 height)
+struct NE_Window *ne_platform_create_window(const i8 *title, i16 x, i16 y, u16 width, u16 height)
 {
-	struct NE_Window *w = malloc(sizeof *w);
-	w->handle = GetModuleHandleA(NULL);
-
 	WNDCLASSA wc = { 0 };
-	wc.lpfnWndProc = window_proc;
-	wc.hInstance = w->handle;
-  wc.lpszClassName = "NEngine_Window_Class";
+	wc.lpfnWndProc = win32_proc;
+	wc.lpszClassName = title;
 
-  if (!RegisterClassA(&wc)) {
-    MessageBoxA(NULL, "Failed to register window class", "FATAL ERROR", MB_OK);
-    exit(-1);
-  }
+	ATOM class_uid = RegisterClassA(&wc);
+	(void)class_uid;
+	
+	HWND hwnd = CreateWindowExA(0, title, title, WS_OVERLAPPEDWINDOW, x, y, width, height, NULL, NULL, NULL, NULL);
+	if (!hwnd) {
+		fprintf(stderr, "FATAL ERROR: Failed to create window\n");
+		return NULL;
+	}
 
-  w->window = CreateWindowExA(0, wc.lpszClassName, title, WS_OVERLAPPEDWINDOW, x, y, width, height, NULL, NULL, w->handle, NULL);
-  if (!w->window) {
-    const DWORD err = GetLastError();
-    LPSTR message_buffer = NULL;
-    TCHAR format_buffer[512] = { 0 };
-    
-    FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-      NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message_buffer, 0, NULL);
+	struct NE_Window *w = malloc(sizeof *w);
+	w->window = hwnd;
 
-    StringCbPrintfA(format_buffer, sizeof(format_buffer), "%lu - %s", err, message_buffer);
-
-    MessageBoxA(NULL, format_buffer, "FATAL ERROR", MB_OK);
-    LocalFree(message_buffer);
-    exit(-1);
-  }
-
-  ShowWindow(w->window, SW_SHOW);
+	ShowWindow(hwnd, SW_MAXIMIZE);
 
 	return w;
 }
 
-NE_API void ne_platform_destroy_window(struct NE_Window *w)
+void ne_platform_destroy_window(struct NE_Window *w)
 {
 	free(w);
 }
 
 
-NE_API b8 ne_platform_pump_messages(struct NE_Window *w)
+void ne_platform_pump_messages(struct NE_Window *w)
 {
-  (void)w;
-  MSG m = { 0 };
-  while (GetMessage(&m, NULL, 0, 0) > 0) {
-    TranslateMessage(&m);
-    DispatchMessage(&m);
-  }
-  return NE_TRUE;
+	(void)w;
+    MSG msg = { 0 };
+    while (GetMessageA(&msg, NULL, 0, 0) > 0)
+    {
+        TranslateMessage(&msg);
+        DispatchMessageA(&msg);
+    }
 }
 
 #endif
