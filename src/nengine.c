@@ -55,3 +55,12 @@ NE_API void ne_println_error(const i8 *fmt, ...)
 	ne_println(NE_LOG_LEVEL_ERROR, fmt, args);
 	va_end(args);
 }
+
+
+NE_API void ne_assert(u8 cond, const i8 *expr, const i8 *msg, const i8 *file, i32 line)
+{
+	if (!cond) {
+		ne_println_error("Assertion \"%s\" failed at %s:%d. %s", expr, file, line, msg ? msg : "");
+		ne_platform_terminate();
+	}
+}

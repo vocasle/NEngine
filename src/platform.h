@@ -15,3 +15,5 @@ enum NE_LogLevel
 	NE_LOG_LEVEL_ERROR,
 };
 void ne_platform_println(const i8 *msg, enum NE_LogLevel level);
+
+void ne_platform_terminate(void);

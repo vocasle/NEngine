@@ -62,6 +62,7 @@ struct NE_Window *ne_platform_create_window(const i8 *title, i16 x, i16 y, u16 w
 
 void ne_platform_destroy_window(struct NE_Window *w)
 {
+	DestroyWindow(w->window);
 	free(w);
 }
 
@@ -102,6 +103,12 @@ void ne_platform_println(const i8 *msg, enum NE_LogLevel level)
 	printf("%s\n", msg);
 
 	SetConsoleTextAttribute(h, old_color_attr);
+}
+
+
+void ne_platform_terminate(void)
+{
+	FatalAppExitA(0, "Platform termination requested");
 }
 
 #endif

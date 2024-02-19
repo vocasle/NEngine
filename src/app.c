@@ -3,7 +3,6 @@
 #include "nengine.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
 struct NE_App
 {
@@ -23,8 +22,6 @@ NE_API struct NE_App *ne_app_new(const struct NE_AppConfig *c)
 NE_API void ne_app_run(struct NE_App *app)
 {
 	ne_print_version();
-	(void)app;
-	printf("Running...\n");
 	ne_platform_pump_messages(app->wnd);	
 }
 
