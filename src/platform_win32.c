@@ -103,4 +103,29 @@ void ne_platform_terminate(void)
 	FatalAppExitA(0, "Platform termination requested");
 }
 
+struct NE_Library
+{
+	HINSTANCE lib;
+	const i8 *name;
+};
+struct NE_Library *ne_platform_load_library(const i8 *name)
+{
+	struct NE_Library *lib = malloc(sizeof *lib);
+	lib->name = name;
+	lib->lib = LoadLibraryA(name);
+	return lib;
+}
+
+void *ne_platform_get_proc_address(struct NE_Library *lib, const i8 *proc)
+{
+	return (void*)GetProcAddress(lib->lib, proc);
+}
+
+void ne_platform_destroy_library(struct NE_Library *lib)
+{
+	FreeLibrary(lib->lib);
+	free(lib);
+}
+
+
 #endif

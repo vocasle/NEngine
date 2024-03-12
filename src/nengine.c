@@ -64,3 +64,19 @@ NE_API void ne_assert(u8 cond, const i8 *expr, const i8 *msg, const i8 *file, i3
 		ne_platform_terminate();
 	}
 }
+
+NE_API struct NE_Library *ne_load_library(const i8 *name)
+{
+	return ne_platform_load_library(name);
+}
+
+NE_API void *ne_get_proc_address(struct NE_Library *lib, const i8 *proc)
+{
+	return ne_platform_get_proc_address(lib, proc);
+}
+
+NE_API  void ne_destroy_library(struct NE_Library *lib)
+{
+	ne_platform_destroy_library(lib);
+}
+

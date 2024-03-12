@@ -17,6 +17,8 @@ typedef _Bool b8;
 
 #define NULL 0
 
+#define NE_ARI_VULKAN 1 // for now we only support Vulkan
+
  #if NE_EXPORT
     /*Enabled as "export" while compiling the dll project*/
     #define NE_API __declspec(dllexport)  

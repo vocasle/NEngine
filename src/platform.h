@@ -17,3 +17,8 @@ enum NE_LogLevel
 void ne_platform_println(const i8 *msg, enum NE_LogLevel level);
 
 void ne_platform_terminate(void);
+
+struct NE_Library *ne_platform_load_library(const i8 *name);
+void *ne_platform_get_proc_address(struct NE_Library *lib, const i8 *proc);
+void ne_platform_destroy_library(struct NE_Library *lib);
+

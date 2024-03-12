@@ -10,6 +10,11 @@ NE_API void ne_println_warning(const i8 *fmt, ...);
 NE_API void ne_println_error(const i8 *fmt, ...);
 NE_API void ne_assert(u8 cond, const i8 *expr, const i8 *msg, const i8 *file, i32 line);
 
+struct NE_Library;
+NE_API struct NE_Library *ne_load_library(const i8 *name);
+NE_API void *ne_get_proc_address(struct NE_Library *lib, const i8 *proc);
+NE_API  void ne_destroy_library(struct NE_Library *lib);
+
 #define NE_LOG_DEBUG_ENABLED 1
 #define NE_LOG_INFO_ENABLED 1
 #define NE_ASSERT_ENABLED 1
