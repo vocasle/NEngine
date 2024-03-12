@@ -36,5 +36,7 @@ typedef _Bool b8;
 #endif
 
 #if _NDEBUG
-#define NE_RELEASE
+#define NE_RELEASE 1
+#else
+#define NE_DEBUG 1
 #endif
