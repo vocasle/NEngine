@@ -20,3 +20,7 @@ add_library(nemath SHARED math/nemath.h math/nemath.c)
 target_include_directories(nemath PRIVATE src PUBLIC math)
 target_compile_options(nemath PRIVATE -Wall -Werror -Wextra -Wpedantic)
 target_compile_definitions(nemath PRIVATE NE_EXPORT=1)
+
+find_package(Vulkan REQUIRED)
+target_link_libraries(nengine PRIVATE ${Vulkan_LIBRARIES})
+target_include_directories(nengine PRIVATE ${Vulkan_INCLUDE_DIR})
