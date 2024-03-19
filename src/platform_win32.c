@@ -5,6 +5,8 @@
 #include <Windows.h>
 #include <stdio.h>
 
+#include "allocator.h"
+
 struct NE_Window 
 {
 	HWND window;
@@ -96,6 +98,7 @@ void ne_platform_println(const i8 *msg, enum NE_LogLevel level)
 	OutputDebugStringA(msg);
 	u64 num_written = 0;
 	WriteConsoleA(h, msg, strlen(msg), (LPDWORD)&num_written, NULL);
+	WriteConsoleA(h, "\n", 1, NULL, NULL);
 	SetConsoleTextAttribute(h, old_color_attr);
 }
 
@@ -128,52 +131,14 @@ void ne_platform_destroy_library(struct NE_Library *lib)
 	free(lib);
 }
 
-struct MemoryChunkInfo
-{
-	u16 head;
-	u16 tail;
-	u64 size;
-	const i8 *file;
-	i32 line;
-};
-
-#define NE_HEAD_GUARD 0xF0
-#define NE_TAIL_GUARD 0x0D
-
 void *ne_platform_allocate_dbg(u64 size, const i8 *file, i32 line)
 {
-	const u64 effective_size = size + sizeof(struct MemoryChunkInfo);
-	void *bytes = malloc(effective_size);
-	ne_platform_zero_memory(bytes, effective_size);
-	struct MemoryChunkInfo *info = bytes;
-	info->head = NE_HEAD_GUARD;
-	info->tail = NE_TAIL_GUARD;
-	info->size = size;
-	info->file = file;
-	info->line = line;
-	info++;
-	return info;
+	return ne_allocate_debug(size, file, line);
 }
 
 void ne_platform_free_dbg(void *ptr, const i8 *file, i32 line)
 {
-	struct MemoryChunkInfo *info = ptr;
-	--info;
-
-	i8 log_buf[1024] = { 0 };
-	if (info->head != NE_HEAD_GUARD) {
-		snprintf(log_buf, 1024, "FATAL ERROR: Head guard corrupted. Allocated at %s:%d, freed at: %s:%d",
-			info->file, info->line, file, line);
-		ne_platform_println(log_buf, NE_LOG_LEVEL_ERROR);
-		ne_platform_terminate();
-	}
-	if (info->tail != NE_TAIL_GUARD) {
-		snprintf(log_buf, 1024, "FATAL ERROR: Tail guard corrupted. Allocated at %s:%d, freed at: %s:%d",
-			info->file, info->line, file, line);
-		ne_platform_println(log_buf, NE_LOG_LEVEL_ERROR);
-		ne_platform_terminate();
-	}
-	free(info);
+	ne_free_debug(ptr, file, line);
 }
 
 #if NE_RELEASE

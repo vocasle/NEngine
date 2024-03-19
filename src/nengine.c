@@ -8,6 +8,15 @@
 NE_API void ne_print_version(void)
 {
 	ne_println_info("NEngine %d.%d.%d", NE_VERSION_MAJOR, NE_VERSION_MINOR, NE_VERSION_PATCH);
+
+	i32 *ints = ne_platform_allocate(16);
+	ne_platform_zero_memory(ints, 16);
+	for (i32 i = 0; i < 4; ++i) {
+		ints[i] = i;
+	}
+	i8 *bytes = (i8 *)ints;
+	*(bytes - 1) = 'A';
+	ne_platform_free(ints);
 }
 
 static i32 ne_buffer_size(const i8 *fmt, va_list args)
