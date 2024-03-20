@@ -1,0 +1,12 @@
+CompileFlags:
+  Add: [
+    /Wall,
+    /WX,
+    /std:c11,
+    -IC:/Users/vocasle/NEngine/src,
+    -IC:/Users/vocasle/NEngine/math,
+    -IC:/VulkanSDK/1.3.275.0/Include,
+    -DNE_EXPORT=1,
+    -D_NDEBUG=0,
+    -DNE_VERBOSE_ALLOCATIONS=0
+  ]

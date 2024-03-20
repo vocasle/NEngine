@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stddef.h>
+#include <stdalign.h>
 
 struct MemoryChunk
 {
@@ -17,10 +19,13 @@ struct MemoryChunk
 
 void *ne_allocate_debug(u64 size, const i8 *file, i32 line)
 {
-	i8 *bytes = malloc(sizeof(struct MemoryChunk) + size * sizeof(i32) * 2);
-	*((i32 *)bytes) = MEMORY_GUARD;
-	*((i32 *)(bytes + sizeof(i32) + sizeof(struct MemoryChunk) + size)) = MEMORY_GUARD;
-	struct MemoryChunk *mc = (struct MemoryChunk *)(bytes + sizeof(i32));
+	const u32 min_alignment = alignof(max_align_t);
+	const u64 unaligned_size = sizeof(struct MemoryChunk) + size * sizeof(i32) * 2;
+	const u64 aligned_size = unaligned_size + unaligned_size % min_alignment;
+	i8 *bytes = malloc(aligned_size);
+	*(i32 *)(void *)bytes = (i32)MEMORY_GUARD;
+	*(i32 *)(void *)(bytes + sizeof(i32) + sizeof(struct MemoryChunk) + size) = (i32)MEMORY_GUARD;
+	struct MemoryChunk *mc = (struct MemoryChunk *)(void *)(bytes + sizeof(i32));
 	memset(mc, 0, sizeof *mc + size);
 	mc->file = file;
 	mc->line = line;
@@ -37,7 +42,7 @@ void ne_free_debug(void *ptr, const i8 *file, i32 line)
 	(void)file;
 	(void)line;
 	i8 *bytes = ptr;
-	const i32 head_guard_value = *((i32*)(bytes - sizeof(struct MemoryChunk) - sizeof(i32)));
+	const i32 head_guard_value = *(i32 *)(void *)(bytes - sizeof(struct MemoryChunk) - sizeof(i32));
 	assert((u32)head_guard_value == MEMORY_GUARD);
 #if NE_VERBOSE_ALLOCATIONS
 	if (head_guard_value != MEMORY_GUARD) {
@@ -48,7 +53,7 @@ void ne_free_debug(void *ptr, const i8 *file, i32 line)
 	struct MemoryChunk *mc = ((struct MemoryChunk *)ptr) - 1;
 	const b8 is_size_corrupted = mc->size > (u64)MAX_MEMORY_ALLOCATED;
 	assert(!is_size_corrupted);
-	const i32 tail_guard_value = *((i32*)(bytes + mc->size));
+	const i32 tail_guard_value = *(i32 *)(void *)(bytes + mc->size);
 	assert((u32)tail_guard_value == MEMORY_GUARD);
 #if NE_VERBOSE_ALLOCATIONS
 	if (is_size_corrupted) {
